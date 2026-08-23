@@ -17,7 +17,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
+    /**
+     * Verificacao de unicidade no cadastro.
+     *
+     * Nao existe equivalente para a atualizacao porque o documento e imutavel
+     * apos o cadastro: AtualizarUsuarioRequest nao o aceita.
+     */
     boolean existsByCpf(String cpf);
-
-    boolean existsByCpfAndIdNot(String cpf, Long id);
 }

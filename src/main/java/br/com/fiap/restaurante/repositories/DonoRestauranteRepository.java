@@ -12,7 +12,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DonoRestauranteRepository extends JpaRepository<DonoRestaurante, Long> {
 
+    /**
+     * Verificacao de unicidade no cadastro. Assim como o CPF, o CNPJ nao pode
+     * ser alterado depois do cadastro, entao nao ha versao para a atualizacao.
+     */
     boolean existsByCnpj(String cnpj);
-
-    boolean existsByCnpjAndIdNot(String cnpj, Long id);
 }

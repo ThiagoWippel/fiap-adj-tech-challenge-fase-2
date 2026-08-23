@@ -6,6 +6,8 @@ import br.com.fiap.restaurante.entities.DonoRestaurante;
 import br.com.fiap.restaurante.entities.Endereco;
 import br.com.fiap.restaurante.entities.Usuario;
 import br.com.fiap.restaurante.services.exceptions.RegraDeNegocioException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,6 +24,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class UsuarioFactory {
 
+    private static final Logger logger = LoggerFactory.getLogger(UsuarioFactory.class);
+
     public Usuario criar(CriarUsuarioRequest requisicao, String senhaCodificada,
                          Endereco endereco, String documentoNormalizado) {
 
@@ -29,6 +33,7 @@ public class UsuarioFactory {
 
             case CLIENTE -> {
                 if (documentoNormalizado == null) {
+                    logger.warn("Cadastro rejeitado: CPF ausente para usuario do tipo CLIENTE");
                     throw new RegraDeNegocioException("O CPF e obrigatorio para usuarios do tipo CLIENTE");
                 }
                 yield new Cliente(
@@ -43,6 +48,7 @@ public class UsuarioFactory {
 
             case DONO_RESTAURANTE -> {
                 if (documentoNormalizado == null) {
+                    logger.warn("Cadastro rejeitado: CNPJ ausente para usuario do tipo DONO_RESTAURANTE");
                     throw new RegraDeNegocioException("O CNPJ e obrigatorio para usuarios do tipo DONO_RESTAURANTE");
                 }
                 yield new DonoRestaurante(
