@@ -1,14 +1,14 @@
 -- =============================================================
 -- Estrutura do banco de dados - Tech Challenge Fase 1
 --
--- Executado automaticamente pelo MySQL na PRIMEIRA inicializacao
+-- Executado automaticamente pelo MySQL na PRIMEIRA inicialização
 -- do contêiner, quando o volume de dados ainda esta vazio.
 --
--- A criacao do esquema e responsabilidade do banco, nao da aplicacao.
+-- A criação do esquema é responsabilidade do banco, não da aplicação.
 -- No perfil docker o Hibernate opera em modo "validate": confere se a
--- estrutura corresponde ao mapeamento das entidades, sem cria-la nem
--- altera-la. Assim a estrutura e um artefato explicito e versionado,
--- e nao efeito colateral do mapeamento objeto-relacional.
+-- estrutura corresponde ao mapeamento das entidades, sem criá-la nem
+-- alterá-la. Assim a estrutura e um artefato explícito e versionado,
+-- e não efeito colateral do mapeamento objeto-relacional.
 -- =============================================================
 
 CREATE TABLE IF NOT EXISTS usuario (

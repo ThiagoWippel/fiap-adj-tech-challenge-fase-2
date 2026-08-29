@@ -9,13 +9,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -39,14 +45,12 @@ import java.util.List;
  */
 @RestControllerAdvice
 // Precedencia maxima. Com spring.mvc.problemdetails.enabled=true, o proprio
-// Spring Boot registra um tratador para as excecoes do framework - incluindo a
-// de validacao. Sem declarar a ordem, os dois disputam MethodArgumentNotValidException
-// e o do Spring vence, devolvendo uma mensagem generica sem a relacao de campos
-// rejeitados. Com a precedencia definida, o nosso atende primeiro e o do Spring
-// permanece cobrindo o que nao declaramos aqui: JSON malformado, verbo nao
-// suportado, parametro ausente.
+// Spring Boot registra um ProblemDetailsExceptionHandler para as excecoes do
+// framework - incluindo a de validacao. Sem declarar a ordem, os dois disputam
+// MethodArgumentNotValidException e o do Spring vence, devolvendo uma mensagem
+// generica sem a relacao de campos rejeitados.
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class ControllerExceptionHandler {
+public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ControllerExceptionHandler.class);
 
@@ -155,13 +159,16 @@ public class ControllerExceptionHandler {
     /**
      * Falhas das anotacoes de validacao dos DTOs.
      *
-     * Declarar este tratamento sobrepoe o comportamento padrao do Spring, que
-     * responderia apenas com uma mensagem generica. Aqui a resposta carrega a
-     * relacao completa de campos rejeitados.
+     * Sobrescreve o comportamento herdado, que responderia apenas com uma
+     * mensagem generica. Aqui a resposta carrega a relacao completa de campos
+     * rejeitados, na extensao "erros".
      */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ProblemDetail tratarValidacao(MethodArgumentNotValidException excecao,
-                                         HttpServletRequest requisicao) {
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException excecao,
+            HttpHeaders cabecalhos,
+            HttpStatusCode status,
+            WebRequest requisicao) {
 
         List<ErroDeCampo> erros = excecao.getBindingResult().getFieldErrors().stream()
                 .map(erro -> new ErroDeCampo(erro.getField(), erro.getDefaultMessage()))
@@ -175,10 +182,10 @@ public class ControllerExceptionHandler {
                 "Dados invalidos",
                 "Um ou mais campos da requisicao nao passaram na validacao",
                 "#dados-invalidos",
-                requisicao
+                ((ServletWebRequest) requisicao).getRequest()
         );
         problema.setProperty("erros", erros);
-        return problema;
+        return handleExceptionInternal(excecao, problema, cabecalhos, status, requisicao);
     }
 
     // ------------------------------------------------------------------
@@ -204,6 +211,24 @@ public class ControllerExceptionHandler {
                 "#erro-interno",
                 requisicao
         );
+    }
+
+    /**
+     * Acrescenta a extensao "momento" tambem as respostas montadas pela classe
+     * base, de modo que TODA resposta de erro da API - inclusive JSON malformado
+     * e verbo nao suportado - possa ser correlacionada com o registro em log.
+     */
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(Exception excecao, Object corpo,
+                                                             HttpHeaders cabecalhos, HttpStatusCode status,
+                                                             WebRequest requisicao) {
+        ResponseEntity<Object> resposta =
+                super.handleExceptionInternal(excecao, corpo, cabecalhos, status, requisicao);
+
+        if (resposta != null && resposta.getBody() instanceof ProblemDetail problema) {
+            problema.setProperty("momento", LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).toString());
+        }
+        return resposta;
     }
 
     // ------------------------------------------------------------------
