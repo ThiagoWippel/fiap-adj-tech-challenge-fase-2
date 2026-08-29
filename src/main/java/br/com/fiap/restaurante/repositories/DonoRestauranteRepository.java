@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * Consultas especificas de dono de restaurante.
+ * Consultas específicas de dono de restaurante.
  *
  * Mesma justificativa do ClienteRepository: o CNPJ pertence a esta subclasse.
  */
@@ -13,8 +13,8 @@ import org.springframework.stereotype.Repository;
 public interface DonoRestauranteRepository extends JpaRepository<DonoRestaurante, Long> {
 
     /**
-     * Verificacao de unicidade no cadastro. Assim como o CPF, o CNPJ nao pode
-     * ser alterado depois do cadastro, entao nao ha versao para a atualizacao.
+     * Verificação de unicidade no cadastro. Assim como o CPF, o CNPJ não pode
+     * ser alterado depois do cadastro, então não há versão para a atualização.
      */
     boolean existsByCnpj(String cnpj);
 }

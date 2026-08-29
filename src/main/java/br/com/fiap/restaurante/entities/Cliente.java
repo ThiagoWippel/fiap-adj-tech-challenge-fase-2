@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Usuario que consome os servicos dos restaurantes.
+ * Usuário que consome os serviços dos restaurantes.
  *
- * Identificado por CPF. A coluna aceita nulo no banco porque, na estrategia
- * de tabela unica, o registro de um dono de restaurante nao a preenche. A
- * obrigatoriedade por tipo e garantida na camada de aplicacao, pela validacao
+ * Identificado por CPF. A coluna aceita nulo no banco porque, na estratégia
+ * de tabela única, o registro de um dono de restaurante não a preenche. A
+ * obrigatoriedade por tipo é garantida na camada de aplicação, pela validação
  * condicional do DTO de cadastro.
  */
 @Entity
@@ -23,9 +23,9 @@ import lombok.Setter;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Cliente extends Usuario {
 
-    // Apenas digitos, sem pontuacao. Armazenar formatado permitiria que
+    // Apenas dígitos, sem pontuação. Armazenar formatado permitiria que
     // "123.456.789-00" e "12345678900" coexistissem como registros distintos,
-    // anulando na pratica a restricao de unicidade.
+    // anulando na prática a restrição de unicidade.
     @Column(name = "cpf", length = 11, unique = true)
     private String cpf;
 

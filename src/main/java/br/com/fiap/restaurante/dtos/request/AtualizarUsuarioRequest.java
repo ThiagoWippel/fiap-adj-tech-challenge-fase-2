@@ -9,12 +9,12 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
- * Dados de entrada para atualizacao de usuario.
+ * Dados de entrada para atualização de usuário.
  *
- * Nao aceita senha - a troca tem endpoint proprio, conforme o enunciado.
- * Nao aceita tipo nem documento: sao imutaveis apos o cadastro. O que
- * identifica quem a pessoa e permanece fixo; o que e dado de contato e
- * editavel.
+ * Não aceita senha - a troca tem endpoint próprio, conforme o enunciado.
+ * Não aceita tipo nem documento: são imutáveis após o cadastro. O que
+ * identifica quem a pessoa é permanece fixo; o que é dado de contato é
+ * editável.
  */
 @Schema(description = "Dados para atualizacao de um usuario existente")
 public record AtualizarUsuarioRequest(

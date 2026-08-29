@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Usuario proprietario de um ou mais estabelecimentos.
+ * Usuário proprietário de um ou mais estabelecimentos.
  *
- * Identificado por CNPJ. Nas proximas fases do projeto, e nesta classe que a
- * associacao com a entidade Restaurante sera declarada - motivo pelo qual a
- * heranca foi preferida a um simples campo de tipo.
+ * Identificado por CNPJ. Nas próximas fases do projeto, é nesta classe que a
+ * associação com a entidade Restaurante será declarada - motivo pelo qual a
+ * herança foi preferida a um simples campo de tipo.
  */
 @Entity
 @DiscriminatorValue("DONO_RESTAURANTE")
@@ -22,7 +22,7 @@ import lombok.Setter;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DonoRestaurante extends Usuario {
 
-    // Apenas digitos, mesma justificativa do CPF.
+    // Apenas dígitos, mesma justificativa do CPF.
     @Column(name = "cnpj", length = 14, unique = true)
     private String cnpj;
 

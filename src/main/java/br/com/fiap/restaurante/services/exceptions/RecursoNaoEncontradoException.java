@@ -1,11 +1,11 @@
 package br.com.fiap.restaurante.services.exceptions;
 
 /**
- * Recurso solicitado nao existe. Mapeada para HTTP 404.
+ * Recurso solicitado não existe. Mapeada para HTTP 404.
  *
- * Estende RuntimeException por opcao deliberada: a ausencia de um registro nao
- * e condicao que o chamador possa tratar e prosseguir. Obrigar cada camada
- * intermediaria a declarar ou capturar so acrescentaria ruido.
+ * Estende RuntimeException por opção deliberada: a ausência de um registro não
+ * é condição que o chamador possa tratar e prosseguir. Obrigar cada camada
+ * intermediária a declarar ou capturar só acrescentaria ruído.
  */
 public class RecursoNaoEncontradoException extends RuntimeException {
 

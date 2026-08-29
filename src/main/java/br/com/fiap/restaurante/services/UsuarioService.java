@@ -25,15 +25,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Regras de negocio do cadastro de usuarios.
+ * Regras de negócio do cadastro de usuários.
  *
- * Responsabilidade unica: gerenciar o ciclo de vida do usuario. A validacao de
- * credenciais e assunto do AutenticacaoService - sao operacoes que mudam por
+ * Responsabilidade única: gerenciar o ciclo de vida do usuário. A validação de
+ * credenciais é assunto do AutenticacaoService - são operações que mudam por
  * motivos diferentes e por isso vivem em classes diferentes.
  *
- * Todas as dependencias chegam pelo construtor, em campos finais. Nao ha como
- * construir a classe em estado incompleto, e nao e preciso subir o contexto do
- * Spring para testa-la: basta passar dublês no construtor.
+ * Todas as dependências chegam pelo construtor, em campos finais. Não há como
+ * construir a classe em estado incompleto, e não é preciso subir o contexto do
+ * Spring para testá-la: basta passar dublês no construtor.
  */
 @Service
 public class UsuarioService {
@@ -102,11 +102,11 @@ public class UsuarioService {
     }
 
     /**
-     * Busca por nome sem paginacao - versao 1 da API.
+     * Busca por nome sem paginação - versão 1 da API.
      *
-     * Devolve lista vazia quando nada corresponde ao termo. A colecao filtrada
-     * existe como recurso; ela apenas nao contem elementos. Responder 404 nesse
-     * caso afirmaria que a rota nao existe.
+     * Devolve lista vazia quando nada corresponde ao termo. A coleção filtrada
+     * existe como recurso; ela apenas não contém elementos. Responder 404 nesse
+     * caso afirmaria que a rota não existe.
      */
     @Transactional(readOnly = true)
     public List<UsuarioResponse> buscarPorNome(String nome) {
@@ -118,7 +118,7 @@ public class UsuarioService {
     }
 
     /**
-     * Busca por nome com paginacao - versao 2 da API.
+     * Busca por nome com paginação - versão 2 da API.
      */
     @Transactional(readOnly = true)
     public Page<UsuarioResponse> buscarPorNomePaginado(String nome, Pageable paginacao) {
@@ -128,7 +128,7 @@ public class UsuarioService {
     }
 
     // ------------------------------------------------------------------
-    // Atualizacao de dados
+    // Atualização de dados
     // ------------------------------------------------------------------
 
     @Transactional
@@ -137,9 +137,9 @@ public class UsuarioService {
 
         Usuario usuario = buscarEntidade(id);
 
-        // A pergunta e "existe OUTRO usuario com este valor?". Sem excluir o
-        // proprio registro da busca, salvar o cadastro sem alterar o e-mail
-        // resultaria em conflito do usuario consigo mesmo.
+        // A pergunta é "existe OUTRO usuário com este valor?". Sem excluir o
+        // próprio registro da busca, salvar o cadastro sem alterar o e-mail
+        // resultaria em conflito do usuário consigo mesmo.
         if (usuarioRepository.existsByEmailAndIdNot(requisicao.email(), id)) {
             logger.warn("Conflito de e-mail na atualizacao do usuario {}", id);
             throw new ConflitoDeDadosException("O e-mail informado ja esta cadastrado");
@@ -157,8 +157,8 @@ public class UsuarioService {
                 apenasDigitos(requisicao.endereco().cep())
         ));
 
-        // A data de ultima alteracao e preenchida pela auditoria do JPA no
-        // momento da sincronizacao com o banco. Nao ha atribuicao manual.
+        // A data de última alteração é preenchida pela auditoria do JPA no
+        // momento da sincronização com o banco. Não há atribuição manual.
         return usuarioMapper.paraResposta(usuario);
     }
 
@@ -172,15 +172,15 @@ public class UsuarioService {
 
         Usuario usuario = buscarEntidade(id);
 
-        // A comparacao ocorre entre hashes. A senha armazenada nunca e revertida.
+        // A comparação ocorre entre hashes. A senha armazenada nunca é revertida.
         if (!passwordEncoder.matches(requisicao.senhaAtual(), usuario.getSenha())) {
             logger.warn("Senha atual incorreta na troca de senha do usuario {}", id);
             throw new CredenciaisInvalidasException("A senha atual informada esta incorreta");
         }
 
-        // Carregar a entidade e altera-la faz a auditoria disparar. Uma
-        // atualizacao por consulta direta gravaria a senha sem atualizar a data
-        // de ultima alteracao - e trocar a senha e, sim, uma alteracao.
+        // Carregar a entidade e alterá-la faz a auditoria disparar. Uma
+        // atualização por consulta direta gravaria a senha sem atualizar a data
+        // de última alteração - e trocar a senha é, sim, uma alteração.
         usuario.setSenha(passwordEncoder.encode(requisicao.novaSenha()));
 
         logger.info("Senha alterada para o usuario {}", id);
@@ -213,9 +213,9 @@ public class UsuarioService {
     }
 
     private void validarUnicidadeNoCadastro(CriarUsuarioRequest requisicao) {
-        // Verificacao previa existe para produzir mensagem legivel. A garantia
-        // efetiva contra requisicoes concorrentes vem das restricoes do banco,
-        // cuja violacao e tratada no handler de excecoes.
+        // Verificação prévia existe para produzir mensagem legível. A garantia
+        // efetiva contra requisições concorrentes vem das restrições do banco,
+        // cuja violação é tratada no handler de exceções.
         if (usuarioRepository.existsByEmail(requisicao.email())) {
             logger.warn("Tentativa de cadastro com e-mail ja existente");
             throw new ConflitoDeDadosException("O e-mail informado ja esta cadastrado");
@@ -248,11 +248,11 @@ public class UsuarioService {
     }
 
     /**
-     * Remove pontuacao, mantendo apenas digitos.
+     * Remove pontuação, mantendo apenas dígitos.
      *
-     * Sem esta normalizacao, "123.456.789-09" e "12345678909" seriam gravados
-     * como valores distintos e a restricao de unicidade nao teria efeito
-     * pratico algum.
+     * Sem esta normalização, "123.456.789-09" e "12345678909" seriam gravados
+     * como valores distintos e a restrição de unicidade não teria efeito
+     * prático algum.
      */
     private String apenasDigitos(String valor) {
         if (valor == null || valor.isBlank()) {

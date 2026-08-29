@@ -34,15 +34,15 @@ import java.net.URI;
 import java.util.List;
 
 /**
- * Recursos de usuario - versao 1.
+ * Recursos de usuário - versão 1.
  *
- * A versao integra o caminho da rota. Entre as alternativas avaliadas -
- * cabecalho customizado e negociacao de conteudo pelo Accept - esta e a unica
- * visivel na documentacao Swagger e na colecao Postman, os dois artefatos onde
- * a estrategia precisa ser demonstravel.
+ * A versão integra o caminho da rota. Entre as alternativas avaliadas -
+ * cabeçalho customizado e negociação de conteúdo pelo Accept - esta é a única
+ * visível na documentação Swagger e na coleção Postman, os dois artefatos onde
+ * a estratégia precisa ser demonstrável.
  *
- * O controller nao contem regra de negocio. Ele traduz HTTP para chamadas de
- * servico e devolve o codigo de status adequado - nada alem disso.
+ * O controller não contém regra de negócio. Ele traduz HTTP para chamadas de
+ * serviço e devolve o código de status adequado - nada além disso.
  */
 @RestController
 @RequestMapping("/api/v1/usuarios")
@@ -145,9 +145,9 @@ public class UsuarioController {
         logger.info("POST /api/v1/usuarios");
         UsuarioResponse resposta = usuarioService.cadastrar(requisicao);
 
-        // O cabecalho Location informa onde o recurso recem-criado pode ser
-        // consultado. E a convencao REST para respostas 201 e poupa o cliente
-        // de montar a URL por conta propria.
+        // O cabeçalho Location informa onde o recurso recém-criado pode ser
+        // consultado. É a convenção REST para respostas 201 e poupa o cliente
+        // de montar a URL por conta própria.
         URI localizacao = construtorDeUri
                 .path("/api/v1/usuarios/{id}")
                 .buildAndExpand(resposta.id())
@@ -291,8 +291,8 @@ public class UsuarioController {
         logger.info("PUT /api/v1/usuarios/{}/senha", id);
         usuarioService.trocarSenha(id, requisicao);
 
-        // 204: a operacao teve exito e nao ha o que devolver. Retornar
-        // qualquer informacao relacionada a senha seria indesejavel.
+        // 204: a operação teve êxito e não há o que devolver. Retornar
+        // qualquer informação relacionada a senha seria indesejável.
         return ResponseEntity.noContent().build();
     }
 

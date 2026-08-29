@@ -8,11 +8,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Metadados da documentacao OpenAPI.
+ * Metadados da documentação OpenAPI.
  *
- * Define o cabecalho exibido no topo da interface Swagger. A descricao registra
- * a estrategia de versionamento, de modo que quem abre a documentacao entende a
- * convencao de rotas sem precisar consultar o relatorio.
+ * Define o cabeçalho exibido no topo da interface Swagger. A descrição registra
+ * a estratégia de versionamento, de modo que quem abre a documentação entende a
+ * convenção de rotas sem precisar consultar o relatório.
  */
 @Configuration
 public class OpenApiConfig {

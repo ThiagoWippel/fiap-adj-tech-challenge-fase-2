@@ -21,21 +21,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Recursos de usuario - versao 2.
+ * Recursos de usuário - versão 2.
  *
- * Existe para demonstrar a estrategia de versionamento em funcionamento, e nao
- * apenas descrita no relatorio.
+ * Existe para demonstrar a estratégia de versionamento em funcionamento, e não
+ * apenas descrita no relatório.
  *
- * O criterio que justifica a nova versao merece registro. Acrescentar um campo
- * a uma resposta e mudanca compativel: consumidores existentes seguem
- * funcionando e simplesmente ignoram o campo novo - e portanto nao demanda nova
- * versao. Ja alterar a resposta de um vetor para um objeto quebra todo cliente
- * que percorre o resultado, e e exatamente o caso de uso para o qual o
+ * O critério que justifica a nova versão merece registro. Acrescentar um campo
+ * a uma resposta é mudança compatível: consumidores existentes seguem
+ * funcionando e simplesmente ignoram o campo novo - e portanto não demanda nova
+ * versão. Já alterar a resposta de um vetor para um objeto quebra todo cliente
+ * que percorre o resultado, e é exatamente o caso de uso para o qual o
  * versionamento existe.
  *
- * Por isso a v2 nao replica os demais endpoints: eles permanecem inalterados e
- * continuam atendidos pela v1. Duplicar rotas identicas apenas para preencher a
- * versao seria ruido.
+ * Por isso a v2 não replica os demais endpoints: eles permanecem inalterados e
+ * continuam atendidos pela v1. Duplicar rotas idênticas apenas para preencher a
+ * versão seria ruído.
  */
 @RestController
 @RequestMapping("/api/v2/usuarios")

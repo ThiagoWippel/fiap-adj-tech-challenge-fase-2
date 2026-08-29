@@ -1,5 +1,5 @@
-# A chave "version" foi removida da especificacao do Compose e
-# hoje gera aviso de obsolescencia. Por isso o arquivo comeca
+# A chave "version" foi removida da especificação do Compose e
+# hoje gera aviso de obsolescência. Por isso o arquivo começa
 # direto em "services".
 
 services:
@@ -15,22 +15,22 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
       TZ: America/Sao_Paulo
     ports:
-      # Porta externa diferente da interna para nao conflitar com
-      # uma eventual instalacao local de MySQL na maquina.
+      # Porta externa diferente da interna para não conflitar com
+      # uma eventual instalação local de MySQL na máquina.
       - "${DB_EXTERNAL_PORT:-3307}:3306"
     volumes:
       # Volume nomeado: os dados sobrevivem ao ciclo de vida do
       # contêiner. Sem ele, o banco volta vazio a cada "down".
       - mysql-data:/var/lib/mysql
-      # Scripts nesta pasta sao executados pelo MySQL apenas na
-      # PRIMEIRA inicializacao, com o volume ainda vazio.
+      # Scripts nesta pasta são executados pelo MySQL apenas na
+      # PRIMEIRA inicialização, com o volume ainda vazio.
       - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       # O ponto mais importante deste arquivo. "depends_on" sozinho
-      # garante apenas que o contêiner do banco COMECOU a subir, nao
-      # que o MySQL ja aceita conexoes. Sem esta verificacao, a
-      # aplicacao sobe antes, falha ao conectar e morre - um erro
-      # intermitente que so aparece na primeira execucao.
+      # garante apenas que o contêiner do banco COMEÇOU a subir, não
+      # que o MySQL já aceita conexões. Sem esta verificação, a
+      # aplicação sobe antes, falha ao conectar e morre - um erro
+      # intermitente que só aparece na primeira execução.
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
@@ -48,9 +48,9 @@ services:
     environment:
       # Sobrescreve o perfil declarado em application.properties.
       SPRING_PROFILES_ACTIVE: docker
-      # DB_HOST e o NOME DO SERVICO acima, nao "localhost".
-      # Dentro da rede do Compose, cada contêiner tem seu proprio
-      # localhost; o Docker resolve o nome do servico para o IP certo.
+      # DB_HOST é o NOME DO SERVIÇO acima, não "localhost".
+      # Dentro da rede do Compose, cada contêiner tem seu próprio
+      # localhost; o Docker resolve o nome do serviço para o IP certo.
       DB_HOST: mysql
       DB_PORT: 3306
       DB_NAME: ${DB_NAME}
@@ -61,7 +61,7 @@ services:
       - "${APP_PORT:-8080}:8080"
     depends_on:
       mysql:
-        # Aguarda o healthcheck passar, nao apenas o contêiner existir.
+        # Aguarda o healthcheck passar, não apenas o contêiner existir.
         condition: service_healthy
     networks:
       - restaurante-net

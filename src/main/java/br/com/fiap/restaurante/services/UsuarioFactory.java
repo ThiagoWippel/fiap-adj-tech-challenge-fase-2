@@ -11,14 +11,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Fabrica de usuarios (padrao Factory Method).
+ * Fabrica de usuários (padrão Factory Method).
  *
- * O campo "tipo" da requisicao determina qual subclasse concreta instanciar.
- * Essa e a definicao do problema que o padrao resolve: decidir, em tempo de
- * execucao, qual objeto de uma hierarquia criar.
+ * O campo "tipo" da requisição determina qual subclasse concreta instanciar.
+ * Essa é a definição do problema que o padrão resolve: decidir, em tempo de
+ * execução, qual objeto de uma hierarquia criar.
  *
- * Concentrar a decisao aqui tem dois efeitos. O servico deixa de conhecer as
- * subclasses e passa a lidar apenas com Usuario. E a inclusao de um terceiro
+ * Concentrar a decisão aqui tem dois efeitos. O serviço deixa de conhecer as
+ * subclasses e passa a lidar apenas com Usuário. E a inclusão de um terceiro
  * tipo altera unicamente esta classe - o restante do sistema segue intacto.
  */
 @Component

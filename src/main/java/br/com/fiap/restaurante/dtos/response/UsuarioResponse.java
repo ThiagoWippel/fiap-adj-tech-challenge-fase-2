@@ -7,16 +7,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 
 /**
- * Representacao publica de um usuario.
+ * Representação pública de um usuário.
  *
- * A senha simplesmente nao existe aqui. Nao ha campo a ocultar, nem anotacao a
- * lembrar de aplicar - a estrutura torna o vazamento impossivel por construcao,
- * que e a razao de a API nao expor a entidade diretamente.
+ * A senha simplesmente não existe aqui. Não há campo a ocultar, nem anotação a
+ * lembrar de aplicar - a estrutura torna o vazamento impossível por construção,
+ * que é a razão de a API não expor a entidade diretamente.
  *
- * Note a assimetria em relacao ao dominio: la ha heranca, porque o polimorfismo
- * tem valor no comportamento. Aqui ha uma estrutura unica, porque a
- * representacao externa dos dois tipos e identica. Modelo interno e contrato
- * externo nao precisam ter a mesma forma.
+ * Note a assimetria em relação ao domínio: lá há herança, porque o polimorfismo
+ * tem valor no comportamento. Aqui há uma estrutura única, porque a
+ * representação externa dos dois tipos é idêntica. Modelo interno e contrato
+ * externo não precisam ter a mesma forma.
  */
 @Schema(description = "Dados publicos de um usuario")
 public record UsuarioResponse(
@@ -36,7 +36,7 @@ public record UsuarioResponse(
         @Schema(example = "CLIENTE")
         TipoUsuario tipo,
 
-        // Campo unico em vez de cpf e cnpj separados: um usuario possui
+        // Campo único em vez de cpf e cnpj separados: um usuário possui
         // exatamente um documento, determinado pelo tipo. Dois campos deixariam
         // um deles permanentemente nulo em toda resposta.
         @Schema(example = "12345678909", description = "CPF para cliente, CNPJ para dono de restaurante")
@@ -44,11 +44,11 @@ public record UsuarioResponse(
 
         EnderecoResponse endereco,
 
-        // Sem o formato explicito, o Jackson serializa LocalDateTime com
-        // precisao de nanossegundos, enquanto a coluna no banco guarda
-        // microssegundos. O objeto recem-criado sairia com nove casas decimais e
-        // o mesmo registro, relido do MySQL, com seis - divergencia que
-        // apareceria nos prints da documentacao.
+        // Sem o formato explícito, o Jackson serializa LocalDateTime com
+        // precisão de nanossegundos, enquanto a coluna no banco guarda
+        // microssegundos. O objeto recém-criado sairia com nove casas decimais e
+        // o mesmo registro, relido do MySQL, com seis - divergência que
+        // apareceria nos prints da documentação.
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         @Schema(example = "2026-08-21T10:30:00")
         LocalDateTime dataCriacao,

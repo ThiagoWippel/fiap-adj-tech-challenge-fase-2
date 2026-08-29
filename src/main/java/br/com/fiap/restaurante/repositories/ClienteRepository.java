@@ -5,23 +5,23 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * Consultas especificas de cliente.
+ * Consultas específicas de cliente.
  *
- * Existe separado de UsuarioRepository por uma razao concreta: o CPF e um
- * atributo de Cliente, nao de Usuario. Um metodo derivado nao pode referenciar
- * um campo ausente na entidade sobre a qual o repositorio opera.
+ * Existe separado de UsuarioRepository por uma razão concreta: o CPF é um
+ * atributo de Cliente, não de Usuário. Um método derivado não pode referenciar
+ * um campo ausente na entidade sobre a qual o repositório opera.
  *
- * O resultado atende ao Principio da Segregacao de Interfaces: quem so precisa
- * autenticar um usuario nao passa a depender de metodos sobre CPF.
+ * O resultado atende ao Princípio da Segregação de Interfaces: quem só precisa
+ * autenticar um usuário não passa a depender de métodos sobre CPF.
  */
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
     /**
-     * Verificacao de unicidade no cadastro.
+     * Verificação de unicidade no cadastro.
      *
-     * Nao existe equivalente para a atualizacao porque o documento e imutavel
-     * apos o cadastro: AtualizarUsuarioRequest nao o aceita.
+     * Não existe equivalente para a atualização porque o documento é imutável
+     * após o cadastro: AtualizarUsuarioRequest não o aceita.
      */
     boolean existsByCpf(String cpf);
 }

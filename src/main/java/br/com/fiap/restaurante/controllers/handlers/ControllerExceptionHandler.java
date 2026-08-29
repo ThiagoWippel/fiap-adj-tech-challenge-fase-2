@@ -32,23 +32,23 @@ import java.util.List;
 /**
  * Tratamento centralizado de erros, no formato ProblemDetail (RFC 7807).
  *
- * Concentrar o tratamento em um unico ponto mantem os controllers limpos e
+ * Concentrar o tratamento em um único ponto mantém os controllers limpos e
  * garante que toda falha saia no mesmo formato - inclusive as que nenhum
  * controller previu.
  *
  * A RFC define cinco campos: type, title, status, detail e instance. A
- * distincao entre title e detail costuma confundir: title e constante para
- * aquele tipo de problema, detail descreve a ocorrencia especifica.
- * Acrescentamos duas extensoes: "momento", que permite correlacionar a resposta
+ * distinção entre title e detail costuma confundir: title é constante para
+ * aquele tipo de problema, detail descreve a ocorrência específica.
+ * Acrescentamos duas extensões: "momento", que permite correlacionar a resposta
  * com o registro em log, e "erros", com o detalhamento por campo nas falhas de
- * validacao.
+ * validação.
  */
 @RestControllerAdvice
-// Precedencia maxima. Com spring.mvc.problemdetails.enabled=true, o proprio
-// Spring Boot registra um ProblemDetailsExceptionHandler para as excecoes do
-// framework - incluindo a de validacao. Sem declarar a ordem, os dois disputam
+// Precedência máxima. Com spring.mvc.problemdetails.enabled=true, o próprio
+// Spring Boot registra um ProblemDetailsExceptionHandler para as exceções do
+// framework - incluindo a de validação. Sem declarar a ordem, os dois disputam
 // MethodArgumentNotValidException e o do Spring vence, devolvendo uma mensagem
-// generica sem a relacao de campos rejeitados.
+// genérica sem a relação de campos rejeitados.
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
@@ -57,12 +57,12 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     /**
      * Base dos identificadores de tipo de problema.
      *
-     * O comportamento padrao do Spring preenche "type" com o valor generico
-     * "about:blank", que nao identifica nada. Apontar para ancoras reais na
-     * documentacao do projeto e o que diferencia usar a classe ProblemDetail de
-     * compreender o proposito da RFC: o campo existe para que um cliente possa
+     * O comportamento padrão do Spring preenche "type" com o valor genérico
+     * "about:blank", que não identifica nada. Apontar para âncoras reais na
+     * documentação do projeto e o que diferencia usar a classe ProblemDetail de
+     * compreender o propósito da RFC: o campo existe para que um cliente possa
      * reconhecer programaticamente a categoria do erro e consultar sua
-     * descricao.
+     * descrição.
      */
     private static final String BASE_TIPOS =
             "https://github.com/ThiagoWippel/fiap-adj-tech-challenge-fase-1/blob/main/README.md";
@@ -100,11 +100,11 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Rede de seguranca para violacoes de unicidade detectadas pelo banco.
+     * Rede de segurança para violações de unicidade detectadas pelo banco.
      *
-     * O servico verifica a unicidade antes de gravar, mas duas requisicoes
-     * simultaneas podem passar por essa verificacao e colidir na escrita. A
-     * restricao do banco e o unico mecanismo capaz de resolver essa disputa;
+     * O serviço verifica a unicidade antes de gravar, mas duas requisições
+     * simultâneas podem passar por essa verificação e colidir na escrita. A
+     * restrição do banco é o único mecanismo capaz de resolver essa disputa;
      * este tratamento converte a falha resultante em uma resposta coerente.
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -121,7 +121,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     // ------------------------------------------------------------------
-    // 401 - Credenciais invalidas
+    // 401 - Credenciais inválidas
     // ------------------------------------------------------------------
 
     @ExceptionHandler(CredenciaisInvalidasException.class)
@@ -137,7 +137,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     // ------------------------------------------------------------------
-    // 400 - Regra de negocio
+    // 400 - Regra de negócio
     // ------------------------------------------------------------------
 
     @ExceptionHandler(RegraDeNegocioException.class)
@@ -153,15 +153,15 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     // ------------------------------------------------------------------
-    // 400 - Validacao de campos
+    // 400 - Validação de campos
     // ------------------------------------------------------------------
 
     /**
-     * Falhas das anotacoes de validacao dos DTOs.
+     * Falhas das anotações de validação dos DTOs.
      *
      * Sobrescreve o comportamento herdado, que responderia apenas com uma
-     * mensagem generica. Aqui a resposta carrega a relacao completa de campos
-     * rejeitados, na extensao "erros".
+     * mensagem genérica. Aqui a resposta carrega a relação completa de campos
+     * rejeitados, na extensão "erros".
      */
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
@@ -189,16 +189,16 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     // ------------------------------------------------------------------
-    // 500 - Falha nao prevista
+    // 500 - Falha não prevista
     // ------------------------------------------------------------------
 
     /**
-     * Ultima barreira.
+     * Última barreira.
      *
-     * O rastro da excecao vai para o log, nunca para a resposta: mensagens
-     * internas revelam estrutura de pacotes, versoes de biblioteca e por vezes
+     * O rastro da exceção vai para o log, nunca para a resposta: mensagens
+     * internas revelam estrutura de pacotes, versões de biblioteca e por vezes
      * trechos de consulta ao banco. O cliente recebe apenas uma mensagem
-     * generica, conforme orienta o material de Excecoes da disciplina.
+     * genérica, conforme orienta o material de Exceções da disciplina.
      */
     @ExceptionHandler(Exception.class)
     public ProblemDetail tratarFalhaNaoPrevista(Exception excecao,
@@ -214,9 +214,9 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Acrescenta a extensao "momento" tambem as respostas montadas pela classe
+     * Acrescenta a extensão "momento" também às respostas montadas pela classe
      * base, de modo que TODA resposta de erro da API - inclusive JSON malformado
-     * e verbo nao suportado - possa ser correlacionada com o registro em log.
+     * e verbo não suportado - possa ser correlacionada com o registro em log.
      */
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(Exception excecao, Object corpo,

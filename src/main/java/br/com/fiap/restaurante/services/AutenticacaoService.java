@@ -15,16 +15,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 /**
- * Validacao de credenciais.
+ * Validação de credenciais.
  *
  * Separado do UsuarioService por responsabilidade: gerenciar cadastro e
- * autenticar sao operacoes que mudam por motivos distintos. Uma evolui com as
- * regras de dados pessoais, a outra com as politicas de seguranca. Manter as
- * duas na mesma classe faria com que qualquer mudanca em uma exigisse
+ * autenticar são operações que mudam por motivos distintos. Uma evolui com as
+ * regras de dados pessoais, a outra com as políticas de segurança. Manter as
+ * duas na mesma classe faria com que qualquer mudança em uma exigisse
  * reexaminar a outra.
  *
- * O retorno nao e booleano. O material de Excecoes da fase e explicito quanto a
- * isso: falhas devem ser sinalizadas por excecao, nao por valor de status.
+ * O retorno não é booleano. O material de Exceções da fase é explícito quanto a
+ * isso: falhas devem ser sinalizadas por exceção, não por valor de status.
  */
 @Service
 public class AutenticacaoService {
@@ -34,12 +34,12 @@ public class AutenticacaoService {
     private static final String MENSAGEM_FALHA = "Login ou senha invalidos";
 
     /**
-     * Hash de descarte, usado quando o login nao existe.
+     * Hash de descarte, usado quando o login não existe.
      *
      * Sem ele, a resposta para um login inexistente seria imediata, enquanto a
-     * resposta para uma senha incorreta levaria o tempo do calculo do hash.
-     * Essa diferenca permitiria descobrir quais logins existem apenas medindo o
-     * tempo de resposta. Manter a mensagem igual nao basta se a duracao denuncia.
+     * resposta para uma senha incorreta levaria o tempo do cálculo do hash.
+     * Essa diferença permitiria descobrir quais logins existem apenas medindo o
+     * tempo de resposta. Manter a mensagem igual não basta se a duração denuncia.
      */
     private static final String HASH_DE_DESCARTE =
             "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy";
@@ -62,7 +62,7 @@ public class AutenticacaoService {
 
         Optional<Usuario> encontrado = usuarioRepository.findByLogin(requisicao.login());
 
-        // A comparacao acontece sempre, exista o usuario ou nao, para que o
+        // A comparação acontece sempre, exista o usuário ou não, para que o
         // tempo de resposta seja equivalente nos dois casos.
         String hashArmazenado = encontrado
                 .map(Usuario::getSenha)
@@ -71,7 +71,7 @@ public class AutenticacaoService {
         boolean senhaConfere = passwordEncoder.matches(requisicao.senha(), hashArmazenado);
 
         if (encontrado.isEmpty() || !senhaConfere) {
-            // Uma unica mensagem para os dois cenarios. Distinguir "login nao
+            // Uma única mensagem para os dois cenários. Distinguir "login não
             // existe" de "senha incorreta" permitiria enumerar os logins
             // cadastrados por tentativa e erro.
             logger.warn("Falha na validacao de credenciais para o login {}", requisicao.login());

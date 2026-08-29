@@ -8,8 +8,8 @@ import java.util.List;
 /**
  * Envelope de resultados paginados.
  *
- * Existe para nao serializar diretamente o objeto Page do Spring Data, cujo
- * formato JSON nao tem estabilidade garantida entre versoes. Declarando a
+ * Existe para não serializar diretamente o objeto Page do Spring Data, cujo
+ * formato JSON não tem estabilidade garantida entre versões. Declarando a
  * estrutura aqui, o contrato da API deixa de depender de detalhe interno do
  * framework.
  */

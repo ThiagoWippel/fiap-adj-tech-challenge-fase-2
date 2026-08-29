@@ -22,10 +22,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Validacao de credenciais.
+ * Validação de credenciais.
  *
- * O enunciado dispensa o uso de Spring Security e admite verificacao simples
- * contra os dados do banco. A senha e conferida por comparacao de hashes
+ * O enunciado dispensa o uso de Spring Security e admite verificação simples
+ * contra os dados do banco. A senha é conferida por comparação de hashes
  * BCrypt, jamais em texto.
  */
 @RestController

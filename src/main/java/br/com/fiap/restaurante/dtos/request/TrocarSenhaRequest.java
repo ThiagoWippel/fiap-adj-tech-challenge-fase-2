@@ -7,9 +7,9 @@ import jakarta.validation.constraints.Size;
 /**
  * Dados para troca de senha.
  *
- * A senha atual e exigida como protecao contra alteracao indevida em sessao
- * deixada aberta. O enunciado nao menciona essa exigencia - trata-se de
- * decisao de seguranca, documentada no Swagger e na colecao Postman para que
+ * A senha atual é exigida como proteção contra alteração indevida em sessão
+ * deixada aberta. O enunciado não menciona essa exigência - trata-se de
+ * decisão de segurança, documentada no Swagger e na coleção Postman para que
  * quem for testar o endpoint saiba do requisito.
  */
 @Schema(description = "Dados para troca de senha")

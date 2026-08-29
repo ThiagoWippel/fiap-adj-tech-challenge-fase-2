@@ -6,21 +6,21 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
- * Codificacao de senhas.
+ * Codificação de senhas.
  *
  * Usa apenas spring-security-crypto, a biblioteca de criptografia isolada, sem
  * a cadeia de filtros do Spring Security completo - que o enunciado dispensa
  * explicitamente.
  *
- * O BCrypt e unidirecional: o valor armazenado nao pode ser revertido. A
- * verificacao compara hashes, nunca textos. O algoritmo incorpora um valor
- * aleatorio por registro, de modo que senhas identicas produzem hashes
+ * O BCrypt é unidirecional: o valor armazenado não pode ser revertido. A
+ * verificação compara hashes, nunca textos. O algoritmo incorpora um valor
+ * aleatório por registro, de modo que senhas idênticas produzem hashes
  * diferentes - impedindo que senhas repetidas sejam identificadas por
- * inspecao do banco.
+ * inspeção do banco.
  *
- * O tipo devolvido e a interface PasswordEncoder, e nao a implementacao. Os
- * servicos passam a depender da abstracao, o que atende ao Principio da
- * Inversao de Dependencia e permite substituir o algoritmo alterando apenas
+ * O tipo devolvido é a interface PasswordEncoder, e não a implementação. Os
+ * serviços passam a depender da abstração, o que atende ao Princípio da
+ * Inversão de Dependência e permite substituir o algoritmo alterando apenas
  * esta classe.
  */
 @Configuration

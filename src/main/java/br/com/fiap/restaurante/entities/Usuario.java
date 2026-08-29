@@ -24,17 +24,17 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 /**
- * Raiz da hierarquia de usuarios.
+ * Raiz da hierarquia de usuários.
  *
- * Estrategia de heranca: SINGLE_TABLE. Todos os subtipos compartilham uma
- * unica tabela, distinguidos pela coluna discriminadora "tipo_usuario". A
- * alternativa JOINED exigiria juncao em toda leitura e triplicaria o numero
+ * Estratégia de herança: SINGLE_TABLE. Todos os subtipos compartilham uma
+ * única tabela, distinguidos pela coluna discriminadora "tipo_usuario". A
+ * alternativa JOINED exigiria junção em toda leitura e triplicaria o número
  * de tabelas; TABLE_PER_CLASS foi descartada por inviabilizar a unicidade de
- * e-mail no sistema inteiro, ja que uma restricao de unicidade nao abrange
+ * e-mail no sistema inteiro, já que uma restrição de unicidade não abrange
  * tabelas distintas.
  *
- * A classe e abstrata de proposito: nao existe "um usuario generico" no
- * dominio. Todo usuario e um cliente ou um dono de restaurante.
+ * A classe é abstrata de propósito: não existe "um usuário genérico" no
+ * domínio. Todo usuário é um cliente ou um dono de restaurante.
  */
 @Entity
 @Table(
@@ -45,21 +45,21 @@ import java.time.LocalDateTime;
         }
 )
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-// Por padrao o JPA nomeia a coluna discriminadora como "DTYPE" e a preenche
-// com o nome da classe. Nomear explicitamente torna a tabela legivel para
-// quem a inspeciona sem conhecer o codigo.
+// Por padrão o JPA nomeia a coluna discriminadora como "DTYPE" e a preenche
+// com o nome da classe. Nomear explicitamente torna a tabela legível para
+// quem a inspeciona sem conhecer o código.
 @DiscriminatorColumn(
         name = "tipo_usuario",
         discriminatorType = DiscriminatorType.STRING,
         length = 20
 )
-// Habilita o preenchimento automatico das datas de criacao e alteracao.
+// Habilita o preenchimento automático das datas de criação e alteração.
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 // O JPA exige um construtor sem argumentos para instanciar entidades ao ler
-// do banco. Deixa-lo protegido impede que o codigo da aplicacao crie usuarios
-// em estado invalido, sem passar pelo construtor real.
+// do banco. Deixá-lo protegido impede que o código da aplicação crie usuários
+// em estado inválido, sem passar pelo construtor real.
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class Usuario {
 
@@ -70,7 +70,7 @@ public abstract class Usuario {
     @Column(nullable = false, length = 120)
     private String nome;
 
-    // 255 acomoda o limite normativo de 254 caracteres de um endereco de e-mail.
+    // 255 acomoda o limite normativo de 254 caracteres de um endereço de e-mail.
     @Column(nullable = false, length = 255)
     private String email;
 
@@ -78,7 +78,7 @@ public abstract class Usuario {
     private String login;
 
     // Armazena o hash BCrypt, nunca a senha em texto. O hash tem 60 caracteres
-    // fixos; a folga ate 100 evita acoplar o esquema a um algoritmo especifico.
+    // fixos; a folga até 100 evita acoplar o esquema a um algoritmo específico.
     @Column(nullable = false, length = 100)
     private String senha;
 
@@ -102,21 +102,21 @@ public abstract class Usuario {
     }
 
     /**
-     * Tipo do usuario, resolvido por polimorfismo.
+     * Tipo do usuário, resolvido por polimorfismo.
      *
-     * O valor nao e lido da coluna discriminadora: cada subclasse declara o
-     * proprio tipo. Adicionar um terceiro tipo de usuario e criar uma classe
-     * nova que implementa este metodo, sem alterar nada do que ja existe -
-     * o Principio Aberto/Fechado aplicado ao dominio.
+     * O valor não é lido da coluna discriminadora: cada subclasse declara o
+     * próprio tipo. Adicionar um terceiro tipo de usuário é criar uma classe
+     * nova que implementa este método, sem alterar nada do que já existe -
+     * o Princípio Aberto/Fechado aplicado ao domínio.
      */
     public abstract TipoUsuario getTipo();
 
     /**
-     * Documento de identificacao, resolvido por polimorfismo.
+     * Documento de identificação, resolvido por polimorfismo.
      *
-     * Cliente devolve o CPF, DonoRestaurante devolve o CNPJ. Sem este metodo,
-     * qualquer codigo que precisasse do documento teria de testar o tipo
-     * concreto do objeto - exatamente o condicional que a heranca elimina.
+     * Cliente devolve o CPF, DonoRestaurante devolve o CNPJ. Sem este método,
+     * qualquer código que precisasse do documento teria de testar o tipo
+     * concreto do objeto - exatamente o condicional que a herança elimina.
      */
     public abstract String getDocumento();
 
@@ -124,7 +124,7 @@ public abstract class Usuario {
      * Igualdade baseada exclusivamente no identificador.
      *
      * Comparar todos os campos quebraria com entidades gerenciadas pelo
-     * Hibernate, que podem ser proxies com atributos ainda nao carregados.
+     * Hibernate, que podem ser proxies com atributos ainda não carregados.
      */
     @Override
     public boolean equals(Object objeto) {
@@ -138,11 +138,11 @@ public abstract class Usuario {
     }
 
     /**
-     * Valor constante de proposito.
+     * Valor constante de propósito.
      *
-     * Uma entidade recem-criada ainda nao tem id; se o hashCode dependesse
-     * dele, mudaria apos a persistencia e o objeto se perderia dentro de
-     * colecoes baseadas em hash.
+     * Uma entidade recém-criada ainda não tem id; se o hashCode dependesse
+     * dele, mudaria após a persistência e o objeto se perderia dentro de
+     * coleções baseadas em hash.
      */
     @Override
     public int hashCode() {

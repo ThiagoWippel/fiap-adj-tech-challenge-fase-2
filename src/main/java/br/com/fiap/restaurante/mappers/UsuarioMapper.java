@@ -9,16 +9,16 @@ import br.com.fiap.restaurante.entities.Usuario;
 import org.springframework.stereotype.Component;
 
 /**
- * Conversao entre entidades e objetos de transferencia.
+ * Conversão entre entidades e objetos de transferência.
  *
- * Escrito a mao, sem biblioteca de mapeamento automatico. Bibliotecas do genero
- * associam campos por reflexao em tempo de execucao: um nome errado nao impede
- * a compilacao e so se manifesta quando a aplicacao roda. Com poucas conversoes,
- * o mapeamento explicito e mais rapido de depurar e torna visivel, no proprio
- * codigo, que a senha nao atravessa para a resposta.
+ * Escrito a mão, sem biblioteca de mapeamento automático. Bibliotecas do gênero
+ * associam campos por reflexão em tempo de execução: um nome errado não impede
+ * a compilação e só se manifesta quando a aplicação roda. Com poucas conversões,
+ * o mapeamento explícito é mais rápido de depurar e torna visível, no próprio
+ * código, que a senha não atravessa para a resposta.
  *
  * Note que getDocumento() dispensa qualquer teste de tipo: a entidade sabe
- * responder qual e o seu documento.
+ * responder qual é o seu documento.
  */
 @Component
 public class UsuarioMapper {

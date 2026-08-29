@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 # =========================================================
-# Verificacao dos endpoints da API
+# Verificação dos endpoints da API
 #
 # Uso:
 #   chmod +x verificar-api.sh
 #   ./verificar-api.sh
 #
-# Repetivel: captura os identificadores das respostas em vez de
+# Repetível: captura os identificadores das respostas em vez de
 # presumi-los, e remove ao final os registros que criou. Funciona
-# tanto no perfil dev (H2, recriado a cada inicializacao) quanto
+# tanto no perfil dev (H2, recriado a cada inicialização) quanto
 # no perfil docker (MySQL, com volume persistente).
 #
-# Caso uma execucao seja interrompida no meio, pode restar residuo
-# no banco e o cadastro inicial falhara com 409. Para limpar:
+# Caso uma execução seja interrompida no meio, pode restar resíduo
+# no banco e o cadastro inicial falhará com 409. Para limpar:
 #   docker compose down -v && docker compose up --build
 # =========================================================
 
@@ -23,7 +23,7 @@ total=0
 falhas=0
 ultimo_corpo=""
 
-# executa uma requisicao e compara o status obtido com o esperado
+# executa uma requisição e compara o status obtido com o esperado
 verificar() {
     local descricao="$1" esperado="$2" metodo="$3" rota="$4" corpo="$5"
     total=$((total + 1))
@@ -47,12 +47,12 @@ verificar() {
     fi
 }
 
-# extrai o campo id do ultimo corpo de resposta
+# extrai o campo id do último corpo de resposta
 extrair_id() {
     echo "$ultimo_corpo" | grep -o '"id":[0-9]*' | head -n1 | cut -d: -f2
 }
 
-# confirma a presenca de um campo no ultimo corpo de resposta
+# confirma a presença de um campo no último corpo de resposta
 verificar_campo() {
     local descricao="$1" campo="$2"
     total=$((total + 1))
@@ -64,7 +64,7 @@ verificar_campo() {
     fi
 }
 
-# confirma a AUSENCIA de um campo no ultimo corpo de resposta
+# confirma a AUSÊNCIA de um campo no último corpo de resposta
 verificar_ausencia() {
     local descricao="$1" campo="$2"
     total=$((total + 1))
