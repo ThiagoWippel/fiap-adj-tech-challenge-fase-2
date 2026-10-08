@@ -34,6 +34,21 @@
 			"key": "idEntregador",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "idDonaCantina",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "idClienteCantina",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "idCantina",
+			"value": "",
+			"type": "string"
 		}
 	],
 	"item": [
@@ -2654,6 +2669,903 @@
 							"query": []
 						},
 						"description": "Cenários do catálogo: TIP-16."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "12. Restaurantes",
+			"description": "CRUD de restaurantes (Fase 2). O dono precisa ser um usuário ativo do tipo Dono de Restaurante. Os horários\nsão turnos por dia da semana; fechamento antes da abertura quer dizer que o turno termina no dia seguinte.",
+			"item": [
+				{
+					"name": "Cadastrar a dona do restaurante",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 201 Created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set('idDonaCantina', pm.response.json().id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios"
+							],
+							"query": []
+						},
+						"description": "Usuária do tipo Dono de Restaurante, que será a dona da Cantina.\n\nCenários do catálogo: USU-19.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Carla Dias\",\n  \"email\": \"carla.dias@exemplo.com\",\n  \"login\": \"carla.dias\",\n  \"senha\": \"SenhaSegura123\",\n  \"tipo\": \"DONO_RESTAURANTE\",\n  \"cnpj\": \"33.683.948/0001-48\",\n  \"endereco\": {\n    \"rua\": \"Rua Hercílio Luz\",\n    \"numero\": \"120\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"Itajaí\",\n    \"estado\": \"SC\",\n    \"cep\": \"88301-000\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar um cliente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 201 Created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set('idClienteCantina', pm.response.json().id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: USU-18.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Diego Rocha\",\n  \"email\": \"diego.rocha@exemplo.com\",\n  \"login\": \"diego.rocha\",\n  \"senha\": \"SenhaSegura123\",\n  \"tipo\": \"CLIENTE\",\n  \"cpf\": \"390.533.447-05\",\n  \"endereco\": {\n    \"rua\": \"Rua Hercílio Luz\",\n    \"numero\": \"120\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"Itajaí\",\n    \"estado\": \"SC\",\n    \"cep\": \"88301-000\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar restaurante com dono Cliente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 409 Conflict', function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Conflito de dados\"', function () {",
+									"    pm.expect(problema.title).to.eql('Conflito de dados');",
+									"});",
+									"pm.test('Orienta a trocar o tipo antes', function () {",
+									"    pm.expect(problema.detail).to.include('Troque o tipo dele antes');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes"
+							],
+							"query": []
+						},
+						"description": "O dono precisa ser do tipo Dono de Restaurante.\n\nCenários do catálogo: RES-07.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Cantina da Nona\",\n  \"endereco\": {\n    \"rua\": \"Rua Hercílio Luz\",\n    \"numero\": \"120\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"Itajaí\",\n    \"estado\": \"SC\",\n    \"cep\": \"88301-000\"\n  },\n  \"tipoCozinha\": \"ITALIANA\",\n  \"donoId\": {{idClienteCantina}},\n  \"horarios\": [\n    {\n      \"diaSemana\": \"SEXTA\",\n      \"abertura\": \"18:00\",\n      \"fechamento\": \"02:00\"\n    },\n    {\n      \"diaSemana\": \"SEGUNDA\",\n      \"abertura\": \"18:00\",\n      \"fechamento\": \"23:00\"\n    },\n    {\n      \"diaSemana\": \"SEGUNDA\",\n      \"abertura\": \"11:00\",\n      \"fechamento\": \"15:00\"\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar restaurante",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 201 Created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"const restaurante = pm.response.json();",
+									"pm.test('Location aponta para o restaurante', function () {",
+									"    pm.expect(pm.response.headers.get('Location')).to.include('/api/v1/restaurantes/' + restaurante.id);",
+									"});",
+									"pm.test('Dono como id e nome', function () {",
+									"    pm.expect(restaurante.dono).to.eql({ id: Number(pm.collectionVariables.get('idDonaCantina')), nome: 'Carla Dias' });",
+									"});",
+									"pm.test('Turnos ordenados por dia e abertura', function () {",
+									"    pm.expect(restaurante.horarios.map(function (t) { return t.diaSemana + ' ' + t.abertura; }))",
+									"        .to.eql(['SEGUNDA 11:00', 'SEGUNDA 18:00', 'SEXTA 18:00']);",
+									"});",
+									"pm.collectionVariables.set('idCantina', restaurante.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes"
+							],
+							"query": []
+						},
+						"description": "Os turnos vão fora de ordem; a resposta os devolve ordenados.\n\nCenários do catálogo: RES-12 · HOR-11.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Cantina da Nona\",\n  \"endereco\": {\n    \"rua\": \"Rua Hercílio Luz\",\n    \"numero\": \"120\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"Itajaí\",\n    \"estado\": \"SC\",\n    \"cep\": \"88301-000\"\n  },\n  \"tipoCozinha\": \"ITALIANA\",\n  \"donoId\": {{idDonaCantina}},\n  \"horarios\": [\n    {\n      \"diaSemana\": \"SEXTA\",\n      \"abertura\": \"18:00\",\n      \"fechamento\": \"02:00\"\n    },\n    {\n      \"diaSemana\": \"SEGUNDA\",\n      \"abertura\": \"18:00\",\n      \"fechamento\": \"23:00\"\n    },\n    {\n      \"diaSemana\": \"SEGUNDA\",\n      \"abertura\": \"11:00\",\n      \"fechamento\": \"15:00\"\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar com turnos sobrepostos",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 400 Bad Request', function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Regra de negócio violada\"', function () {",
+									"    pm.expect(problema.title).to.eql('Regra de negócio violada');",
+									"});",
+									"pm.test('Cita os dois turnos', function () {",
+									"    pm.expect(problema.detail).to.eql('Os turnos SEXTA 18:00–02:00 e SABADO 01:00–10:00 se sobrepõem.');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes"
+							],
+							"query": []
+						},
+						"description": "O turno de sábado colide com a parte depois da meia-noite do turno de sexta.\n\nCenários do catálogo: HOR-08.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Bar do Porto\",\n  \"endereco\": {\n    \"rua\": \"Rua Hercílio Luz\",\n    \"numero\": \"120\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"Itajaí\",\n    \"estado\": \"SC\",\n    \"cep\": \"88301-000\"\n  },\n  \"tipoCozinha\": \"OUTRA\",\n  \"donoId\": {{idDonaCantina}},\n  \"horarios\": [\n    {\n      \"diaSemana\": \"SEXTA\",\n      \"abertura\": \"18:00\",\n      \"fechamento\": \"02:00\"\n    },\n    {\n      \"diaSemana\": \"SABADO\",\n      \"abertura\": \"01:00\",\n      \"fechamento\": \"10:00\"\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar com tipo de cozinha inválido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 400 Bad Request', function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Dados inválidos\"', function () {",
+									"    pm.expect(problema.title).to.eql('Dados inválidos');",
+									"});",
+									"pm.test('Lista os valores aceitos', function () {",
+									"    pm.expect(problema.detail).to.include('Valores aceitos');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: COZ-01.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Thai Express\",\n  \"endereco\": {\n    \"rua\": \"Rua Hercílio Luz\",\n    \"numero\": \"120\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"Itajaí\",\n    \"estado\": \"SC\",\n    \"cep\": \"88301-000\"\n  },\n  \"tipoCozinha\": \"TAILANDESA\",\n  \"donoId\": {{idDonaCantina}},\n  \"horarios\": [\n    {\n      \"diaSemana\": \"TERCA\",\n      \"abertura\": \"18:00\",\n      \"fechamento\": \"23:00\"\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar com filtro de nome",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"const pagina = pm.response.json();",
+									"pm.test('Encontra pelo trecho do nome, sem diferenciar maiúsculas', function () {",
+									"    pm.expect(pagina.conteudo.map(function (r) { return r.nome; })).to.include('Cantina da Nona');",
+									"});",
+									"pm.test('Página com metadados', function () {",
+									"    pm.expect(pagina).to.have.property('totalElementos');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes?nome=NONA",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes"
+							],
+							"query": [
+								{
+									"key": "nome",
+									"value": "NONA"
+								}
+							]
+						},
+						"description": "Cenários do catálogo: RES-13."
+					},
+					"response": []
+				},
+				{
+					"name": "Listar com filtro de tipo de cozinha",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Só restaurantes italianos', function () {",
+									"    pm.response.json().conteudo.forEach(function (r) { pm.expect(r.tipoCozinha).to.eql('ITALIANA'); });",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes?tipoCozinha=italiana",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes"
+							],
+							"query": [
+								{
+									"key": "tipoCozinha",
+									"value": "italiana"
+								}
+							]
+						},
+						"description": "Cenários do catálogo: COZ-03."
+					},
+					"response": []
+				},
+				{
+					"name": "Listar com tipo de cozinha inválido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 400 Bad Request', function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Dados inválidos\"', function () {",
+									"    pm.expect(problema.title).to.eql('Dados inválidos');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes?tipoCozinha=TAILANDESA",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes"
+							],
+							"query": [
+								{
+									"key": "tipoCozinha",
+									"value": "TAILANDESA"
+								}
+							]
+						},
+						"description": "Cenários do catálogo: COZ-03."
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar restaurante",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Devolve o restaurante pedido', function () {",
+									"    pm.expect(pm.response.json().nome).to.eql('Cantina da Nona');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idCantina}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idCantina}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: RES-14."
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar restaurante",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"const restaurante = pm.response.json();",
+									"pm.test('Dados alterados e turnos substituídos', function () {",
+									"    pm.expect(restaurante.nome).to.eql('Pizzaria da Nona');",
+									"    pm.expect(restaurante.tipoCozinha).to.eql('PIZZARIA');",
+									"    pm.expect(restaurante.horarios).to.have.lengthOf(1);",
+									"});",
+									"pm.test('Data de alteração não anterior à de criação', function () {",
+									"    pm.expect(new Date(restaurante.dataUltimaAlteracao).getTime())",
+									"        .to.be.at.least(new Date(restaurante.dataCriacao).getTime());",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idCantina}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idCantina}}"
+							],
+							"query": []
+						},
+						"description": "O PUT substitui a lista inteira de turnos.\n\nCenários do catálogo: RES-15 · HOR-12.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Pizzaria da Nona\",\n  \"endereco\": {\n    \"rua\": \"Rua Hercílio Luz\",\n    \"numero\": \"120\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"Itajaí\",\n    \"estado\": \"SC\",\n    \"cep\": \"88301-000\"\n  },\n  \"tipoCozinha\": \"PIZZARIA\",\n  \"donoId\": {{idDonaCantina}},\n  \"horarios\": [\n    {\n      \"diaSemana\": \"TERCA\",\n      \"abertura\": \"18:00\",\n      \"fechamento\": \"23:30\"\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Restaurantes da dona",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Lista o restaurante ativo da dona', function () {",
+									"    pm.expect(pm.response.json().conteudo.map(function (r) { return r.nome; })).to.eql(['Pizzaria da Nona']);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idDonaCantina}}/restaurantes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idDonaCantina}}",
+								"restaurantes"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: RES-17."
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir a dona com restaurante ativo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 409 Conflict', function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Conflito de dados\"', function () {",
+									"    pm.expect(problema.title).to.eql('Conflito de dados');",
+									"});",
+									"pm.test('Orienta a transferir ou excluir o restaurante', function () {",
+									"    pm.expect(problema.detail).to.include('Transfira ou exclua o restaurante');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idDonaCantina}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idDonaCantina}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: EXC-07."
+					},
+					"response": []
+				},
+				{
+					"name": "Trocar a dona para Cliente com restaurante ativo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 409 Conflict', function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Conflito de dados\"', function () {",
+									"    pm.expect(problema.title).to.eql('Conflito de dados');",
+									"});",
+									"pm.test('Continua Dono de Restaurante enquanto tiver restaurante ativo', function () {",
+									"    pm.expect(problema.detail).to.include('só deixa de ser Dono de Restaurante');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idDonaCantina}}/tipo",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idDonaCantina}}",
+								"tipo"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: TRO-10.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tipo\": \"CLIENTE\",\n  \"documento\": \"453.178.287-91\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir restaurante",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idCantina}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idCantina}}"
+							],
+							"query": []
+						},
+						"description": "Exclusão lógica: a linha fica no banco, marcada como removida.\n\nCenários do catálogo: RES-11 · RES-16."
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar restaurante excluído",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 404 Not Found', function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Recurso não encontrado\"', function () {",
+									"    pm.expect(problema.title).to.eql('Recurso não encontrado');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idCantina}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idCantina}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: RES-16."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "13. Limpeza dos restaurantes",
+			"description": "Sem restaurante ativo, a dona pode ser excluída; o restaurante removido continua apontando para ela.",
+			"item": [
+				{
+					"name": "Excluir a dona",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idDonaCantina}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idDonaCantina}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: EXC-08."
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir o cliente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									"pm.collectionVariables.unset('idDonaCantina');",
+									"pm.collectionVariables.unset('idClienteCantina');",
+									"pm.collectionVariables.unset('idCantina');"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idClienteCantina}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idClienteCantina}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: EXC-01."
 					},
 					"response": []
 				}
