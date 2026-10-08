@@ -49,6 +49,36 @@
 			"key": "idCantina",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "idDonaBistro",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "idBistro",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "idLanchonete",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "idRatatouille",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "idRatatouilleLanchonete",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "idRatatouilleNovo",
+			"value": "",
+			"type": "string"
 		}
 	],
 	"item": [
@@ -3566,6 +3596,958 @@
 							"query": []
 						},
 						"description": "Cenários do catálogo: EXC-01."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "14. Itens do cardápio",
+			"description": "CRUD de itens do cardápio (Fase 2), nas rotas do restaurante. O nome é único entre os itens ativos do\nrestaurante; o preço tem no máximo duas casas e sai sempre com duas.",
+			"item": [
+				{
+					"name": "Cadastrar a dona dos restaurantes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 201 Created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set('idDonaBistro', pm.response.json().id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: USU-19.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Elisa Prado\",\n  \"email\": \"elisa.prado@exemplo.com\",\n  \"login\": \"elisa.prado\",\n  \"senha\": \"SenhaSegura123\",\n  \"tipo\": \"DONO_RESTAURANTE\",\n  \"cnpj\": \"19.131.948/0001-04\",\n  \"endereco\": {\n    \"rua\": \"Rua Lauro Müller\",\n    \"numero\": \"88\",\n    \"bairro\": \"Fazenda\",\n    \"cidade\": \"Itajaí\",\n    \"estado\": \"SC\",\n    \"cep\": \"88301-400\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar o bistrô",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 201 Created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set('idBistro', pm.response.json().id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: RES-12.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Bistrô da Elisa\",\n  \"endereco\": {\n    \"rua\": \"Rua Lauro Müller\",\n    \"numero\": \"88\",\n    \"bairro\": \"Fazenda\",\n    \"cidade\": \"Itajaí\",\n    \"estado\": \"SC\",\n    \"cep\": \"88301-400\"\n  },\n  \"tipoCozinha\": \"FRANCESA\",\n  \"donoId\": {{idDonaBistro}},\n  \"horarios\": [\n    {\n      \"diaSemana\": \"TERCA\",\n      \"abertura\": \"18:00\",\n      \"fechamento\": \"23:00\"\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar a lanchonete",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 201 Created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set('idLanchonete', pm.response.json().id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: RES-12.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Lanchonete da Elisa\",\n  \"endereco\": {\n    \"rua\": \"Rua Lauro Müller\",\n    \"numero\": \"88\",\n    \"bairro\": \"Fazenda\",\n    \"cidade\": \"Itajaí\",\n    \"estado\": \"SC\",\n    \"cep\": \"88301-400\"\n  },\n  \"tipoCozinha\": \"LANCHES\",\n  \"donoId\": {{idDonaBistro}},\n  \"horarios\": [\n    {\n      \"diaSemana\": \"TERCA\",\n      \"abertura\": \"18:00\",\n      \"fechamento\": \"23:00\"\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar item",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 201 Created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"const item = pm.response.json();",
+									"pm.test('Location aponta para o item, dentro do restaurante', function () {",
+									"    pm.expect(pm.response.headers.get('Location'))",
+									"        .to.include('/api/v1/restaurantes/' + pm.collectionVariables.get('idBistro') + '/itens-cardapio/' + item.id);",
+									"});",
+									"pm.test('Nome sem espaços sobrando', function () {",
+									"    pm.expect(item.nome).to.eql('Ratatouille da casa');",
+									"});",
+									"pm.test('Preço sempre com duas casas: 39.9 vira 39.90', function () {",
+									"    pm.expect(pm.response.text()).to.include('\"preco\":39.90');",
+									"});",
+									"pm.collectionVariables.set('idRatatouille', item.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idBistro}}/itens-cardapio",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idBistro}}",
+								"itens-cardapio"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: ITE-03 · ITE-07 · ITE-21.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"  Ratatouille   da casa \",\n  \"descricao\": \"Legumes assados em camadas, com molho de tomate.\",\n  \"preco\": 39.9,\n  \"apenasNoLocal\": false,\n  \"caminhoFoto\": \"fotos/ratatouille.jpg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar item com nome repetido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 409 Conflict', function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Conflito de dados\"', function () {",
+									"    pm.expect(problema.title).to.eql('Conflito de dados');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idBistro}}/itens-cardapio",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idBistro}}",
+								"itens-cardapio"
+							],
+							"query": []
+						},
+						"description": "Mesmo nome, com outras maiúsculas e sem acento: conflito.\n\nCenários do catálogo: ITE-12 · ITE-13.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"RATATOUILLE DA CASA\",\n  \"descricao\": \"Legumes assados em camadas, com molho de tomate.\",\n  \"preco\": 39.9,\n  \"apenasNoLocal\": false,\n  \"caminhoFoto\": \"fotos/ratatouille.jpg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar o mesmo nome em outro restaurante",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 201 Created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set('idRatatouilleLanchonete', pm.response.json().id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idLanchonete}}/itens-cardapio",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idLanchonete}}",
+								"itens-cardapio"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: ITE-14.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Ratatouille da casa\",\n  \"descricao\": \"Legumes assados em camadas, com molho de tomate.\",\n  \"preco\": 29.5,\n  \"apenasNoLocal\": true,\n  \"caminhoFoto\": \"fotos/ratatouille.jpg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar item sem a disponibilidade",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 400 Bad Request', function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Dados inválidos\"', function () {",
+									"    pm.expect(problema.title).to.eql('Dados inválidos');",
+									"});",
+									"pm.test('Aponta o campo apenasNoLocal', function () {",
+									"    pm.expect(problema.erros.map(function (e) { return e.campo; })).to.include('apenasNoLocal');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idBistro}}/itens-cardapio",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idBistro}}",
+								"itens-cardapio"
+							],
+							"query": []
+						},
+						"description": "Sem valor padrão: a disponibilidade precisa ser informada.\n\nCenários do catálogo: ITE-09.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Quiche\",\n  \"descricao\": \"Quiche lorraine.\",\n  \"preco\": 25.0,\n  \"caminhoFoto\": \"fotos/quiche.png\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar o cardápio",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"const pagina = pm.response.json();",
+									"pm.test('Página com os itens do restaurante', function () {",
+									"    pm.expect(pagina.conteudo.map(function (i) { return i.nome; })).to.eql(['Ratatouille da casa']);",
+									"    pm.expect(pagina).to.have.property('totalElementos');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idBistro}}/itens-cardapio?apenasNoLocal=false",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idBistro}}",
+								"itens-cardapio"
+							],
+							"query": [
+								{
+									"key": "apenasNoLocal",
+									"value": "false"
+								}
+							]
+						},
+						"description": "Filtro opcional apenasNoLocal.\n\nCenários do catálogo: ITE-21."
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar item",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Devolve o item pedido', function () {",
+									"    pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('idRatatouille')));",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idBistro}}/itens-cardapio/{{idRatatouille}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idBistro}}",
+								"itens-cardapio",
+								"{{idRatatouille}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: ITE-21."
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar item pela rota de outro restaurante",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 404 Not Found', function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Recurso não encontrado\"', function () {",
+									"    pm.expect(problema.title).to.eql('Recurso não encontrado');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idLanchonete}}/itens-cardapio/{{idRatatouille}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idLanchonete}}",
+								"itens-cardapio",
+								"{{idRatatouille}}"
+							],
+							"query": []
+						},
+						"description": "O item é do bistrô; pela rota da lanchonete, ele não existe.\n\nCenários do catálogo: ITE-17."
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar item mantendo o nome",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"const item = pm.response.json();",
+									"pm.test('Aceita o próprio nome e grava os dados novos', function () {",
+									"    pm.expect(item.nome).to.eql('Ratatouille da casa');",
+									"    pm.expect(item.apenasNoLocal).to.eql(true);",
+									"    pm.expect(pm.response.text()).to.include('\"preco\":42.50');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idBistro}}/itens-cardapio/{{idRatatouille}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idBistro}}",
+								"itens-cardapio",
+								"{{idRatatouille}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: ITE-15 · ITE-21.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Ratatouille da casa\",\n  \"descricao\": \"Legumes assados em camadas, com molho de tomate.\",\n  \"preco\": 42.5,\n  \"apenasNoLocal\": true,\n  \"caminhoFoto\": \"fotos/ratatouille-grande.webp\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir item",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idBistro}}/itens-cardapio/{{idRatatouille}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idBistro}}",
+								"itens-cardapio",
+								"{{idRatatouille}}"
+							],
+							"query": []
+						},
+						"description": "Exclusão lógica.\n\nCenários do catálogo: ITE-18 · ITE-21."
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar item excluído",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 404 Not Found', function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Recurso não encontrado\"', function () {",
+									"    pm.expect(problema.title).to.eql('Recurso não encontrado');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idBistro}}/itens-cardapio/{{idRatatouille}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idBistro}}",
+								"itens-cardapio",
+								"{{idRatatouille}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: ITE-21."
+					},
+					"response": []
+				},
+				{
+					"name": "Recadastrar com o mesmo nome",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 201 Created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"pm.collectionVariables.set('idRatatouilleNovo', pm.response.json().id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idBistro}}/itens-cardapio",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idBistro}}",
+								"itens-cardapio"
+							],
+							"query": []
+						},
+						"description": "O nome do item removido fica livre.\n\nCenários do catálogo: ITE-19.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Ratatouille da casa\",\n  \"descricao\": \"Legumes assados em camadas, com molho de tomate.\",\n  \"preco\": 44.0,\n  \"apenasNoLocal\": false,\n  \"caminhoFoto\": \"fotos/ratatouille.jpg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "15. Limpeza do cardápio",
+			"description": "Exclui os itens, os restaurantes e a dona criados na pasta 14. Depois de excluir o restaurante, as rotas de\nitem dele devolvem 404.",
+			"item": [
+				{
+					"name": "Excluir o item novo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idBistro}}/itens-cardapio/{{idRatatouilleNovo}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idBistro}}",
+								"itens-cardapio",
+								"{{idRatatouilleNovo}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: ITE-18."
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir o item da lanchonete",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idLanchonete}}/itens-cardapio/{{idRatatouilleLanchonete}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idLanchonete}}",
+								"itens-cardapio",
+								"{{idRatatouilleLanchonete}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: ITE-18."
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir o bistrô",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idBistro}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idBistro}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: RES-16."
+					},
+					"response": []
+				},
+				{
+					"name": "Cardápio de restaurante excluído",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 404 Not Found', function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Recurso não encontrado\"', function () {",
+									"    pm.expect(problema.title).to.eql('Recurso não encontrado');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idBistro}}/itens-cardapio",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idBistro}}",
+								"itens-cardapio"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: ITE-22."
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir a lanchonete",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/restaurantes/{{idLanchonete}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"restaurantes",
+								"{{idLanchonete}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: RES-16."
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir a dona",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									"['idDonaBistro', 'idBistro', 'idLanchonete', 'idRatatouille', 'idRatatouilleLanchonete', 'idRatatouilleNovo']",
+									"    .forEach(function (variavel) { pm.collectionVariables.unset(variavel); });"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idDonaBistro}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idDonaBistro}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: EXC-08."
 					},
 					"response": []
 				}
