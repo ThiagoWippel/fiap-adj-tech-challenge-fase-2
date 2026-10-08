@@ -31,6 +31,10 @@ public final class Exemplos {
         return TipoUsuario.create(2L, "Dono de Restaurante", TipoUsuario.CODIGO_DONO_RESTAURANTE);
     }
 
+    public static TipoUsuario entregador() {
+        return TipoUsuario.create(3L, "Entregador", "ENTREGADOR");
+    }
+
     public static Endereco endereco() {
         return new Endereco("Rua das Flores", "123", "Apto 45", "Centro", "Itajaí", "SC", "88301000");
     }

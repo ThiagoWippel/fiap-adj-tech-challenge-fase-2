@@ -41,17 +41,30 @@ public final class ApiDeTeste {
                 .extract().jsonPath().getLong("id");
     }
 
+    /** Cadastra o tipo pela API e devolve o id. */
+    public long cadastrarTipo(String nome) {
+        return requisicao().body(tipo(nome))
+                .post("/api/v1/tipos-usuario")
+                .then().statusCode(201)
+                .extract().jsonPath().getLong("id");
+    }
+
     public static String cliente(String nome, String email, String login, String cpf) {
+        return usuarioComCpf("CLIENTE", nome, email, login, cpf);
+    }
+
+    /** Usuário de qualquer tipo que exige CPF, inclusive os criados pelo CRUD. */
+    public static String usuarioComCpf(String tipo, String nome, String email, String login, String cpf) {
         return """
                 {
                   "nome": "%s",
                   "email": "%s",
                   "login": "%s",
                   "senha": "%s",
-                  "tipo": "CLIENTE",
+                  "tipo": "%s",
                   "cpf": "%s",
                   "endereco": %s
-                }""".formatted(nome, email, login, SENHA, cpf, ENDERECO);
+                }""".formatted(nome, email, login, SENHA, tipo, cpf, ENDERECO);
     }
 
     public static String dono(String nome, String email, String login, String cnpj) {
@@ -80,6 +93,16 @@ public final class ApiDeTeste {
     public static String credenciais(String login, String senha) {
         return """
                 { "login": "%s", "senha": "%s" }""".formatted(login, senha);
+    }
+
+    public static String tipo(String nome) {
+        return """
+                { "nome": "%s" }""".formatted(nome);
+    }
+
+    public static String trocaDeTipo(String tipo, String documento) {
+        return """
+                { "tipo": "%s", "documento": "%s" }""".formatted(tipo, documento);
     }
 
     public static String trocaDeSenha(String senhaAtual, String novaSenha) {

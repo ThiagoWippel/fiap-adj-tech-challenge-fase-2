@@ -5,7 +5,9 @@ import br.com.fiap.restaurante.application.dto.NovoUsuarioDTO;
 import br.com.fiap.restaurante.application.dto.Pagina;
 import br.com.fiap.restaurante.application.dto.PedidoDePagina;
 import br.com.fiap.restaurante.application.dto.TrocaDeSenhaDTO;
+import br.com.fiap.restaurante.application.dto.TrocaDeTipoDTO;
 import br.com.fiap.restaurante.application.port.IPasswordEncoder;
+import br.com.fiap.restaurante.interfaceadapter.datasource.DadosTipoUsuario;
 import br.com.fiap.restaurante.interfaceadapter.datasource.DadosUsuario;
 import br.com.fiap.restaurante.interfaceadapter.datasource.ITipoUsuarioDataSource;
 import br.com.fiap.restaurante.interfaceadapter.datasource.IUsuarioDataSource;
@@ -150,5 +152,21 @@ class UsuarioControllerTest {
 
         /* assert */
         verify(usuarios).anonimizar(7L);
+    }
+
+    @Test
+    @DisplayName("TRO-01 · trocar o tipo grava o novo tipo e o novo documento")
+    void deveTrocarOTipo() {
+        /* arrange */
+        when(tipos.buscarPorCodigo("DONO_RESTAURANTE"))
+                .thenReturn(Optional.of(new DadosTipoUsuario(2L, "Dono de Restaurante", "DONO_RESTAURANTE")));
+        when(usuarios.atualizar(any())).thenAnswer(chamada -> chamada.getArgument(0));
+
+        /* act */
+        UsuarioResponse resposta = controller.trocarTipo(new TrocaDeTipoDTO(7L, "DONO_RESTAURANTE", "11222333000181"));
+
+        /* assert */
+        assertThat(resposta.tipo()).isEqualTo("DONO_RESTAURANTE");
+        assertThat(resposta.documento()).isEqualTo("11222333000181");
     }
 }

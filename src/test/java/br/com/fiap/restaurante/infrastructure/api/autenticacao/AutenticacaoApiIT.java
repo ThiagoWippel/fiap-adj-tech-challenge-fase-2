@@ -2,6 +2,7 @@ package br.com.fiap.restaurante.infrastructure.api.autenticacao;
 
 import br.com.fiap.restaurante.infrastructure.config.TokenProperties;
 import br.com.fiap.restaurante.suporte.ApiDeTeste;
+import br.com.fiap.restaurante.suporte.LimpezaDoBanco;
 import br.com.fiap.restaurante.suporte.TesteDeIntegracao;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.SignedJWT;
@@ -47,7 +48,7 @@ class AutenticacaoApiIT {
 
     @BeforeEach
     void preparar() {
-        jdbc.update("DELETE FROM usuario");
+        LimpezaDoBanco.limpar(jdbc);
         api = new ApiDeTeste(porta);
         idMaria = api.cadastrar(cliente("Maria Silva", "maria@exemplo.com", "maria.silva", "12345678909"));
     }

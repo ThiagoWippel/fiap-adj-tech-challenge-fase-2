@@ -1,6 +1,7 @@
 package br.com.fiap.restaurante.infrastructure.api.usuario;
 
 import br.com.fiap.restaurante.suporte.ApiDeTeste;
+import br.com.fiap.restaurante.suporte.LimpezaDoBanco;
 import br.com.fiap.restaurante.suporte.TesteDeIntegracao;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +45,7 @@ class UsuarioApiIT {
 
     @BeforeEach
     void preparar() {
-        jdbc.update("DELETE FROM usuario");
+        LimpezaDoBanco.limpar(jdbc);
         api = new ApiDeTeste(porta);
     }
 

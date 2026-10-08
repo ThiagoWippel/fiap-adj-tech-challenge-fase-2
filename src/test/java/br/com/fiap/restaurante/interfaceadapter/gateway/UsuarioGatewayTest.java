@@ -128,4 +128,19 @@ class UsuarioGatewayTest {
         assertThat(gateway.existeDocumento(CPF)).isTrue();
         verify(dataSource).anonimizar(7L);
     }
+
+    @Test
+    @DisplayName("TIP-17 · a busca por tipo converte a página; a contagem e o documento de outro usuário são repassados")
+    void deveBuscarPorTipoEContar() {
+        /* arrange */
+        PedidoDePagina pedido = new PedidoDePagina(0, 10, List.of());
+        when(dataSource.buscarPorTipo(1L, pedido)).thenReturn(new Pagina<>(List.of(DADOS_MARIA), 0, 10, 1, 1));
+        when(dataSource.contarAtivosPorTipo(1L)).thenReturn(5L);
+        when(dataSource.existeDocumentoEmOutroUsuario(CPF, 8L)).thenReturn(true);
+
+        /* act + assert */
+        assertThat(gateway.buscarPorTipo(1L, pedido).conteudo()).extracting(Usuario::getId).containsExactly(7L);
+        assertThat(gateway.contarAtivosPorTipo(1L)).isEqualTo(5L);
+        assertThat(gateway.existeDocumentoEmOutroUsuario(CPF, 8L)).isTrue();
+    }
 }

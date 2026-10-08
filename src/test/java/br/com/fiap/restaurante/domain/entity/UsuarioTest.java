@@ -232,4 +232,83 @@ class UsuarioTest {
         /* assert */
         assertThat(maria).isEqualTo(mariaAlterada).isNotEqualTo(outra);
     }
+
+    @Test
+    @DisplayName("TRO-01 · trocar para Dono de Restaurante com CNPJ troca o tipo e o documento")
+    void deveTrocarParaDonoComCnpj() {
+        /* arrange */
+        Usuario usuario = Usuario.create(7L, "Maria Silva", "maria@exemplo.com", "maria.silva", SENHA_CODIFICADA,
+                endereco, cliente, cpf, LocalDateTime.of(2026, 10, 1, 10, 0), LocalDateTime.of(2026, 10, 1, 10, 0));
+
+        /* act */
+        usuario.trocarTipo(dono, cnpj);
+
+        /* assert */
+        assertThat(usuario.getTipo()).isEqualTo(dono);
+        assertThat(usuario.getDocumento()).isEqualTo(cnpj);
+        assertThat(usuario.ehDonoDeRestaurante()).isTrue();
+        assertThat(usuario.getId()).isEqualTo(7L);
+        assertThat(usuario.getNome()).isEqualTo("Maria Silva");
+        assertThat(usuario.getDataCriacao()).isEqualTo(LocalDateTime.of(2026, 10, 1, 10, 0));
+    }
+
+    @Test
+    @DisplayName("TRO-02 · trocar para Dono de Restaurante informando CPF é recusado, e o usuário fica como estava")
+    void deveRecusarTrocaParaDonoComCpf() {
+        /* arrange */
+        Usuario usuario = Usuario.create("Maria Silva", "maria@exemplo.com", "maria.silva", SENHA_CODIFICADA,
+                endereco, cliente, cpf);
+
+        /* act + assert */
+        assertThatThrownBy(() -> usuario.trocarTipo(dono, Documento.cpf("52998224725")))
+                .isInstanceOf(RegraDeNegocioException.class)
+                .hasMessage("Usuário do tipo Dono de Restaurante deve informar CNPJ.");
+        assertThat(usuario.getTipo()).isEqualTo(cliente);
+        assertThat(usuario.getDocumento()).isEqualTo(cpf);
+    }
+
+    @Test
+    @DisplayName("TRO-03 · trocar para Cliente, ou para um tipo criado pelo CRUD, informando CNPJ é recusado")
+    void deveRecusarTrocaParaOutrosTiposComCnpj() {
+        /* arrange */
+        Usuario usuario = Usuario.create("Ana Souza", "ana@exemplo.com", "ana.souza", SENHA_CODIFICADA,
+                endereco, dono, cnpj);
+
+        /* act + assert */
+        assertThatThrownBy(() -> usuario.trocarTipo(cliente, cnpj))
+                .isInstanceOf(RegraDeNegocioException.class)
+                .hasMessage("Usuário do tipo Cliente deve informar CPF.");
+        assertThatThrownBy(() -> usuario.trocarTipo(entregador, cnpj))
+                .isInstanceOf(RegraDeNegocioException.class)
+                .hasMessage("Usuário do tipo Entregador deve informar CPF.");
+        assertThat(usuario.getTipo()).isEqualTo(dono);
+    }
+
+    @Test
+    @DisplayName("TRO-03 · trocar para um tipo criado pelo CRUD com CPF é aceito")
+    void deveTrocarParaTipoCriadoPeloCrud() {
+        /* arrange */
+        Usuario usuario = Usuario.create("Ana Souza", "ana@exemplo.com", "ana.souza", SENHA_CODIFICADA,
+                endereco, dono, cnpj);
+
+        /* act */
+        usuario.trocarTipo(entregador, cpf);
+
+        /* assert */
+        assertThat(usuario.getTipo()).isEqualTo(entregador);
+        assertThat(usuario.getDocumento()).isEqualTo(cpf);
+    }
+
+    @Test
+    @DisplayName("TRO-07 · o usuário sabe dizer se já tem o tipo e o documento pedidos")
+    void deveReconhecerOTipoEODocumentoAtuais() {
+        /* arrange */
+        Usuario usuario = Usuario.create("Maria Silva", "maria@exemplo.com", "maria.silva", SENHA_CODIFICADA,
+                endereco, cliente, cpf);
+
+        /* act + assert */
+        assertThat(usuario.temTipoEDocumento(cliente, Documento.cpf("123.456.789-09"))).isTrue();
+        assertThat(usuario.temTipoEDocumento(cliente, Documento.cpf("52998224725"))).isFalse();
+        assertThat(usuario.temTipoEDocumento(entregador, cpf)).isFalse();
+    }
 }

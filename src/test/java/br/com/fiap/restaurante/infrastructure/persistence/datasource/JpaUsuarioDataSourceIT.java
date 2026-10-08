@@ -1,10 +1,12 @@
 package br.com.fiap.restaurante.infrastructure.persistence.datasource;
 
+import br.com.fiap.restaurante.application.dto.PedidoDePagina;
 import br.com.fiap.restaurante.application.port.ITransactionManager;
 import br.com.fiap.restaurante.interfaceadapter.datasource.DadosEndereco;
 import br.com.fiap.restaurante.interfaceadapter.datasource.DadosTipoUsuario;
 import br.com.fiap.restaurante.interfaceadapter.datasource.DadosUsuario;
 import br.com.fiap.restaurante.interfaceadapter.datasource.IUsuarioDataSource;
+import br.com.fiap.restaurante.suporte.LimpezaDoBanco;
 import br.com.fiap.restaurante.suporte.TesteDeIntegracao;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,7 +54,7 @@ class JpaUsuarioDataSourceIT {
 
     @BeforeEach
     void limpar() {
-        jdbc.update("DELETE FROM usuario");
+        LimpezaDoBanco.limpar(jdbc);
     }
 
     @Test
@@ -140,6 +142,34 @@ class JpaUsuarioDataSourceIT {
         assertThat(usuarios.existeLogin("Maria.Silva")).isTrue();
         assertThat(usuarios.existeDocumento("12345678909")).isTrue();
         assertThat(usuarios.existeDocumento("52998224725")).isFalse();
+    }
+
+    @Test
+    @DisplayName("TIP-11 · TIP-17 · contagem e busca por tipo consideram só os usuários ativos")
+    void deveContarEBuscarSoUsuariosAtivosDoTipo() {
+        /* arrange */
+        transacao.executar(() -> usuarios.incluir(maria("maria@exemplo.com", "maria.silva", "12345678909")));
+        Long removida = transacao.executar(
+                () -> usuarios.incluir(maria("maria2@exemplo.com", "maria.souza", "52998224725"))).id();
+        transacao.executar(() -> usuarios.anonimizar(removida));
+        PedidoDePagina pedido = new PedidoDePagina(0, 10, List.of(new PedidoDePagina.Ordem("nome", true)));
+
+        /* act + assert */
+        assertThat(usuarios.contarAtivosPorTipo(CLIENTE.id())).isEqualTo(1);
+        assertThat(usuarios.buscarPorTipo(CLIENTE.id(), pedido).conteudo())
+                .extracting(DadosUsuario::email).containsExactly("maria@exemplo.com");
+        assertThat(usuarios.contarAtivosPorTipo(2L)).isZero();
+    }
+
+    @Test
+    @DisplayName("TRO-04 · a verificação de documento em outro usuário ignora o próprio usuário")
+    void deveVerificarDocumentoEmOutroUsuario() {
+        /* arrange */
+        Long id = transacao.executar(() -> usuarios.incluir(maria("maria@exemplo.com", "maria.silva", "12345678909"))).id();
+
+        /* act + assert */
+        assertThat(usuarios.existeDocumentoEmOutroUsuario("12345678909", id)).isFalse();
+        assertThat(usuarios.existeDocumentoEmOutroUsuario("12345678909", id + 1)).isTrue();
     }
 
     private static DadosUsuario maria(String email, String login, String documento) {
