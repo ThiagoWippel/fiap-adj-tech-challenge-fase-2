@@ -26,5 +26,7 @@ public interface IRestauranteGateway {
 
     long contarAtivosPorDono(Long donoId);
 
+    boolean existeAtivo(Long id);
+
     void remover(Long id);
 }

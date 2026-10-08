@@ -83,6 +83,11 @@ public class JpaRestauranteDataSource implements IRestauranteDataSource {
     }
 
     @Override
+    public boolean existeAtivo(Long id) {
+        return restaurantes.existsByIdAndRemovidoEmIsNull(id);
+    }
+
+    @Override
     public void remover(Long id) {
         RestauranteEntity entidade = restaurantes.findById(id).orElseThrow();
         entidade.setRemovidoEm(LocalDateTime.now());

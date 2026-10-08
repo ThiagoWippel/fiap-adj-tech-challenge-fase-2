@@ -209,6 +209,40 @@ public final class ExemplosDeProblema {
               "momento": "2026-10-08T10:30:00"
             }""";
 
+    public static final String ITEM_NAO_ENCONTRADO = """
+            {
+              "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+              "title": "Recurso não encontrado",
+              "status": 404,
+              "detail": "Item 5 não encontrado no restaurante 9.",
+              "instance": "/api/v1/restaurantes/9/itens-cardapio/5",
+              "momento": "2026-10-08T10:30:00"
+            }""";
+
+    public static final String NOME_DE_ITEM_EM_USO = """
+            {
+              "type": "http://localhost:8080/problemas/conflito-de-dados",
+              "title": "Conflito de dados",
+              "status": 409,
+              "detail": "O restaurante 9 já tem um item ativo chamado Feijoada.",
+              "instance": "/api/v1/restaurantes/9/itens-cardapio",
+              "momento": "2026-10-08T10:30:00"
+            }""";
+
+    public static final String DADOS_DO_ITEM_INVALIDOS = """
+            {
+              "type": "http://localhost:8080/problemas/dados-invalidos",
+              "title": "Dados inválidos",
+              "status": 400,
+              "detail": "Um ou mais campos da requisição não passaram na validação.",
+              "instance": "/api/v1/restaurantes/9/itens-cardapio",
+              "momento": "2026-10-08T10:30:00",
+              "erros": [
+                { "campo": "apenasNoLocal", "mensagem": "Informe se o item está disponível só para consumo no local." },
+                { "campo": "preco", "mensagem": "O preço deve ter no máximo duas casas decimais." }
+              ]
+            }""";
+
     private ExemplosDeProblema() {
     }
 }

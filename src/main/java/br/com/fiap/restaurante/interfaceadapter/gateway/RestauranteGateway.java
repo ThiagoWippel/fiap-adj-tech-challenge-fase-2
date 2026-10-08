@@ -62,6 +62,11 @@ public class RestauranteGateway implements IRestauranteGateway {
     }
 
     @Override
+    public boolean existeAtivo(Long id) {
+        return dataSource.existeAtivo(id);
+    }
+
+    @Override
     public void remover(Long id) {
         dataSource.remover(id);
     }

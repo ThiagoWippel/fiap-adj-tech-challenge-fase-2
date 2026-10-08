@@ -28,4 +28,6 @@ public interface RestauranteRepository extends JpaRepository<RestauranteEntity, 
     Page<RestauranteEntity> findByDonoIdAndRemovidoEmIsNull(Long donoId, Pageable paginacao);
 
     long countByDonoIdAndRemovidoEmIsNull(Long donoId);
+
+    boolean existsByIdAndRemovidoEmIsNull(Long id);
 }
