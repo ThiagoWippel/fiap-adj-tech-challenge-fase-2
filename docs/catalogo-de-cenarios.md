@@ -61,12 +61,12 @@ Decisões do dossiê: A repositório · B token · C horário · D tipo do dono 
 
 | Fatia | Tema | Cenários |
 |---|---|---|
-| 0 | Fundação: arquitetura, infraestrutura, erros, paginação | 27 |
+| 0 | Fundação: arquitetura, infraestrutura, erros, paginação | 29 |
 | 1 | Usuário: herança da Fase 1, login, token, exclusão | 59 |
 | 2 | Tipo de usuário e troca de tipo | 27 |
 | 3 | Restaurante, horários e tipo de cozinha | 38 |
 | 4 | Item do cardápio | 22 |
-| | **Total** | **173** |
+| | **Total** | **175** |
 
 Os cenários de paginação (PAG) valem para todas as listagens e são repetidos no teste de integração de cada uma.
 
@@ -94,6 +94,8 @@ Os cenários de paginação (PAG) valem para todas as listagens e são repetidos
 | INF-05 | Quando consulto `/v3/api-docs`, então os 26 endpoints aparecem, cada um com ao menos um exemplo de sucesso e um de erro. | I | F1-12, EN-3 |
 | INF-06 | Dado o perfil `docker` sem a chave de assinatura do token, quando a aplicação sobe, então ela falha na inicialização com uma mensagem que nomeia a variável de ambiente que falta. | I | Dec. B |
 | INF-07 | A cada push, o GitHub Actions roda `mvn verify` (unitários, integração com Testcontainers, ArchUnit e os cortes de cobertura) e termina verde. | CI | EN-6, EN-8, Dec. V |
+| INF-08 | A porta de transação desfaz tudo o que foi gravado quando a operação lança exceção, e confirma as gravações quando ela termina sem erro. | U · I | Dec. G |
+| INF-09 | A porta de senha gera um hash BCrypt diferente a cada codificação, nunca o texto original, e confere a senha correta. | U | F1-07 |
 
 ### Erros (ERR)
 
@@ -102,7 +104,7 @@ Os cenários de paginação (PAG) valem para todas as listagens e são repetidos
 | ERR-01 | Quando qualquer erro acontece, então a resposta é `application/problem+json` com `type`, `title`, `status`, `detail`, `instance` e `momento`. | I | F1-11, FB-3 |
 | ERR-02 | O `type` aponta para o namespace estável da própria aplicação (`/problemas/{tipo}`), e essa URL responde 200 com a descrição do problema. | I | FB-3 |
 | ERR-03 | Dado um corpo que falha no Bean Validation, então a resposta traz a extensão `erros` com o campo e a mensagem de cada falha. | I | F1-11 |
-| ERR-04 | Dado um JSON malformado, então a resposta é 400 em ProblemDetail. | I | F1-11 |
+| ERR-04 | Dado um JSON malformado, então a resposta é 400 em ProblemDetail; dado um corpo que não é JSON, a resposta é 415. | I | F1-11 |
 | ERR-05 | Dado um verbo HTTP não suportado na rota, então a resposta é 405 em ProblemDetail. | I | F1-11 |
 | ERR-06 | Dada uma rota inexistente, então a resposta é 404 em ProblemDetail. | I | F1-11 |
 | ERR-07 | Dada uma falha inesperada, então a resposta é 500 sem rastro de pilha no corpo; o rastro vai só para o log. | I | F1-11 |
