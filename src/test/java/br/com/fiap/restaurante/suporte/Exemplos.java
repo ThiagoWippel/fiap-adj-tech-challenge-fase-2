@@ -1,12 +1,20 @@
 package br.com.fiap.restaurante.suporte;
 
 import br.com.fiap.restaurante.application.dto.EnderecoDTO;
+import br.com.fiap.restaurante.application.dto.TurnoDTO;
+import br.com.fiap.restaurante.domain.entity.Restaurante;
 import br.com.fiap.restaurante.domain.entity.TipoUsuario;
 import br.com.fiap.restaurante.domain.entity.Usuario;
+import br.com.fiap.restaurante.domain.enums.DiaSemana;
+import br.com.fiap.restaurante.domain.enums.TipoCozinha;
 import br.com.fiap.restaurante.domain.valueobject.Documento;
 import br.com.fiap.restaurante.domain.valueobject.Endereco;
+import br.com.fiap.restaurante.domain.valueobject.QuadroDeHorarios;
+import br.com.fiap.restaurante.domain.valueobject.Turno;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 
 /**
  * Dados de exemplo usados nos testes de caso de uso e de adaptadores.
@@ -46,6 +54,26 @@ public final class Exemplos {
     public static Usuario maria() {
         return Usuario.create(7L, "Maria Silva", "maria@exemplo.com", "maria.silva", SENHA_CODIFICADA,
                 endereco(), cliente(), Documento.cpf(CPF), CRIACAO, ALTERACAO);
+    }
+
+    public static List<TurnoDTO> turnosDTO() {
+        return List.of(new TurnoDTO("SEXTA", "18:00", "02:00"), new TurnoDTO("SEGUNDA", "11:00", "15:00"));
+    }
+
+    public static QuadroDeHorarios horarios() {
+        return new QuadroDeHorarios(List.of(new Turno(DiaSemana.SEGUNDA, LocalTime.of(11, 0), LocalTime.of(15, 0)),
+                new Turno(DiaSemana.SEXTA, LocalTime.of(18, 0), LocalTime.of(2, 0))));
+    }
+
+    /** Cantina da Nona, da Ana (Dono de Restaurante). */
+    public static Restaurante cantina() {
+        return Restaurante.create(9L, "Cantina da Nona", endereco(), TipoCozinha.ITALIANA, horarios(), ana(),
+                CRIACAO, ALTERACAO);
+    }
+
+    public static Usuario joao() {
+        return Usuario.create(10L, "João Pereira", "joao@exemplo.com", "joao.pereira", SENHA_CODIFICADA,
+                endereco(), donoDeRestaurante(), Documento.cnpj("11444777000161"), CRIACAO, ALTERACAO);
     }
 
     public static Usuario ana() {

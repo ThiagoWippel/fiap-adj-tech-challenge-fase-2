@@ -3,6 +3,7 @@ package br.com.fiap.restaurante.application.usecase.usuario;
 import br.com.fiap.restaurante.application.dto.TrocaDeTipoDTO;
 import br.com.fiap.restaurante.application.exception.ConflitoDeDadosException;
 import br.com.fiap.restaurante.application.exception.RecursoNaoEncontradoException;
+import br.com.fiap.restaurante.application.gateway.IRestauranteGateway;
 import br.com.fiap.restaurante.application.gateway.ITipoUsuarioGateway;
 import br.com.fiap.restaurante.application.gateway.IUsuarioGateway;
 import br.com.fiap.restaurante.domain.entity.TipoUsuario;
@@ -14,6 +15,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -44,6 +47,9 @@ class TrocarTipoDoUsuarioUseCaseTest {
     @Mock
     private ITipoUsuarioGateway tipos;
 
+    @Mock
+    private IRestauranteGateway restaurantes;
+
     private AutoCloseable mocks;
     private TransacaoImediata transacao;
     private TrocarTipoDoUsuarioUseCase useCase;
@@ -52,7 +58,7 @@ class TrocarTipoDoUsuarioUseCaseTest {
     void preparar() {
         mocks = MockitoAnnotations.openMocks(this);
         transacao = new TransacaoImediata();
-        useCase = TrocarTipoDoUsuarioUseCase.create(usuarios, tipos, transacao);
+        useCase = TrocarTipoDoUsuarioUseCase.create(usuarios, tipos, restaurantes, transacao);
         when(usuarios.buscarPorId(7L)).thenReturn(Optional.of(maria()));
         when(usuarios.buscarPorId(8L)).thenReturn(Optional.of(ana()));
         when(tipos.buscarPorCodigo(TipoUsuario.CODIGO_CLIENTE)).thenReturn(Optional.of(cliente()));
@@ -82,14 +88,46 @@ class TrocarTipoDoUsuarioUseCaseTest {
     }
 
     @Test
-    @DisplayName("TRO-06 · dono sem restaurante ativo vira Cliente informando CPF")
+    @DisplayName("TRO-06 · TRO-11 · dono sem restaurante ativo vira Cliente informando CPF; os removidos não contam")
     void deveTrocarDonoParaCliente() {
+        /* arrange */
+        when(restaurantes.contarAtivosPorDono(8L)).thenReturn(0L);
+
         /* act */
         Usuario trocado = useCase.run(new TrocaDeTipoDTO(8L, "CLIENTE", "52998224725"));
 
         /* assert */
         assertThat(trocado.getTipo().getCodigo()).isEqualTo("CLIENTE");
         assertThat(trocado.getDocumento().numero()).isEqualTo("52998224725");
+        verify(restaurantes).contarAtivosPorDono(8L);
+    }
+
+    @ParameterizedTest(name = "TRO-10 · dono com {0} restaurante(s) ativo(s) não vira Cliente")
+    @CsvSource(delimiter = '|', value = {
+            "1 | O usuário 8 é responsável por 1 restaurante ativo e só deixa de ser Dono de Restaurante depois de transferir ou excluir o restaurante.",
+            "2 | O usuário 8 é responsável por 2 restaurantes ativos e só deixa de ser Dono de Restaurante depois de transferir ou excluir os restaurantes."
+    })
+    void deveRecusarDonoComRestauranteAtivo(long quantidade, String mensagem) {
+        /* arrange */
+        when(restaurantes.contarAtivosPorDono(8L)).thenReturn(quantidade);
+
+        /* act + assert */
+        assertThatThrownBy(() -> useCase.run(new TrocaDeTipoDTO(8L, "CLIENTE", "52998224725")))
+                .isInstanceOf(ConflitoDeDadosException.class)
+                .hasMessage(mensagem);
+        verify(usuarios, never()).atualizar(any());
+    }
+
+    @Test
+    @DisplayName("TRO-10 · quem vira ou continua Dono de Restaurante não passa pela verificação de restaurantes")
+    void naoDeveContarRestaurantesQuandoContinuaDono() {
+        /* act */
+        useCase.run(new TrocaDeTipoDTO(7L, "DONO_RESTAURANTE", CNPJ));
+        Usuario corrigido = useCase.run(new TrocaDeTipoDTO(8L, "DONO_RESTAURANTE", "11444777000161"));
+
+        /* assert */
+        assertThat(corrigido.getDocumento().numero()).isEqualTo("11444777000161");
+        verify(restaurantes, never()).contarAtivosPorDono(anyLong());
     }
 
     @Test

@@ -9,9 +9,11 @@ import br.com.fiap.restaurante.application.dto.TrocaDeTipoDTO;
 import br.com.fiap.restaurante.application.port.IPasswordEncoder;
 import br.com.fiap.restaurante.interfaceadapter.datasource.DadosTipoUsuario;
 import br.com.fiap.restaurante.interfaceadapter.datasource.DadosUsuario;
+import br.com.fiap.restaurante.interfaceadapter.datasource.IRestauranteDataSource;
 import br.com.fiap.restaurante.interfaceadapter.datasource.ITipoUsuarioDataSource;
 import br.com.fiap.restaurante.interfaceadapter.datasource.IUsuarioDataSource;
 import br.com.fiap.restaurante.interfaceadapter.presenter.PaginaResponse;
+import br.com.fiap.restaurante.interfaceadapter.presenter.RestauranteResponse;
 import br.com.fiap.restaurante.interfaceadapter.presenter.UsuarioResponse;
 import br.com.fiap.restaurante.suporte.DadosDeExemplo;
 import br.com.fiap.restaurante.suporte.TransacaoImediata;
@@ -45,6 +47,9 @@ class UsuarioControllerTest {
     private ITipoUsuarioDataSource tipos;
 
     @Mock
+    private IRestauranteDataSource restaurantes;
+
+    @Mock
     private IPasswordEncoder senhas;
 
     private AutoCloseable mocks;
@@ -53,7 +58,7 @@ class UsuarioControllerTest {
     @BeforeEach
     void preparar() {
         mocks = MockitoAnnotations.openMocks(this);
-        controller = UsuarioController.create(usuarios, tipos, senhas, new TransacaoImediata());
+        controller = UsuarioController.create(usuarios, tipos, restaurantes, senhas, new TransacaoImediata());
         when(usuarios.buscarPorId(7L)).thenReturn(Optional.of(DadosDeExemplo.maria()));
     }
 
@@ -168,5 +173,21 @@ class UsuarioControllerTest {
         /* assert */
         assertThat(resposta.tipo()).isEqualTo("DONO_RESTAURANTE");
         assertThat(resposta.documento()).isEqualTo("11222333000181");
+    }
+
+    @Test
+    @DisplayName("RES-17 · lista os restaurantes ativos do usuário")
+    void deveListarOsRestaurantesDoUsuario() {
+        /* arrange */
+        PedidoDePagina pedido = new PedidoDePagina(0, 10, List.of());
+        when(usuarios.buscarPorId(8L)).thenReturn(Optional.of(DadosDeExemplo.ana()));
+        when(restaurantes.buscarPorDono(8L, pedido))
+                .thenReturn(new Pagina<>(List.of(DadosDeExemplo.cantina()), 0, 10, 1, 1));
+
+        /* act */
+        PaginaResponse<RestauranteResponse> pagina = controller.listarRestaurantes(8L, pedido);
+
+        /* assert */
+        assertThat(pagina.conteudo()).extracting(RestauranteResponse::nome).containsExactly("Cantina da Nona");
     }
 }

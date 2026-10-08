@@ -49,6 +49,35 @@ public final class ApiDeTeste {
                 .extract().jsonPath().getLong("id");
     }
 
+    /** Cadastra o restaurante pela API e devolve o id. */
+    public long cadastrarRestaurante(String corpo) {
+        return requisicao().body(corpo)
+                .post("/api/v1/restaurantes")
+                .then().statusCode(201)
+                .extract().jsonPath().getLong("id");
+    }
+
+    /**
+     * Restaurante com os turnos informados, cada um como "DIA HH:mm HH:mm", por
+     * exemplo "SEXTA 18:00 02:00".
+     */
+    public static String restaurante(String nome, String tipoCozinha, long donoId, String... turnos) {
+        StringBuilder horarios = new StringBuilder();
+        for (String turno : turnos) {
+            String[] partes = turno.split(" ");
+            horarios.append(horarios.isEmpty() ? "" : ", ").append("""
+                    { "diaSemana": "%s", "abertura": "%s", "fechamento": "%s" }""".formatted(partes[0], partes[1], partes[2]));
+        }
+        return """
+                {
+                  "nome": "%s",
+                  "endereco": %s,
+                  "tipoCozinha": "%s",
+                  "donoId": %d,
+                  "horarios": [%s]
+                }""".formatted(nome, ENDERECO, tipoCozinha, donoId, horarios);
+    }
+
     public static String cliente(String nome, String email, String login, String cpf) {
         return usuarioComCpf("CLIENTE", nome, email, login, cpf);
     }
