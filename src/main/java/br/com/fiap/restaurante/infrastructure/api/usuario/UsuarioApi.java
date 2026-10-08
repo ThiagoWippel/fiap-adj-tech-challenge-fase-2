@@ -21,8 +21,8 @@ import java.util.List;
 
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DADOS_INVALIDOS;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DOCUMENTO_DO_TIPO;
-import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DONO_COM_RESTAURANTE;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DOCUMENTO_EM_USO;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DONO_COM_RESTAURANTE;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.EMAIL_EM_USO;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.REGRA_DE_NEGOCIO;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.SENHA_ATUAL_INCORRETA;

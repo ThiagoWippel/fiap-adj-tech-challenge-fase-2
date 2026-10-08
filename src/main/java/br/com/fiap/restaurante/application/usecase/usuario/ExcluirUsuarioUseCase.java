@@ -34,9 +34,9 @@ public class ExcluirUsuarioUseCase {
             usuarios.buscarPorId(id).orElseThrow(() -> BuscarUsuarioPorIdUseCase.usuarioNaoEncontrado(id));
             long ativos = restaurantes.contarAtivosPorDono(id);
             if (ativos > 0) {
-                throw new ConflitoDeDadosException("O usuário " + id + " é responsável por " + restaurantesAtivos(ativos)
-                        + ". Transfira ou exclua " + (ativos == 1 ? "o restaurante" : "os restaurantes")
-                        + " antes de excluir o usuário.");
+                throw new ConflitoDeDadosException("O usuário " + id + " é responsável por "
+                        + restaurantesAtivos(ativos) + ". Transfira ou exclua "
+                        + (ativos == 1 ? "o restaurante" : "os restaurantes") + " antes de excluir o usuário.");
             }
             usuarios.anonimizar(id);
         });

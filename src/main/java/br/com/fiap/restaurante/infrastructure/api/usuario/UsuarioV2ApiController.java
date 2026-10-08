@@ -39,6 +39,7 @@ public class UsuarioV2ApiController implements UsuarioV2Api {
     public ResponseEntity<PaginaResponse<UsuarioResponse>> buscarPorNome(
             @RequestParam(required = false) String nome,
             @PageableDefault(sort = "nome") Pageable paginacao) {
-        return ResponseEntity.ok(controller.buscarPorNomePaginado(nome, Paginacao.pedido(paginacao, CamposOrdenaveis.USUARIO)));
+        return ResponseEntity.ok(
+                controller.buscarPorNomePaginado(nome, Paginacao.pedido(paginacao, CamposOrdenaveis.USUARIO)));
     }
 }

@@ -35,6 +35,7 @@ interface AutenticacaoApi {
     @ApiResponse(responseCode = "400", description = "Login ou senha ausente",
             content = @Content(mediaType = "application/problem+json", examples = @ExampleObject(DADOS_INVALIDOS)))
     @ApiResponse(responseCode = "401", description = "Login ou senha inválidos",
-            content = @Content(mediaType = "application/problem+json", examples = @ExampleObject(CREDENCIAIS_INVALIDAS)))
+            content = @Content(mediaType = "application/problem+json",
+                    examples = @ExampleObject(CREDENCIAIS_INVALIDAS)))
     ResponseEntity<LoginResponse> autenticar(LoginRequest requisicao);
 }

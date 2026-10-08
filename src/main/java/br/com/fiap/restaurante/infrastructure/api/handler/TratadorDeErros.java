@@ -63,12 +63,14 @@ public class TratadorDeErros extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(CredenciaisInvalidasException.class)
-    public ResponseEntity<Object> tratarCredenciaisInvalidas(CredenciaisInvalidasException excecao, WebRequest requisicao) {
+    public ResponseEntity<Object> tratarCredenciaisInvalidas(CredenciaisInvalidasException excecao,
+                                                             WebRequest requisicao) {
         return responder(TipoDeProblema.CREDENCIAIS_INVALIDAS, excecao.getMessage(), excecao, requisicao);
     }
 
     @ExceptionHandler(RecursoNaoEncontradoException.class)
-    public ResponseEntity<Object> tratarRecursoNaoEncontrado(RecursoNaoEncontradoException excecao, WebRequest requisicao) {
+    public ResponseEntity<Object> tratarRecursoNaoEncontrado(RecursoNaoEncontradoException excecao,
+                                                             WebRequest requisicao) {
         return responder(TipoDeProblema.RECURSO_NAO_ENCONTRADO, excecao.getMessage(), excecao, requisicao);
     }
 

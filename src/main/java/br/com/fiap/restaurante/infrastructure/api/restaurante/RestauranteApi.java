@@ -39,7 +39,8 @@ interface RestauranteApi {
     @ApiResponse(responseCode = "201", description = "Restaurante cadastrado. O cabeçalho Location aponta para ele.",
             content = @Content(mediaType = JSON, schema = @Schema(implementation = RestauranteResponse.class),
                     examples = @ExampleObject(ExemplosDeRestaurante.RESTAURANTE)))
-    @ApiResponse(responseCode = "400", description = "Campo inválido, tipo de cozinha fora da lista ou turnos sobrepostos",
+    @ApiResponse(responseCode = "400",
+            description = "Campo inválido, tipo de cozinha fora da lista ou turnos sobrepostos",
             content = @Content(mediaType = PROBLEMA, examples = {
                     @ExampleObject(name = "Campos inválidos", value = DADOS_INVALIDOS),
                     @ExampleObject(name = "Tipo de cozinha", value = COZINHA_INVALIDA),
@@ -57,7 +58,8 @@ interface RestauranteApi {
     @ApiResponse(responseCode = "200", description = "Página de restaurantes",
             content = @Content(mediaType = JSON, schema = @Schema(implementation = PaginaResponse.class),
                     examples = @ExampleObject(ExemplosDeRestaurante.PAGINA)))
-    @ApiResponse(responseCode = "400", description = "Tipo de cozinha fora da lista, ou ordenação por campo não aceito",
+    @ApiResponse(responseCode = "400",
+            description = "Tipo de cozinha fora da lista, ou ordenação por campo não aceito",
             content = @Content(mediaType = PROBLEMA, examples = {
                     @ExampleObject(name = "Tipo de cozinha", value = COZINHA_INVALIDA),
                     @ExampleObject(name = "Ordenação", value = ORDENACAO_INVALIDA)}))
@@ -78,7 +80,8 @@ interface RestauranteApi {
                     examples = @ExampleObject(ExemplosDeRestaurante.RESTAURANTE)))
     @ApiResponse(responseCode = "404", description = "Restaurante inexistente ou removido",
             content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(RESTAURANTE_NAO_ENCONTRADO)))
-    ResponseEntity<RestauranteResponse> buscarPorId(@Parameter(description = "Id do restaurante", example = "9") Long id);
+    ResponseEntity<RestauranteResponse> buscarPorId(
+            @Parameter(description = "Id do restaurante", example = "9") Long id);
 
     @Operation(summary = "Atualiza um restaurante", description = """
             Substitui os dados e a lista inteira de turnos. Um donoId diferente transfere o restaurante, com as \
@@ -86,7 +89,8 @@ interface RestauranteApi {
     @ApiResponse(responseCode = "200", description = "Restaurante atualizado",
             content = @Content(mediaType = JSON, schema = @Schema(implementation = RestauranteResponse.class),
                     examples = @ExampleObject(ExemplosDeRestaurante.RESTAURANTE)))
-    @ApiResponse(responseCode = "400", description = "Campo inválido, tipo de cozinha fora da lista ou turnos sobrepostos",
+    @ApiResponse(responseCode = "400",
+            description = "Campo inválido, tipo de cozinha fora da lista ou turnos sobrepostos",
             content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(TURNOS_SOBREPOSTOS)))
     @ApiResponse(responseCode = "404", description = "Restaurante ou novo dono inexistente",
             content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(RESTAURANTE_NAO_ENCONTRADO)))

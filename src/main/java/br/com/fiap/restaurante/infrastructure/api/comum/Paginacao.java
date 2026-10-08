@@ -32,8 +32,9 @@ public final class Paginacao {
 
     private static PedidoDePagina.Ordem ordem(Sort.Order ordem, Set<String> camposOrdenaveis) {
         if (!camposOrdenaveis.contains(ordem.getProperty())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não é possível ordenar por "
-                    + ordem.getProperty() + ". Campos aceitos: " + String.join(", ", new TreeSet<>(camposOrdenaveis)) + ".");
+            String aceitos = String.join(", ", new TreeSet<>(camposOrdenaveis));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Não é possível ordenar por " + ordem.getProperty() + ". Campos aceitos: " + aceitos + ".");
         }
         return new PedidoDePagina.Ordem(ordem.getProperty(), ordem.isAscending());
     }

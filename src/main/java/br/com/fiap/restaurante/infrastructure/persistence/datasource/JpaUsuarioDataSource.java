@@ -66,8 +66,8 @@ public class JpaUsuarioDataSource implements IUsuarioDataSource {
 
     @Override
     public Pagina<DadosUsuario> buscarPorNome(String nome, PedidoDePagina pedido) {
-        return Paginas.paraPagina(usuarios.findByNomeContainingAndRemovidoEmIsNull(nome, Paginas.paraPageRequest(pedido)),
-                JpaUsuarioDataSource::paraDados);
+        var pagina = usuarios.findByNomeContainingAndRemovidoEmIsNull(nome, Paginas.paraPageRequest(pedido));
+        return Paginas.paraPagina(pagina, JpaUsuarioDataSource::paraDados);
     }
 
     @Override

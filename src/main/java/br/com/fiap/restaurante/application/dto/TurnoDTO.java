@@ -23,7 +23,8 @@ public record TurnoDTO(String diaSemana, String abertura, String fechamento) {
         try {
             return LocalTime.parse(valor);
         } catch (DateTimeParseException e) {
-            throw new ValidacaoDeDominioException("O horário " + valor + " não é válido. Use o formato HH:mm, como 18:30.");
+            throw new ValidacaoDeDominioException(
+                    "O horário " + valor + " não é válido. Use o formato HH:mm, como 18:30.");
         }
     }
 }
