@@ -59,6 +59,16 @@ services:
       TZ: America/Sao_Paulo
     ports:
       - "${APP_PORT:-8080}:8080"
+    healthcheck:
+      # O endpoint de saúde do Actuator responde UP só quando a aplicação
+      # terminou de subir e consegue falar com o banco. Assim "docker
+      # compose ps" mostra "healthy" quando a API está de fato pronta para
+      # receber requisições, e não apenas quando o processo Java começou.
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q '\"status\":\"UP\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
     depends_on:
       mysql:
         # Aguarda o healthcheck passar, não apenas o contêiner existir.
