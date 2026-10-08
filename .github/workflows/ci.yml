@@ -1,5 +1,7 @@
-# A cada push e pull request: testes unitários, testes de integração
-# (MySQL via Testcontainers), regras do ArchUnit e cortes de cobertura.
+# A cada push e pull request:
+# - testes unitários, testes de integração (MySQL via Testcontainers), regras do
+#   ArchUnit e cortes de cobertura;
+# - aceitação: o docker compose sobe a aplicação e o Newman roda a collection.
 
 name: CI
 
@@ -36,3 +38,48 @@ jobs:
             target/site/jacoco-unitarios
             target/site/jacoco-total
           if-no-files-found: ignore
+
+  aceitacao:
+    name: Aceitação com a collection do Postman
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v7
+
+      - name: Criar o .env a partir do exemplo
+        run: cp .env.example .env
+
+      - name: Subir a aplicação e o banco
+        run: docker compose up -d --build --wait --wait-timeout 300
+
+      - name: Instalar o Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      # Duas vezes seguidas: a segunda só passa se a exclusão liberar e-mail,
+      # login e documento para um novo cadastro
+      - name: Rodar a collection com o Newman
+        run: >-
+          npx --yes newman@6.2.2 run postman/tech-challenge-fase-2.postman_collection.json
+          -e postman/Local.postman_environment.json
+          -n 2
+          --reporters cli,junit
+          --reporter-junit-export resultados/newman.xml
+
+      - name: Mostrar o log da aplicação
+        if: failure()
+        run: docker compose logs app
+
+      - name: Publicar o resultado do Newman
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: resultado-da-aceitacao
+          path: resultados/newman.xml
+          if-no-files-found: ignore
+
+      - name: Derrubar o compose
+        if: always()
+        run: docker compose down -v
