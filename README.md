@@ -1,5 +1,12 @@
 # API de Gestão de Usuários — Restaurantes
 
+> **Fase 2 em desenvolvimento.** Este repositório continua o projeto da Fase 1,
+> agora reescrito em Clean Architecture. A versão entregue e avaliada da Fase 1
+> está na tag [`fase-1-entregue`](https://github.com/ThiagoWippel/fiap-adj-tech-challenge-fase-2/tree/fase-1-entregue), e é ela que o
+> restante deste README descreve. Os cenários que a Fase 2 precisa comprovar
+> estão em [`docs/catalogo-de-cenarios.md`](docs/catalogo-de-cenarios.md). A
+> documentação da Fase 2 substitui este arquivo ao fim do desenvolvimento.
+
 Backend do sistema compartilhado de gestão para restaurantes.
 **Tech Challenge — Fase 1 · Pós Tech FIAP · Arquitetura e Desenvolvimento em Java**
 
