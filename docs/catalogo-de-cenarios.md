@@ -17,9 +17,9 @@ Assim qualquer frase do enunciado leva a um cenário, e cada cenário leva a um 
 
 | Nível | Significa | Ferramenta |
 |---|---|---|
-| U | Unitário de domínio: entidade ou objeto de valor, sem dependências | JUnit 5 + AssertJ |
-| C | Unitário de caso de uso, com gateways e portas substituídos por mocks | JUnit 5 + Mockito |
-| I | Integração contra MySQL real em container | Testcontainers + `@SpringBootTest` / `@DataJpaTest` + REST-Assured |
+| U | Unitário de domínio: entidade ou objeto de valor, sem dependências | JUnit + AssertJ |
+| C | Unitário de caso de uso, com gateways e portas substituídos por mocks | JUnit + Mockito |
+| I | Integração contra MySQL real em container | Testcontainers + `@SpringBootTest` / `@WebMvcTest` + REST-Assured |
 | P | Collection do Postman, rodada pelo Newman contra o docker-compose | Postman + Newman |
 | A | Regra de arquitetura | ArchUnit |
 | CI | Verificação feita pelo pipeline do GitHub Actions | GitHub Actions |

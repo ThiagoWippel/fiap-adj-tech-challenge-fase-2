@@ -1,646 +1,531 @@
-# API de Gestão de Usuários — Restaurantes
+# API de Gestão de Restaurantes
 
 [![CI](https://github.com/ThiagoWippel/fiap-adj-tech-challenge-fase-2/actions/workflows/ci.yml/badge.svg)](https://github.com/ThiagoWippel/fiap-adj-tech-challenge-fase-2/actions/workflows/ci.yml)
 
-> **Fase 2 em desenvolvimento.** Este repositório continua o projeto da Fase 1,
-> agora reescrito em Clean Architecture. A versão entregue e avaliada da Fase 1
-> está na tag [`fase-1-entregue`](https://github.com/ThiagoWippel/fiap-adj-tech-challenge-fase-2/tree/fase-1-entregue), e é ela que o
-> restante deste README descreve. Os cenários que a Fase 2 precisa comprovar
-> estão em [`docs/catalogo-de-cenarios.md`](docs/catalogo-de-cenarios.md). A
-> documentação da Fase 2 substitui este arquivo ao fim do desenvolvimento.
-
 Backend do sistema compartilhado de gestão para restaurantes.
-**Tech Challenge — Fase 1 · Pós Tech FIAP · Arquitetura e Desenvolvimento em Java**
+**Tech Challenge · Fase 2 · Pós Tech FIAP · Arquitetura e Desenvolvimento em Java**
 
-Um grupo de restaurantes decidiu financiar em conjunto um sistema único de gestão,
-em vez de cada estabelecimento manter o seu. Esta primeira fase entrega a base
-sobre a qual as demais serão construídas: o cadastro de usuários e a validação de
-credenciais.
+A Fase 2 continua a Fase 1 (cadastro de usuários e login) em Clean Architecture e acrescenta os três
+cadastros do enunciado: tipos de usuário, restaurantes e itens do cardápio. A versão avaliada da Fase 1
+está na tag [`fase-1-entregue`](https://github.com/ThiagoWippel/fiap-adj-tech-challenge-fase-2/tree/fase-1-entregue).
 
 ---
+
+## Avaliação rápida
+
+Para subir tudo e rodar a collection inteira (precisa de Docker e, para o Newman, de Node):
+
+```bash
+cp .env.example .env
+docker compose up -d --build --wait
+npx newman run postman/tech-challenge-fase-2.postman_collection.json -e postman/Local.postman_environment.json
+```
+
+Com a aplicação no ar, o Swagger fica em http://localhost:8080/swagger-ui.html.
+
+| Critério do enunciado | Onde verificar |
+|---|---|
+| 1 · Funcionalidade | [Endpoints](#endpoints): 26 rotas, as 8 da Fase 1 e 18 novas · testes em `src/test/.../infrastructure/api` |
+| 2 · Qualidade do código | [Arquitetura](#arquitetura), Javadoc em todas as classes públicas, [decisões](#decisões-principais) |
+| 3 · Documentação | Este README · Swagger com exemplos de sucesso e de erro em cada rota · [`docs/openapi.json`](docs/openapi.json) |
+| 4 · Collections | [`postman/`](postman/): 83 requisições com verificações, rodadas pelo CI a cada push |
+| 5 · Docker Compose | [`docker-compose.yml`](docker-compose.yml): aplicação e MySQL, os dois com healthcheck |
+| 6 · Repositório | Este repositório, público, com o histórico da Fase 1 |
+| 7 · Clean Architecture | Pacotes `domain`, `application`, `interfaceadapter` e `infrastructure`, com as regras de dependência testadas pelo ArchUnit |
+| 8 · Testes | 80% de cobertura exigida em dois cortes que travam o build; integração contra MySQL real ([Testes](#testes)) |
+| 9 · Vídeo | Entregue com o relatório |
+
+Cada requisito leva a um cenário do [catálogo](docs/catalogo-de-cenarios.md), e cada cenário leva ao teste que
+o comprova: está tudo na [matriz requisito → evidência](docs/matriz-de-evidencias.md).
 
 ## Índice
 
-- [Escopo](#escopo)
-- [Stack](#stack)
+- [Avaliação rápida](#avaliação-rápida)
+- [O que o sistema faz](#o-que-o-sistema-faz)
 - [Como executar](#como-executar)
 - [Endpoints](#endpoints)
+- [Arquitetura](#arquitetura)
 - [Modelo de dados](#modelo-de-dados)
-- [Tratamento de erros](#tratamento-de-erros)
-- [Decisões de arquitetura](#decisões-de-arquitetura)
-- [Verificação](#verificação)
+- [Decisões principais](#decisões-principais)
+- [Testes](#testes)
+- [Collection do Postman](#collection-do-postman)
 - [Solução de problemas](#solução-de-problemas)
-- [Melhorias futuras](#melhorias-futuras)
 
 ---
 
-## Escopo
+## O que o sistema faz
 
-O sistema contempla dois tipos de usuário — **cliente** e **dono de restaurante** —
-e oferece:
+- **Usuários** (Fase 1): cadastro, consulta, busca por nome (v1 em lista, v2 paginada), atualização, troca
+  de senha em endpoint próprio, exclusão e login. O login devolve um JWT assinado.
+- **Tipos de usuário**: CRUD com o nome; o código é gerado a partir dele ("Ajudante de Cozinha" vira
+  `AJUDANTE_DE_COZINHA`) e nunca muda. Cliente e Dono de Restaurante são tipos de sistema: podem ser
+  renomeados, não excluídos. Um usuário troca de tipo na mesma conta, informando o documento do novo tipo.
+- **Restaurantes**: nome, endereço, tipo de cozinha (lista fechada), horários e dono. O dono precisa ser do
+  tipo Dono de Restaurante. Os horários são turnos por dia da semana; um turno pode passar da meia-noite
+  (sexta 18:00–02:00) e os turnos não podem se sobrepor.
+- **Itens do cardápio**: nas rotas do restaurante. Nome único entre os itens ativos do restaurante, preço com
+  no máximo duas casas, disponibilidade só no local e o caminho da foto.
 
-- Cadastro, consulta, atualização e exclusão de usuários
-- Troca de senha em endpoint próprio, separado da atualização dos demais dados
-- Busca de usuários pelo nome
-- Registro automático da data da última alteração
-- Unicidade de e-mail, login e documento
-- Validação de credenciais (login e senha)
+Regras que cruzam os cadastros:
 
-Restaurantes, cardápios, pedidos e avaliações são escopo das fases seguintes.
-
----
-
-## Stack
-
-| Componente | Versão | Papel |
-|---|---|---|
-| Java | 21 | Linguagem |
-| Spring Boot | 4.0.7 | Framework de aplicação |
-| Spring Data JPA / Hibernate | 7.2 | Persistência |
-| MySQL | 8.4 | Banco relacional (produção) |
-| H2 | 2.4 | Banco em memória (desenvolvimento) |
-| springdoc-openapi | 3.1.0 | Documentação OpenAPI / Swagger |
-| spring-security-crypto | — | Codificação de senhas com BCrypt |
-| Docker Compose | v2 | Orquestração |
-
----
+- Dono de Restaurante usa CNPJ; os demais tipos usam CPF, com os dígitos verificadores conferidos.
+- Quem tem restaurante ativo não pode ser excluído nem deixar de ser Dono de Restaurante.
+- A exclusão depende da natureza do dado: o usuário é anonimizado, restaurante e item têm exclusão lógica, e
+  o tipo de usuário é excluído de verdade, se nenhum usuário ativo o usar.
 
 ## Como executar
 
 ### Pré-requisitos
 
-- Docker e Docker Compose
-- Porta **8080** livre (aplicação) e **3307** livre (banco)
-
-Não é necessário instalar Java, Maven ou MySQL: a compilação acontece dentro do
-contêiner e o Maven Wrapper (`mvnw`) dispensa instalação prévia.
+- Docker com o Compose v2 (`docker compose version`).
+- Para rodar os testes: Java 21. O Maven vem no projeto (`./mvnw`) e os testes de integração sobem o próprio
+  MySQL com o Testcontainers, então o Docker também precisa estar no ar.
+- Para rodar a collection pelo terminal: Node, para o `npx newman`.
 
 ### Passo a passo
 
-**1. Clonar o repositório**
+**1. Clonar**
 
 ```bash
-git clone https://github.com/ThiagoWippel/fiap-adj-tech-challenge-fase-1.git
-cd fiap-adj-tech-challenge-fase-1
+git clone https://github.com/ThiagoWippel/fiap-adj-tech-challenge-fase-2.git
+cd fiap-adj-tech-challenge-fase-2
 ```
 
-**2. Criar o arquivo de variáveis de ambiente**
+**2. Criar o `.env`**
 
 ```bash
 cp .env.example .env
 ```
 
-Abra o `.env` e substitua as duas senhas por valores próprios. Evite os
-caracteres `#`, `$`, `&`, aspas e espaços: no formato do arquivo, `#` inicia
-comentário e `$` pode ser interpretado como variável, o que faria a senha chegar
-truncada ao banco.
+O `.env.example` já funciona como está. Para uso real, troque as senhas e a `JWT_CHAVE`
+(`openssl rand -base64 32` gera uma).
 
-**3. Garantir a permissão de leitura do script de esquema**
+**3. Subir**
 
 ```bash
-chmod 644 docker/mysql/init/*.sql
+docker compose up -d --build --wait
 ```
 
-O controle de versão preserva apenas o bit de execução, não as permissões de
-leitura — o modo do arquivo após o clone depende do `umask` da máquina. Se o
-arquivo ficar legível somente pelo proprietário, o contêiner do MySQL não
-consegue lê-lo. Ver [Solução de problemas](#solução-de-problemas).
+O `--wait` só devolve o terminal quando o banco e a aplicação passam no healthcheck. A primeira execução
+baixa as imagens e compila o projeto, e leva alguns minutos.
 
-**4. Subir a aplicação**
-
-```bash
-docker compose up --build
-```
-
-A primeira execução baixa as imagens e compila o projeto; leva alguns minutos.
-Nas seguintes, o cache de camadas reduz o tempo a poucos segundos.
-
-**5. Confirmar**
+**4. Conferir**
 
 | Recurso | Endereço |
 |---|---|
-| Swagger UI | http://localhost:8080/swagger-ui.html |
+| Swagger | http://localhost:8080/swagger-ui.html |
 | Especificação OpenAPI | http://localhost:8080/v3/api-docs |
-| Banco (ferramentas externas) | `localhost:3307` |
+| Saúde da aplicação | http://localhost:8080/actuator/health |
+| Tipos de problema dos erros | http://localhost:8080/problemas |
+| Banco, para ferramentas externas | `localhost:3307` |
 
 ### Variáveis de ambiente
 
-Todas são definidas no `.env` e consumidas pelo `docker-compose.yml`.
+Ficam no `.env`, que não é versionado; o `.env.example` é o modelo.
 
-| Variável | Padrão no exemplo | Descrição |
+| Variável | No exemplo | Para quê |
 |---|---|---|
-| `DB_NAME` | `restaurante_db` | Nome do banco criado na primeira inicialização |
-| `DB_USER` | `restaurante` | Usuário da aplicação |
-| `DB_PASSWORD` | — | Senha do usuário da aplicação |
-| `DB_ROOT_PASSWORD` | — | Senha do usuário root do MySQL |
-| `DB_EXTERNAL_PORT` | `3307` | Porta exposta na máquina para acesso ao banco |
-| `APP_PORT` | `8080` | Porta exposta na máquina para a aplicação |
-
-O arquivo `.env` **não é versionado**. O `.env.example` serve de modelo.
+| `DB_NAME` | `restaurante_db` | Banco criado na primeira subida |
+| `DB_USER` / `DB_PASSWORD` | `restaurante` / `altere_esta_senha` | Usuário da aplicação no MySQL |
+| `DB_ROOT_PASSWORD` | `altere_esta_senha_root` | Senha do root do MySQL |
+| `DB_EXTERNAL_PORT` | `3307` | Porta do banco na máquina |
+| `APP_PORT` | `8080` | Porta da aplicação na máquina |
+| `JWT_CHAVE` | um texto de exemplo | Chave de assinatura do token do login, com ao menos 32 caracteres. Sem ela, a aplicação não sobe e o log diz qual variável falta |
 
 ### Encerrar
 
 ```bash
-docker compose down      # para e remove os contêineres, preservando os dados
-docker compose down -v   # remove também o volume — apaga o banco
+docker compose down      # para os contêineres e mantém o banco
+docker compose down -v   # apaga também o volume com os dados do banco
 ```
 
-### Execução local sem Docker
+### Rodar a aplicação fora do Docker
 
-Para desenvolvimento, o perfil `dev` usa H2 em memória e dispensa contêineres:
+O perfil `dev`, que é o padrão, usa o MySQL do compose e lê o `.env` da raiz:
 
 ```bash
+docker compose up -d --wait mysql
 ./mvnw spring-boot:run
 ```
 
-O console do H2 fica em http://localhost:8080/h2-console — informe
-`jdbc:h2:mem:restaurante` no campo *JDBC URL*, usuário `sa` e senha em branco.
-Os dados são recriados a cada inicialização.
+### Rodar os testes
 
-> Os dois modos usam a porta 8080 e **não podem executar simultaneamente**.
+```bash
+./mvnw verify
+```
 
----
+Roda os testes unitários, os de integração (com o MySQL 8.4 do Testcontainers), as regras do ArchUnit e os
+cortes de cobertura. Os relatórios do JaCoCo ficam em `target/site/jacoco-unitarios` e
+`target/site/jacoco-total`. Só os unitários: `./mvnw test`.
 
 ## Endpoints
 
-Base: `http://localhost:8080`
+São 26: as 8 rotas da Fase 1, com o mesmo contrato, e 18 novas. Todas estão no Swagger, com exemplo de sucesso
+e de erro.
 
-| Verbo | Rota | Descrição | Sucesso |
+**Usuários e login**
+
+| Método | Rota | Status | |
 |---|---|---|---|
-| POST | `/api/v1/usuarios` | Cadastra um usuário | 201 |
-| GET | `/api/v1/usuarios/{id}` | Consulta por identificador | 200 |
-| GET | `/api/v1/usuarios?nome=` | Busca por nome (lista) | 200 |
-| GET | `/api/v2/usuarios?nome=` | Busca por nome (paginada) | 200 |
-| PUT | `/api/v1/usuarios/{id}` | Atualiza os dados | 200 |
-| PUT | `/api/v1/usuarios/{id}/senha` | Troca a senha | 204 |
-| DELETE | `/api/v1/usuarios/{id}` | Exclui o usuário | 204 |
-| POST | `/api/v1/auth/login` | Valida credenciais | 200 |
+| POST | `/api/v1/usuarios` | 201 · 400 · 404 · 409 | Cadastro. O tipo vai pelo código (`CLIENTE`, `DONO_RESTAURANTE` ou um tipo do CRUD) |
+| GET | `/api/v1/usuarios?nome=` | 200 | Busca pelo trecho do nome, em lista |
+| GET | `/api/v2/usuarios?nome=` | 200 · 400 | A mesma busca, paginada |
+| GET | `/api/v1/usuarios/{id}` | 200 · 404 | |
+| PUT | `/api/v1/usuarios/{id}` | 200 · 400 · 404 · 409 | Nome, e-mail, login e endereço |
+| PUT | `/api/v1/usuarios/{id}/senha` | 204 · 400 · 401 · 404 | Exige a senha atual |
+| PATCH | `/api/v1/usuarios/{id}/tipo` | 200 · 400 · 404 · 409 | Troca de tipo, com o documento do novo tipo |
+| GET | `/api/v1/usuarios/{id}/restaurantes` | 200 · 400 · 404 | Restaurantes ativos do usuário |
+| DELETE | `/api/v1/usuarios/{id}` | 204 · 404 · 409 | Anonimiza; 409 se tiver restaurante ativo |
+| POST | `/api/v1/auth/login` | 200 · 400 · 401 | Devolve id, nome, tipo, `token` e `expiraEm` |
 
-### Cadastro
+**Tipos de usuário**
 
-```bash
-curl -i -X POST http://localhost:8080/api/v1/usuarios \
-  -H "Content-Type: application/json" \
-  -d '{
-    "nome": "Maria Silva",
-    "email": "maria.silva@exemplo.com",
-    "login": "maria.silva",
-    "senha": "SenhaSegura123",
-    "tipo": "CLIENTE",
-    "cpf": "123.456.789-09",
-    "endereco": {
-      "rua": "Rua das Flores", "numero": "123", "complemento": "Apto 45",
-      "bairro": "Centro", "cidade": "Camboriú", "estado": "SC", "cep": "88340-000"
-    }
-  }'
-```
+| Método | Rota | Status | |
+|---|---|---|---|
+| POST | `/api/v1/tipos-usuario` | 201 · 400 · 409 | Recebe só o nome |
+| GET | `/api/v1/tipos-usuario` | 200 · 400 | |
+| GET | `/api/v1/tipos-usuario/{id}` | 200 · 404 | |
+| PUT | `/api/v1/tipos-usuario/{id}` | 200 · 400 · 404 · 409 | Renomeia; o código não muda |
+| DELETE | `/api/v1/tipos-usuario/{id}` | 204 · 404 · 409 | 409 se for de sistema ou estiver em uso |
+| GET | `/api/v1/tipos-usuario/{id}/usuarios` | 200 · 400 · 404 | Usuários ativos do tipo |
 
-Resposta `201 Created`, com o cabeçalho `Location` apontando para o recurso:
+**Restaurantes**
+
+| Método | Rota | Status | |
+|---|---|---|---|
+| POST | `/api/v1/restaurantes` | 201 · 400 · 404 · 409 | 409 se o dono não for Dono de Restaurante |
+| GET | `/api/v1/restaurantes?nome=&tipoCozinha=` | 200 · 400 | Filtros opcionais |
+| GET | `/api/v1/restaurantes/{id}` | 200 · 404 | |
+| PUT | `/api/v1/restaurantes/{id}` | 200 · 400 · 404 · 409 | Substitui os turnos; outro `donoId` transfere o restaurante |
+| DELETE | `/api/v1/restaurantes/{id}` | 204 · 404 | Exclusão lógica |
+
+**Itens do cardápio**
+
+| Método | Rota | Status | |
+|---|---|---|---|
+| POST | `/api/v1/restaurantes/{restauranteId}/itens-cardapio` | 201 · 400 · 404 · 409 | 409 se o nome já for de outro item ativo |
+| GET | `/api/v1/restaurantes/{restauranteId}/itens-cardapio?apenasNoLocal=` | 200 · 400 · 404 | |
+| GET | `/api/v1/restaurantes/{restauranteId}/itens-cardapio/{itemId}` | 200 · 404 | 404 se o item for de outro restaurante |
+| PUT | `/api/v1/restaurantes/{restauranteId}/itens-cardapio/{itemId}` | 200 · 400 · 404 · 409 | |
+| DELETE | `/api/v1/restaurantes/{restauranteId}/itens-cardapio/{itemId}` | 204 · 404 | Exclusão lógica |
+
+Exemplo de cadastro de restaurante:
 
 ```json
+POST /api/v1/restaurantes
 {
-  "id": 1,
-  "nome": "Maria Silva",
-  "email": "maria.silva@exemplo.com",
-  "login": "maria.silva",
-  "tipo": "CLIENTE",
-  "documento": "12345678909",
-  "endereco": {
-    "rua": "Rua das Flores",
-    "numero": "123",
-    "complemento": "Apto 45",
-    "bairro": "Centro",
-    "cidade": "Camboriú",
-    "estado": "SC",
-    "cep": "88340000"
-  },
-  "dataCriacao": "2026-08-21T10:30:00",
-  "dataUltimaAlteracao": "2026-08-21T10:30:00"
-}
-```
-
-CPF, CNPJ e CEP são normalizados para conter apenas dígitos; a sigla do estado é
-convertida para maiúsculas. A senha não integra nenhuma resposta da API.
-
-Para cadastrar um dono de restaurante, informe `"tipo": "DONO_RESTAURANTE"` e
-`cnpj` no lugar de `cpf`.
-
-### Regras de validação
-
-| Campo | Regra |
-|---|---|
-| `nome` | Obrigatório, 3 a 120 caracteres |
-| `email` | Obrigatório, formato válido, até 255 caracteres, único |
-| `login` | Obrigatório, 4 a 50 caracteres, único. Letras, números, ponto, hífen e sublinhado |
-| `senha` | Obrigatória, 8 a 72 caracteres |
-| `tipo` | Obrigatório: `CLIENTE` ou `DONO_RESTAURANTE` |
-| `cpf` | Obrigatório para `CLIENTE`, com dígitos verificadores válidos, único |
-| `cnpj` | Obrigatório para `DONO_RESTAURANTE`, com dígitos verificadores válidos, único |
-| `endereco` | Obrigatório. Complemento é o único campo opcional |
-| `cep` | Obrigatório, oito dígitos, com ou sem pontuação |
-| `estado` | Obrigatório, exatamente duas letras |
-
-O limite superior da senha não é arbitrário: o BCrypt processa no máximo 72 bytes
-e **descarta silenciosamente** o excedente. Sem essa validação, uma senha mais
-longa permitiria autenticação usando apenas o seu início.
-
-### Busca por nome
-
-```bash
-curl "http://localhost:8080/api/v1/usuarios?nome=maria"
-```
-
-Retorna os usuários cujo nome contém o termo, sem diferenciar maiúsculas de
-minúsculas. Omitindo o parâmetro, retorna todos. Quando nada corresponde, a
-resposta é `200` com lista vazia — a coleção filtrada existe como recurso, apenas
-não contém elementos.
-
-### Atualização
-
-```bash
-curl -X PUT http://localhost:8080/api/v1/usuarios/1 \
-  -H "Content-Type: application/json" \
-  -d '{
-    "nome": "Maria Silva Souza",
-    "email": "maria.souza@exemplo.com",
-    "login": "maria.souza",
-    "endereco": { "rua": "Rua Nova", "numero": "456", "bairro": "Centro",
-      "cidade": "Itajaí", "estado": "SC", "cep": "88300000" }
-  }'
-```
-
-Não aceita senha — a troca possui endpoint próprio. Não aceita tipo nem
-documento: ambos são imutáveis após o cadastro.
-
-### Troca de senha
-
-```bash
-curl -X PUT http://localhost:8080/api/v1/usuarios/1/senha \
-  -H "Content-Type: application/json" \
-  -d '{ "senhaAtual": "SenhaSegura123", "novaSenha": "SenhaNova456" }'
-```
-
-> **A senha atual é obrigatória.** O enunciado não menciona essa exigência; trata-se
-> de decisão de segurança do projeto, adotada como proteção contra alteração
-> indevida em sessão deixada aberta.
-
-Retorna `204 No Content`. A data da última alteração é atualizada — trocar a senha
-é, também, uma alteração do cadastro.
-
-### Validação de credenciais
-
-```bash
-curl -X POST http://localhost:8080/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{ "login": "maria.silva", "senha": "SenhaSegura123" }'
-```
-
-```json
-{ "id": 1, "nome": "Maria Silva", "tipo": "CLIENTE" }
-```
-
-Retorna apenas o necessário para identificar quem autenticou. Não é uma consulta
-de perfil: a operação responde se as credenciais conferem, não quem é o usuário.
-
-### Versionamento
-
-A versão integra o caminho da rota (`/api/v1/...`). Entre as alternativas
-avaliadas — cabeçalho customizado e negociação de conteúdo pelo `Accept` — esta é
-a única visível na documentação Swagger e na coleção Postman.
-
-Mudanças compatíveis, como a inclusão de um campo em uma resposta, permanecem na
-versão corrente: clientes existentes seguem funcionando e ignoram o campo novo.
-Apenas alterações que quebram consumidores originam nova versão.
-
-É o caso de `/api/v2/usuarios`: onde a v1 devolve um vetor de usuários, a v2
-devolve um objeto contendo o vetor no campo `conteudo`, acompanhado dos metadados
-de paginação. Um consumidor da v1 não consegue processar essa resposta — quebra de
-contrato que justifica o incremento de versão.
-
-```json
-{
-  "conteudo": [ /* ... */ ],
-  "pagina": 0,
-  "tamanho": 10,
-  "totalElementos": 42,
-  "totalPaginas": 5,
-  "ultima": false
-}
-```
-
-Na existência de uma v3, a depreciação da v1 se daria por período de convivência
-entre as versões, cabeçalhos de aviso nas respostas da versão obsoleta e, ao fim
-do prazo, resposta indicando a retirada definitiva.
-
----
-
-## Modelo de dados
-
-Tabela única, decorrente da estratégia de herança adotada.
-
-| Coluna | Tipo | Restrições |
-|---|---|---|
-| `id` | BIGINT | PK, AUTO_INCREMENT |
-| `tipo_usuario` | VARCHAR(20) | NOT NULL — discriminadora |
-| `nome` | VARCHAR(120) | NOT NULL |
-| `email` | VARCHAR(255) | NOT NULL, UNIQUE |
-| `login` | VARCHAR(50) | NOT NULL, UNIQUE |
-| `senha` | VARCHAR(100) | NOT NULL — hash BCrypt |
-| `cpf` | VARCHAR(11) | NULL, UNIQUE |
-| `cnpj` | VARCHAR(14) | NULL, UNIQUE |
-| `data_criacao` | DATETIME(6) | NOT NULL |
-| `data_ultima_alteracao` | DATETIME(6) | NOT NULL |
-| `endereco_rua` | VARCHAR(150) | NOT NULL |
-| `endereco_numero` | VARCHAR(10) | NOT NULL |
-| `endereco_complemento` | VARCHAR(60) | NULL |
-| `endereco_bairro` | VARCHAR(80) | NOT NULL |
-| `endereco_cidade` | VARCHAR(80) | NOT NULL |
-| `endereco_estado` | VARCHAR(2) | NOT NULL |
-| `endereco_cep` | VARCHAR(9) | NOT NULL |
-
-Script completo em [`docker/mysql/init/01-schema.sql`](docker/mysql/init/01-schema.sql),
-executado pelo MySQL na primeira inicialização do contêiner.
-
-**Dimensionamentos.** O e-mail acomoda 255 caracteres porque o limite normativo de
-um endereço é 254. A senha reserva 100 embora o hash BCrypt tenha sempre 60 — a
-folga evita acoplar o esquema a um algoritmo específico. O número do endereço é
-texto porque existem valores como "S/N" e "123-A".
-
-**Colunas de documento aceitam nulo** por consequência da estratégia de tabela
-única: o registro de um cliente não preenche o CNPJ, e vice-versa. A
-obrigatoriedade por tipo é garantida na camada de aplicação.
-
-**Não há índice sobre `nome`**, deliberadamente. A busca é por conteúdo, e índices
-de árvore só são aproveitados quando o termo aparece no início do valor. Criar o
-índice daria aparência de otimização sem produzir nenhuma.
-
----
-
-## Tratamento de erros
-
-Todas as respostas de erro seguem a **RFC 7807** (*Problem Details for HTTP APIs*),
-com o tipo de mídia `application/problem+json`.
-
-Aos cinco campos padrão da especificação — `type`, `title`, `status`, `detail` e
-`instance` — foram acrescentadas duas extensões: `momento`, que permite
-correlacionar a resposta com o registro em log, e `erros`, presente nas falhas de
-validação com o detalhamento por campo.
-
-<a id="dados-invalidos"></a>
-
-### Dados inválidos
-
-`400 Bad Request` — um ou mais campos não passaram na validação.
-
-```json
-{
-  "type": "https://github.com/ThiagoWippel/fiap-adj-tech-challenge-fase-1/blob/main/README.md#dados-invalidos",
-  "title": "Dados invalidos",
-  "status": 400,
-  "detail": "Um ou mais campos da requisicao nao passaram na validacao",
-  "instance": "/api/v1/usuarios",
-  "momento": "2026-08-21T10:30:00",
-  "erros": [
-    { "campo": "email", "mensagem": "O e-mail informado nao e valido" },
-    { "campo": "senha", "mensagem": "A senha deve ter entre 8 e 72 caracteres" }
+  "nome": "Cantina da Nona",
+  "endereco": { "rua": "Rua Hercílio Luz", "numero": "120", "bairro": "Centro",
+                "cidade": "Itajaí", "estado": "SC", "cep": "88301-000" },
+  "tipoCozinha": "ITALIANA",
+  "donoId": 7,
+  "horarios": [
+    { "diaSemana": "SEGUNDA", "abertura": "11:00", "fechamento": "15:00" },
+    { "diaSemana": "SEGUNDA", "abertura": "18:00", "fechamento": "23:00" },
+    { "diaSemana": "SEXTA", "abertura": "18:00", "fechamento": "02:00" }
   ]
 }
 ```
 
-<a id="regra-de-negocio"></a>
+### Listagens
 
-### Regra de negócio
+As listagens novas seguem o formato da busca v2 da Fase 1: `conteudo` mais `pagina`, `tamanho`,
+`totalElementos`, `totalPaginas` e `ultima`. Aceitam `page`, `size` e `sort`; o padrão é 10 por página, em
+ordem de nome, e o `size` vai no máximo a 50. Ordenar por um campo que a resposta não mostra devolve 400.
+Registros removidos nunca aparecem.
 
-`400 Bad Request` — a requisição é estruturalmente válida, mas viola uma regra que
-depende da combinação de campos. Ocorre quando o documento informado não
-corresponde ao tipo de usuário: CPF é exigido para `CLIENTE`, CNPJ para
-`DONO_RESTAURANTE`.
+### Versionamento
 
-<a id="credenciais-invalidas"></a>
+A versão faz parte da rota. Mudança compatível, como um campo novo na resposta, fica na versão atual: o
+login ganhou `token` e `expiraEm` sem sair da v1. Só a quebra de contrato gera versão nova, como a busca de
+usuários da v2, que devolve uma página em vez de uma lista. Recursos novos nascem em v1.
 
-### Credenciais inválidas
+### Erros
 
-`401 Unauthorized` — as credenciais não conferem.
+Todas as respostas de erro seguem a RFC 9457 (ProblemDetail), inclusive os erros do próprio Spring, como
+JSON malformado e rota inexistente:
 
-A resposta é **idêntica** para login inexistente e senha incorreta, tanto em
-mensagem quanto em tempo de processamento. Diferenciar os dois casos permitiria
-descobrir quais logins existem no sistema por tentativa e erro.
-
-Também ocorre na troca de senha, quando a senha atual informada está incorreta.
-
-<a id="recurso-nao-encontrado"></a>
-
-### Recurso não encontrado
-
-`404 Not Found` — não existe usuário com o identificador informado.
-
-<a id="conflito-de-dados"></a>
-
-### Conflito de dados
-
-`409 Conflict` — a requisição é válida, mas conflita com o estado atual do banco:
-e-mail, login, CPF ou CNPJ já cadastrados.
-
-A verificação ocorre em duas camadas. O serviço consulta antes de gravar para
-produzir mensagem legível; as restrições do banco garantem a integridade quando
-duas requisições simultâneas passam por essa verificação e colidem na escrita.
-
-<a id="erro-interno"></a>
-
-### Erro interno
-
-`500 Internal Server Error` — falha não prevista.
-
-O rastro da exceção é registrado em log e **nunca** integra a resposta: mensagens
-internas revelam estrutura de pacotes, versões de biblioteca e por vezes trechos de
-consulta ao banco.
-
----
-
-## Decisões de arquitetura
-
-### Organização em camadas
-
-```
-config/                  configuração de Swagger, BCrypt e auditoria
-controllers/             tradução entre HTTP e serviços
-controllers/handlers/    tratamento centralizado de erros
-dtos/request/            contratos de entrada, com validações
-dtos/response/           contratos de saída
-entities/                modelo de domínio
-mappers/                 conversão entre entidades e DTOs
-repositories/            acesso a dados
-services/                regras de negócio
-services/exceptions/     exceções de negócio
+```json
+{
+  "type": "http://localhost:8080/problemas/conflito-de-dados",
+  "title": "Conflito de dados",
+  "status": 409,
+  "detail": "O usuário 7 é responsável por 1 restaurante ativo. Transfira ou exclua o restaurante antes de excluir o usuário.",
+  "instance": "/api/v1/usuarios/7",
+  "momento": "2026-10-08T10:30:00"
+}
 ```
 
-Controllers não contêm regra de negócio: traduzem HTTP para chamadas de serviço e
-devolvem o código de status adequado.
+O `type` aponta para a própria aplicação, que descreve o problema em `/problemas/{identificador}`. As falhas
+de validação de campo trazem também `erros`, com o campo e a mensagem de cada um.
 
-### Herança em tabela única
+| Título | Status | Quando |
+|---|---|---|
+| Dados inválidos | 400 | Campo ausente, fora do formato ou fora das regras |
+| Regra de negócio violada | 400 | Regra que envolve mais de um campo, como o documento exigido pelo tipo ou turnos sobrepostos |
+| Requisição inválida | 400 | JSON malformado, parâmetro de tipo errado, ordenação por campo não aceito |
+| Credenciais inválidas | 401 | Login ou senha incorretos, senha atual incorreta |
+| Recurso não encontrado | 404 | Id inexistente ou registro removido |
+| Método não permitido | 405 | Verbo que a rota não aceita |
+| Conflito de dados | 409 | Unicidade, tipo em uso, dono que não é Dono de Restaurante, restaurante ativo |
+| Mídia não suportada | 415 | Corpo que não é JSON |
+| Erro interno | 500 | Falha inesperada; o detalhe fica só no log |
 
-`Usuario` é abstrata; `Cliente` e `DonoRestaurante` são as implementações
-concretas, distinguidas por coluna discriminadora.
+### Token
 
-A estratégia `JOINED` exigiria junção em toda leitura e triplicaria o número de
-tabelas. `TABLE_PER_CLASS` foi descartada por inviabilizar um requisito: a
-unicidade de e-mail precisa valer no sistema inteiro, e uma restrição de unicidade
-não abrange tabelas distintas.
+O login emite um JWT assinado (HMAC-SHA256), com o id do usuário no `sub`, o código do tipo e a validade de
+uma hora. Nenhum endpoint exige o token nesta fase: o enunciado não define quem pode fazer o quê, e exigir o
+token obrigaria a inventar essas regras.
 
-O tipo do usuário é resolvido por **polimorfismo**, não por leitura da coluna
-discriminadora — cada subclasse declara o próprio tipo e o próprio documento.
-Adicionar um terceiro tipo de usuário significa criar uma classe nova, sem alterar
-código existente.
+## Arquitetura
 
-### Endereço como objeto de valor
+O código segue a Clean Architecture do material da disciplina, em quatro pacotes de primeiro nível:
 
-O endereço não possui identidade própria nem ciclo de vida independente: não existe
-"um endereço" no sistema, existe "o endereço de um usuário". Por isso é um
-`@Embeddable`, cujos campos se tornam colunas da própria tabela de usuário, sem
-tabela adicional nem relacionamento.
+```mermaid
+flowchart TB
+    subgraph INF["infrastructure: o único lugar com framework"]
+        API["Controllers REST e DTOs com @Valid<br/>Tratamento de erros (ProblemDetail)"]
+        PER["Entidades JPA, repositórios e data sources"]
+        SEG["BCrypt, JWT e TransactionTemplate"]
+    end
+    subgraph ADP["interfaceadapter: Java puro"]
+        CTR["Controllers"]
+        GTW["Gateways"]
+        PRE["Presenters"]
+        IDS["Interfaces I…DataSource"]
+    end
+    subgraph APP["application"]
+        UC["Casos de uso"]
+        PORT["Gateways e portas: senha, token, transação"]
+    end
+    subgraph DOM["domain"]
+        ENT["Entidades e objetos de valor<br/>que se validam"]
+    end
+    API --> CTR
+    PER -. implementa .-> IDS
+    SEG -. implementa .-> PORT
+    CTR --> UC
+    CTR --> GTW
+    CTR --> PRE
+    GTW -. implementa .-> PORT
+    GTW --> IDS
+    UC --> PORT
+    UC --> ENT
+    PRE --> ENT
+```
 
-### Senhas
+As dependências apontam sempre para dentro. O ArchUnit trava isso no build: o domínio e a aplicação não
+dependem de framework, os adaptadores não usam Spring, e nada do núcleo depende da infraestrutura.
 
-Codificadas com **BCrypt**, através da biblioteca `spring-security-crypto` — a
-camada de criptografia isolada, sem a cadeia de filtros do Spring Security
-completo, que o enunciado dispensa.
+```
+br.com.fiap.restaurante
+├── domain/            entidades (Usuario, TipoUsuario, Restaurante, ItemCardapio), objetos de valor
+│                      (Endereco, Documento, Turno, QuadroDeHorarios, Preco), enums e exceções
+├── application/       casos de uso (um por operação), interfaces de gateway, portas, DTOs e exceções
+├── interfaceadapter/  controllers puros, gateways, presenters e as interfaces I…DataSource
+└── infrastructure/    REST, persistência JPA, segurança, transação, configuração e tratamento de erros
+```
 
-O algoritmo é unidirecional: o valor armazenado não pode ser revertido, e a
-verificação compara hashes. Incorpora um valor aleatório por registro, de modo que
-senhas idênticas produzem hashes diferentes — impedindo que senhas repetidas sejam
-identificadas por inspeção do banco.
+O caminho de um cadastro de restaurante:
 
-### Criação do esquema
+```mermaid
+sequenceDiagram
+    participant Cliente
+    participant REST as RestauranteApiController
+    participant CTR as RestauranteController
+    participant UC as CadastrarRestauranteUseCase
+    participant DOM as Restaurante
+    participant GW as RestauranteGateway
+    participant DS as JpaRestauranteDataSource
+    Cliente->>REST: POST /api/v1/restaurantes
+    REST->>REST: valida o corpo (@Valid)
+    REST->>CTR: cadastrar(dto)
+    CTR->>UC: monta gateways e caso de uso, run(dto)
+    UC->>UC: abre a transação e confere o dono
+    UC->>DOM: Restaurante.create(...)
+    DOM-->>UC: se valida, ou lança exceção
+    UC->>GW: incluir(restaurante)
+    GW->>DS: incluir(dados)
+    DS-->>GW: dados gravados, com id e datas
+    GW-->>UC: entidade
+    UC-->>CTR: entidade
+    CTR-->>REST: RestaurantePresenter → resposta
+    REST-->>Cliente: 201 Created + Location
+```
 
-A criação das tabelas é responsabilidade do banco, não da aplicação. No perfil
-`docker`, o Hibernate opera em modo `validate`: confere se a estrutura corresponde
-ao mapeamento das entidades, sem criá-la nem alterá-la.
+O material não resolve alguns problemas que a Clean Architecture cria, e cada um ganhou uma solução própria:
+- a transação virou a porta `ITransactionManager`, implementada com `TransactionTemplate`;
+- a senha e o token também viraram portas (`IPasswordEncoder`, `ITokenGenerator`);
+- as datas de auditoria ficam na infraestrutura e voltam ao domínio pela fábrica com id;
+- o data source atualiza a entidade carregada do banco, para não perder a data de criação;
+- os DTOs de requisição conferem formato e presença, e as entidades conferem as regras.
 
-Assim a estrutura do banco é um artefato explícito e versionado, e não efeito
-colateral do mapeamento objeto-relacional. Como consequência, qualquer divergência
-entre o script e as entidades impede a aplicação de iniciar, apontando o campo
-responsável.
+## Modelo de dados
 
-### Exclusão física
+```mermaid
+erDiagram
+    TIPO_USUARIO ||--o{ USUARIO : classifica
+    USUARIO ||--o{ RESTAURANTE : "é dono de"
+    RESTAURANTE ||--|{ HORARIO_FUNCIONAMENTO : "abre em"
+    RESTAURANTE ||--o{ ITEM_CARDAPIO : vende
+    TIPO_USUARIO {
+        bigint id PK
+        varchar nome UK
+        varchar codigo UK
+    }
+    USUARIO {
+        bigint id PK
+        varchar nome
+        varchar email UK
+        varchar login UK
+        varchar senha
+        varchar documento UK
+        bigint tipo_usuario_id FK
+        varchar endereco_campos
+        datetime removido_em
+    }
+    RESTAURANTE {
+        bigint id PK
+        varchar nome
+        varchar tipo_cozinha
+        varchar endereco_campos
+        bigint dono_id FK
+        datetime removido_em
+    }
+    HORARIO_FUNCIONAMENTO {
+        bigint id PK
+        bigint restaurante_id FK
+        varchar dia_semana
+        time abertura
+        time fechamento
+    }
+    ITEM_CARDAPIO {
+        bigint id PK
+        bigint restaurante_id FK
+        varchar nome
+        varchar descricao
+        decimal preco
+        boolean apenas_no_local
+        varchar caminho_foto
+        datetime removido_em
+        tinyint ativo_marcador
+    }
+```
 
-A exclusão lógica foi avaliada e descartada. Manter o registro marcado como inativo
-preservaria o e-mail ocupado na restrição de unicidade, impedindo que a mesma
-pessoa se recadastrasse. Contornar isso exigiria limpar o e-mail na exclusão ou
-adotar restrição condicional.
+Usuário, restaurante e item têm `data_criacao` e `data_ultima_alteracao`, preenchidas pela auditoria do Spring
+Data. O schema vem do script [`docker/mysql/init/01-schema.sql`](docker/mysql/init/01-schema.sql); o Hibernate
+só confere o mapeamento.
 
-### Padrões aplicados
+- As tabelas usam `utf8mb4_unicode_ci`, que compara sem diferenciar maiúsculas, acentos e espaço no fim. É o
+  que faz `Maria@Exemplo.com` colidir com `maria@exemplo.com`.
+- Uma regra `CHECK` exige todos os dados de um usuário ativo. As colunas aceitam nulo só por causa da
+  anonimização.
+- `ativo_marcador` é gerada pelo próprio MySQL: vale 1 para o item ativo e fica nula quando ele é removido.
+  Na restrição única `(restaurante_id, nome, ativo_marcador)`, itens removidos nunca colidem.
+- As chaves estrangeiras bloqueiam a exclusão do pai; só os turnos saem em cascata com o restaurante.
+- Os índices de `dono_id`, `tipo_cozinha`, `restaurante_id` e `tipo_usuario_id` atendem as consultas da
+  aplicação. O [EXPLAIN antes e depois dos índices](docs/explain.md) mostra o ganho em cada uma.
 
-**Factory Method** — o campo `tipo` do cadastro determina qual subclasse
-instanciar. A decisão fica isolada em `UsuarioFactory`; o serviço lida apenas com
-`Usuario` e não conhece as subclasses.
+## Decisões principais
 
-**Injeção de dependência por construtor** — todas as dependências chegam em campos
-finais. Não há como construir uma classe em estado incompleto, e os serviços podem
-ser testados sem subir o contexto do Spring.
+- **MySQL em todo lugar.** O H2 da Fase 1 saiu: os testes de integração usam o MySQL 8.4 do Testcontainers, com
+  o mesmo script do compose. Regras como a colação e a coluna gerada só existem no MySQL.
+- **Exclusão conforme a natureza do dado.** Usuário é dado pessoal: é anonimizado, com base na LGPD, e o e-mail,
+  o login e o documento ficam livres para um novo cadastro. Restaurante e item são dados de negócio, que
+  pedidos e avaliações das próximas fases vão referenciar: exclusão lógica. Tipo de usuário é referência:
+  exclusão física, bloqueada se estiver em uso.
+- **Tipo de usuário é tabela; tipo de cozinha é enum.** Vira tabela o que o negócio precisa gerenciar com o
+  sistema rodando; fica enum o que só muda junto com o código.
+- **Os tipos de sistema são reconhecidos pelo código, não pelo nome.** Por isso podem ser renomeados, e a troca
+  de tipo acontece na mesma conta.
+- **Horários como turnos.** Cada turno vira um intervalo em minutos da semana, comparado como num relógio que dá
+  a volta, para encontrar sobreposição até na passagem de domingo para segunda.
+- **Contrato da Fase 1 preservado.** A collection da Fase 1 roda contra a Fase 2 com três ajustes, descritos na
+  própria collection.
+- **Desempenho.** Associações LAZY, sem sessão aberta durante a serialização, e a listagem de restaurantes com
+  um número fixo de consultas, qualquer que seja o tamanho da página (há um teste que conta).
 
----
-
-## Verificação
-
-O script `verificar-api.sh` exercita todos os endpoints e confere tanto os códigos
-de status quanto o formato das respostas.
+## Testes
 
 ```bash
-chmod +x verificar-api.sh
-./verificar-api.sh
+./mvnw verify
 ```
 
-São 29 verificações, incluindo a ausência do campo de senha nas respostas, a
-presença dos campos do ProblemDetail nos erros e os metadados de paginação na v2.
-O script remove ao final os registros que criou, podendo ser repetido sem deixar
-resíduo.
+| Nível | Ferramenta | O que cobre |
+|---|---|---|
+| Unitário | JUnit 6, AssertJ, Mockito | Entidades, objetos de valor, casos de uso (com mocks), gateways, presenters e controllers |
+| Integração | Testcontainers (MySQL 8.4), `@SpringBootTest`, REST-Assured | Endpoints, formato dos erros, mapeamento, consultas e restrições do banco |
+| Arquitetura | ArchUnit | Direção das dependências entre as camadas |
+| Aceitação | Postman + Newman | A collection inteira contra o docker compose |
 
-Testes automatizados:
+- **Cobertura:** dois cortes travam o build, cada um com 80% de linhas e de ramos: o dos testes unitários sobre
+  o núcleo (`domain`, `application` e `interfaceadapter`) e o total. Hoje o núcleo está em 100% e o total acima
+  de 99%.
+- **Catálogo de cenários:** os 175 cenários de [`docs/catalogo-de-cenarios.md`](docs/catalogo-de-cenarios.md)
+  foram escritos antes do código. O ID de cada um aparece no nome do teste que o comprova, na descrição da
+  requisição da collection e na [matriz](docs/matriz-de-evidencias.md).
+- **TDD:** no histórico do git, o commit dos testes de cada parte vem antes do commit da implementação.
+- **CI:** a cada push, o GitHub Actions roda dois jobs. Um executa o `mvn verify`; o outro sobe o docker compose
+  a partir do `.env.example` e roda a collection duas vezes seguidas com o Newman.
+
+## Collection do Postman
+
+[`postman/tech-challenge-fase-2.postman_collection.json`](postman/tech-challenge-fase-2.postman_collection.json),
+com o ambiente `Local`:
+
+- Pastas 1 a 8: a collection da Fase 1, rodando contra a Fase 2.
+- Pastas 9 em diante: tipos de usuário, troca de tipo, restaurantes e itens do cardápio.
+
+Cada requisição tem verificações e cita os cenários do catálogo que cobre. Cada bloco cria os próprios dados
+e os exclui no fim, então a collection pode rodar quantas vezes for preciso.
+
+No Postman: importe a collection e o ambiente e rode no Runner, na ordem. Pelo terminal:
 
 ```bash
-./mvnw test
+npx newman run postman/tech-challenge-fase-2.postman_collection.json -e postman/Local.postman_environment.json
 ```
-
----
 
 ## Solução de problemas
 
-### `Permission denied` ao ler o script de esquema
+### A aplicação não sobe e o log pede a `JWT_CHAVE`
 
 ```
-/docker-entrypoint-initdb.d/01-schema.sql: Permission denied
+Defina a variável de ambiente JWT_CHAVE com a chave de assinatura do token.
 ```
 
-O contêiner do MySQL aborta a inicialização e reinicia. Na segunda tentativa sobe
-normalmente, **mas sem a tabela** — o passo de inicialização já foi marcado como
-concluído. A aplicação então falha na validação do esquema e entra em laço de
-reinício.
+O `.env` não tem a chave, ou ela tem menos de 32 caracteres. Copie a linha `JWT_CHAVE` do `.env.example`, ou
+gere uma com `openssl rand -base64 32`, e suba de novo.
 
-O arquivo precisa ser legível por todos; o processo dentro do contêiner executa sob
-outro usuário.
+### Mudanças no schema não aparecem
+
+O MySQL só executa o script de `docker/mysql/init` na primeira subida, com o volume vazio. Depois de atualizar
+o projeto:
+
+```bash
+docker compose down -v
+docker compose up -d --build --wait
+```
+
+O `down -v` apaga os dados do banco.
+
+### `Permission denied` ao ler o script do schema
+
+O processo do MySQL dentro do contêiner roda com outro usuário e precisa ler o arquivo:
 
 ```bash
 chmod 644 docker/mysql/init/*.sql
 docker compose down -v
-docker compose up --build
+docker compose up -d --build --wait
 ```
 
-### `address already in use` na porta 8080
+### `address already in use` na porta 8080 ou 3307
 
-Outra aplicação ocupa a porta — com frequência, uma execução local via
-`./mvnw spring-boot:run`.
-
-```bash
-lsof -i :8080
-```
-
-Encerre o processo indicado, ou altere `APP_PORT` no `.env`.
-
-### `UnknownHostException: mysql`
-
-A aplicação não resolve o nome do serviço de banco. Ocorre quando uma subida
-anterior falhou parcialmente e os contêineres ficaram em redes distintas.
-
-```bash
-docker compose down
-docker compose up
-```
-
-O `down` remove contêineres e rede em conjunto; na subida seguinte ambos entram na
-mesma rede recém-criada.
-
-### Alterações no esquema não surtem efeito
-
-O MySQL executa os scripts de `/docker-entrypoint-initdb.d/` apenas na **primeira**
-inicialização, com o volume ainda vazio.
-
-```bash
-docker compose down -v
-docker compose up --build
-```
-
-> `docker compose down -v` apaga os dados do banco.
-
----
-
-## Melhorias futuras
-
-- **Autenticação com JWT** via Spring Security e, em conjunto, migração para
-  identificadores não sequenciais. O risco de enumeração de recursos foi avaliado:
-  identificadores sequenciais permitem inferir o volume de registros, mas nesta
-  fase os endpoints não possuem controle de acesso — sem autorização, ocultar o
-  identificador não protege o recurso. A exposição decorre da ausência de
-  autenticação, não do formato da chave.
-- **Exclusão lógica**, com tratamento do conflito com a unicidade de e-mail.
-- **Endereço como entidade própria**, permitindo múltiplos endereços por usuário.
-- **Migrações versionadas** com Flyway, no lugar do script único de inicialização.
-- **Ampliação da cobertura de testes** para as camadas de controller e repositório.
-- **Separação de dependências por perfil de build**, mantendo H2 e o respectivo
-  console fora do artefato de produção.
+Outro processo usa a porta, muitas vezes uma execução local com `./mvnw spring-boot:run`. Veja qual é com
+`lsof -i :8080` e encerre o processo, ou troque `APP_PORT` ou `DB_EXTERNAL_PORT` no `.env`.
 
 ---
 
 ## Autor
 
-**Thiago Wippel Chaves** — RM375015
-Pós Tech FIAP · Arquitetura e Desenvolvimento em Java · Fase 1
+**Thiago Wippel Chaves** · RM375015
+Pós Tech FIAP · Arquitetura e Desenvolvimento em Java · Fase 2
