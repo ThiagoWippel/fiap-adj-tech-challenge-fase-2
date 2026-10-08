@@ -41,4 +41,11 @@ class CodificadorDeSenhaBCryptTest {
         assertThat(codificador.confere("SenhaSegura123", hash)).isTrue();
         assertThat(codificador.confere("SenhaErrada123", hash)).isFalse();
     }
+
+    @Test
+    @DisplayName("LOG-03 · sem hash para comparar (login inexistente), faz a comparação de descarte e recusa")
+    void deveRecusarQuandoNaoHouverHash() {
+        /* act + assert */
+        assertThat(codificador.confere("SenhaSegura123", null)).isFalse();
+    }
 }
