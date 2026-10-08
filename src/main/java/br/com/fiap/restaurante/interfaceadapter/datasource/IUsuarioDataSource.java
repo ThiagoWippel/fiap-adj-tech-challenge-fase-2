@@ -1,0 +1,38 @@
+package br.com.fiap.restaurante.interfaceadapter.datasource;
+
+import br.com.fiap.restaurante.application.dto.Pagina;
+import br.com.fiap.restaurante.application.dto.PedidoDePagina;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Origem de dados de usuários, implementada na infraestrutura. As buscas
+ * consideram só usuários ativos.
+ */
+public interface IUsuarioDataSource {
+
+    DadosUsuario incluir(DadosUsuario usuario);
+
+    DadosUsuario atualizar(DadosUsuario usuario);
+
+    Optional<DadosUsuario> buscarPorId(Long id);
+
+    Optional<DadosUsuario> buscarPorLogin(String login);
+
+    List<DadosUsuario> buscarPorNome(String nome);
+
+    Pagina<DadosUsuario> buscarPorNome(String nome, PedidoDePagina pedido);
+
+    boolean existeEmail(String email);
+
+    boolean existeEmailEmOutroUsuario(String email, Long id);
+
+    boolean existeLogin(String login);
+
+    boolean existeLoginEmOutroUsuario(String login, Long id);
+
+    boolean existeDocumento(String documento);
+
+    void anonimizar(Long id);
+}

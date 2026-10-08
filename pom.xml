@@ -20,6 +20,7 @@
 		<archunit.version>1.5.1</archunit.version>
 		<rest-assured.version>6.0.1</rest-assured.version>
 		<jacoco.version>0.8.15</jacoco.version>
+		<nimbus-jose-jwt.version>10.10</nimbus-jose-jwt.version>
 		<!-- Cobertura mínima de linhas e de ramos -->
 		<cobertura.minima>0.80</cobertura.minima>
 	</properties>
@@ -60,6 +61,13 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-crypto</artifactId>
+		</dependency>
+
+		<!-- Emissão do JWT no login, sem o Spring Security -->
+		<dependency>
+			<groupId>com.nimbusds</groupId>
+			<artifactId>nimbus-jose-jwt</artifactId>
+			<version>${nimbus-jose-jwt.version}</version>
 		</dependency>
 
 		<!-- MySQL em todos os perfis -->
