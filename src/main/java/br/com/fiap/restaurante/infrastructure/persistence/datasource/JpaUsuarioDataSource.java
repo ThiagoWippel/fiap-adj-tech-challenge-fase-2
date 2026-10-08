@@ -9,9 +9,6 @@ import br.com.fiap.restaurante.infrastructure.persistence.repository.UsuarioRepo
 import br.com.fiap.restaurante.interfaceadapter.datasource.DadosEndereco;
 import br.com.fiap.restaurante.interfaceadapter.datasource.DadosUsuario;
 import br.com.fiap.restaurante.interfaceadapter.datasource.IUsuarioDataSource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -69,9 +66,19 @@ public class JpaUsuarioDataSource implements IUsuarioDataSource {
 
     @Override
     public Pagina<DadosUsuario> buscarPorNome(String nome, PedidoDePagina pedido) {
-        Page<UsuarioEntity> pagina = usuarios.findByNomeContainingAndRemovidoEmIsNull(nome, paraPageRequest(pedido));
-        return new Pagina<>(pagina.getContent().stream().map(JpaUsuarioDataSource::paraDados).toList(),
-                pagina.getNumber(), pagina.getSize(), pagina.getTotalElements(), pagina.getTotalPages());
+        return Paginas.paraPagina(usuarios.findByNomeContainingAndRemovidoEmIsNull(nome, Paginas.paraPageRequest(pedido)),
+                JpaUsuarioDataSource::paraDados);
+    }
+
+    @Override
+    public Pagina<DadosUsuario> buscarPorTipo(Long tipoId, PedidoDePagina pedido) {
+        return Paginas.paraPagina(usuarios.findByTipoIdAndRemovidoEmIsNull(tipoId, Paginas.paraPageRequest(pedido)),
+                JpaUsuarioDataSource::paraDados);
+    }
+
+    @Override
+    public long contarAtivosPorTipo(Long tipoId) {
+        return usuarios.countByTipoIdAndRemovidoEmIsNull(tipoId);
     }
 
     @Override
@@ -100,6 +107,11 @@ public class JpaUsuarioDataSource implements IUsuarioDataSource {
     }
 
     @Override
+    public boolean existeDocumentoEmOutroUsuario(String documento, Long id) {
+        return usuarios.existsByDocumentoAndIdNot(documento, id);
+    }
+
+    @Override
     public void anonimizar(Long id) {
         UsuarioEntity entidade = usuarios.findById(id).orElseThrow();
         entidade.anonimizar(LocalDateTime.now());
@@ -125,12 +137,5 @@ public class JpaUsuarioDataSource implements IUsuarioDataSource {
                 new DadosEndereco(endereco.getRua(), endereco.getNumero(), endereco.getComplemento(),
                         endereco.getBairro(), endereco.getCidade(), endereco.getEstado(), endereco.getCep()),
                 entidade.getDataCriacao(), entidade.getDataUltimaAlteracao());
-    }
-
-    private static PageRequest paraPageRequest(PedidoDePagina pedido) {
-        List<Sort.Order> ordens = pedido.ordenacao().stream()
-                .map(ordem -> ordem.crescente() ? Sort.Order.asc(ordem.campo()) : Sort.Order.desc(ordem.campo()))
-                .toList();
-        return PageRequest.of(pedido.numero(), pedido.tamanho(), Sort.by(ordens));
     }
 }

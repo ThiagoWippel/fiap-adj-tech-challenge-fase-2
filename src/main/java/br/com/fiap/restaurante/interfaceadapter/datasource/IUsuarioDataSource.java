@@ -34,5 +34,11 @@ public interface IUsuarioDataSource {
 
     boolean existeDocumento(String documento);
 
+    boolean existeDocumentoEmOutroUsuario(String documento, Long id);
+
+    long contarAtivosPorTipo(Long tipoId);
+
+    Pagina<DadosUsuario> buscarPorTipo(Long tipoId, PedidoDePagina pedido);
+
     void anonimizar(Long id);
 }

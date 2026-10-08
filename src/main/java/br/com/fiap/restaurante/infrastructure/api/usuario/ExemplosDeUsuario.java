@@ -26,6 +26,27 @@ final class ExemplosDeUsuario {
               "dataUltimaAlteracao": "2026-10-08T10:30:00"
             }""";
 
+    static final String USUARIO_DONO = """
+            {
+              "id": 1,
+              "nome": "Maria Silva",
+              "email": "maria.silva@exemplo.com",
+              "login": "maria.silva",
+              "tipo": "DONO_RESTAURANTE",
+              "documento": "11222333000181",
+              "endereco": {
+                "rua": "Rua das Flores",
+                "numero": "123",
+                "complemento": "Apto 45",
+                "bairro": "Centro",
+                "cidade": "Itajaí",
+                "estado": "SC",
+                "cep": "88301000"
+              },
+              "dataCriacao": "2026-10-08T10:30:00",
+              "dataUltimaAlteracao": "2026-10-09T08:15:00"
+            }""";
+
     static final String LISTA = "[" + USUARIO + "]";
 
     static final String PAGINA = "{\"conteudo\": " + LISTA + """

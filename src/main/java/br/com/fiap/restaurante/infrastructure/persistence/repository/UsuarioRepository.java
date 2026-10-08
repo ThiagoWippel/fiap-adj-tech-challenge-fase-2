@@ -37,4 +37,11 @@ public interface UsuarioRepository extends JpaRepository<UsuarioEntity, Long> {
     boolean existsByLoginAndIdNot(String login, Long id);
 
     boolean existsByDocumento(String documento);
+
+    boolean existsByDocumentoAndIdNot(String documento, Long id);
+
+    long countByTipoIdAndRemovidoEmIsNull(Long tipoId);
+
+    @EntityGraph(attributePaths = "tipo")
+    Page<UsuarioEntity> findByTipoIdAndRemovidoEmIsNull(Long tipoId, Pageable paginacao);
 }

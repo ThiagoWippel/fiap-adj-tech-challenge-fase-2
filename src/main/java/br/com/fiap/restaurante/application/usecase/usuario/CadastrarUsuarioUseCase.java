@@ -2,11 +2,11 @@ package br.com.fiap.restaurante.application.usecase.usuario;
 
 import br.com.fiap.restaurante.application.dto.NovoUsuarioDTO;
 import br.com.fiap.restaurante.application.exception.ConflitoDeDadosException;
-import br.com.fiap.restaurante.application.exception.RecursoNaoEncontradoException;
 import br.com.fiap.restaurante.application.gateway.ITipoUsuarioGateway;
 import br.com.fiap.restaurante.application.gateway.IUsuarioGateway;
 import br.com.fiap.restaurante.application.port.IPasswordEncoder;
 import br.com.fiap.restaurante.application.port.ITransactionManager;
+import br.com.fiap.restaurante.application.usecase.tipousuario.BuscarTipoUsuarioPorIdUseCase;
 import br.com.fiap.restaurante.domain.entity.TipoUsuario;
 import br.com.fiap.restaurante.domain.entity.Usuario;
 import br.com.fiap.restaurante.domain.valueobject.Documento;
@@ -40,8 +40,7 @@ public class CadastrarUsuarioUseCase {
     public Usuario run(NovoUsuarioDTO dados) {
         return transacao.executar(() -> {
             TipoUsuario tipo = tipos.buscarPorCodigo(dados.tipo())
-                    .orElseThrow(() -> new RecursoNaoEncontradoException(
-                            "Tipo de usuário " + dados.tipo() + " não encontrado."));
+                    .orElseThrow(() -> BuscarTipoUsuarioPorIdUseCase.tipoNaoEncontrado(dados.tipo()));
             Documento documento = documentoExigidoPelo(tipo, dados);
             Endereco endereco = dados.endereco() == null ? null : dados.endereco().paraEndereco();
             SenhaEmTexto senha = new SenhaEmTexto(dados.senha());

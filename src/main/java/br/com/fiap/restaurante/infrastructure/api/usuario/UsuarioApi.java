@@ -15,6 +15,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.List;
 
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DADOS_INVALIDOS;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DOCUMENTO_DO_TIPO;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DOCUMENTO_EM_USO;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.EMAIL_EM_USO;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.REGRA_DE_NEGOCIO;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.SENHA_ATUAL_INCORRETA;
@@ -94,6 +96,24 @@ interface UsuarioApi {
             content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(USUARIO_NAO_ENCONTRADO)))
     ResponseEntity<Void> trocarSenha(@Parameter(description = "Id do usuário", example = "1") Long id,
                                      TrocarSenhaRequest requisicao);
+
+    @Operation(summary = "Troca o tipo do usuário", description = """
+            A troca acontece na mesma conta: id, login, senha e data de criação continuam iguais; mudam o tipo \
+            e o documento. Dono de Restaurante informa CNPJ; os demais tipos, CPF. O documento antigo é \
+            descartado. Pedir o tipo e o documento que o usuário já tem devolve 200 sem alterar nada.""")
+    @ApiResponse(responseCode = "200", description = "Tipo trocado",
+            content = @Content(mediaType = JSON, schema = @Schema(implementation = UsuarioResponse.class),
+                    examples = @ExampleObject(ExemplosDeUsuario.USUARIO_DONO)))
+    @ApiResponse(responseCode = "400", description = "Documento ausente, inválido ou incompatível com o tipo",
+            content = @Content(mediaType = PROBLEMA, examples = {
+                    @ExampleObject(name = "Documento do tipo", value = DOCUMENTO_DO_TIPO),
+                    @ExampleObject(name = "Campos inválidos", value = DADOS_INVALIDOS)}))
+    @ApiResponse(responseCode = "404", description = "Usuário ou tipo inexistente",
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(USUARIO_NAO_ENCONTRADO)))
+    @ApiResponse(responseCode = "409", description = "Documento usado por outro usuário",
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(DOCUMENTO_EM_USO)))
+    ResponseEntity<UsuarioResponse> trocarTipo(@Parameter(description = "Id do usuário", example = "1") Long id,
+                                               TrocarTipoRequest requisicao);
 
     @Operation(summary = "Exclui um usuário", description = """
             Anonimiza o registro: o nome vira "Usuário removido" e os dados pessoais são apagados. Depois \

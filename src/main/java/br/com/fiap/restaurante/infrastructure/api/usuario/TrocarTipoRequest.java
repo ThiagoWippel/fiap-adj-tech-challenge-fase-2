@@ -1,0 +1,23 @@
+package br.com.fiap.restaurante.infrastructure.api.usuario;
+
+import br.com.fiap.restaurante.application.dto.TrocaDeTipoDTO;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+
+/**
+ * Corpo da troca de tipo: o código do novo tipo e o documento que ele exige. Se
+ * o documento é CPF ou CNPJ sai do número de dígitos.
+ */
+public record TrocarTipoRequest(
+        @Schema(example = "DONO_RESTAURANTE", description = "Código do novo tipo")
+        @NotBlank(message = "O tipo é obrigatório.")
+        String tipo,
+
+        @Schema(example = "11.222.333/0001-81", description = "CNPJ para DONO_RESTAURANTE, CPF para os demais")
+        @NotBlank(message = "O documento é obrigatório.")
+        String documento) {
+
+    public TrocaDeTipoDTO paraDTO(Long id) {
+        return new TrocaDeTipoDTO(id, tipo, documento);
+    }
+}

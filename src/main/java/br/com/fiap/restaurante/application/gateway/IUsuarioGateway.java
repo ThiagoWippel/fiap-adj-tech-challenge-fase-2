@@ -35,6 +35,12 @@ public interface IUsuarioGateway {
 
     boolean existeDocumento(String numero);
 
+    boolean existeDocumentoEmOutroUsuario(String numero, Long id);
+
+    long contarAtivosPorTipo(Long tipoId);
+
+    Pagina<Usuario> buscarPorTipo(Long tipoId, PedidoDePagina pedido);
+
     /** Apaga os dados pessoais e mantém o registro, para preservar o histórico. */
     void anonimizar(Long id);
 }

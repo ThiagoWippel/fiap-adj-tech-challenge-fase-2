@@ -4,6 +4,7 @@ import br.com.fiap.restaurante.application.dto.AtualizacaoDeUsuarioDTO;
 import br.com.fiap.restaurante.application.dto.NovoUsuarioDTO;
 import br.com.fiap.restaurante.application.dto.PedidoDePagina;
 import br.com.fiap.restaurante.application.dto.TrocaDeSenhaDTO;
+import br.com.fiap.restaurante.application.dto.TrocaDeTipoDTO;
 import br.com.fiap.restaurante.application.port.IPasswordEncoder;
 import br.com.fiap.restaurante.application.port.ITransactionManager;
 import br.com.fiap.restaurante.application.usecase.usuario.AtualizarUsuarioUseCase;
@@ -13,6 +14,7 @@ import br.com.fiap.restaurante.application.usecase.usuario.BuscarUsuariosPorNome
 import br.com.fiap.restaurante.application.usecase.usuario.CadastrarUsuarioUseCase;
 import br.com.fiap.restaurante.application.usecase.usuario.ExcluirUsuarioUseCase;
 import br.com.fiap.restaurante.application.usecase.usuario.TrocarSenhaUseCase;
+import br.com.fiap.restaurante.application.usecase.usuario.TrocarTipoDoUsuarioUseCase;
 import br.com.fiap.restaurante.interfaceadapter.datasource.ITipoUsuarioDataSource;
 import br.com.fiap.restaurante.interfaceadapter.datasource.IUsuarioDataSource;
 import br.com.fiap.restaurante.interfaceadapter.gateway.TipoUsuarioGateway;
@@ -76,6 +78,12 @@ public class UsuarioController {
 
     public void trocarSenha(TrocaDeSenhaDTO dados) {
         TrocarSenhaUseCase.create(usuarioGateway(), senhas, transacao).run(dados);
+    }
+
+    public UsuarioResponse trocarTipo(TrocaDeTipoDTO dados) {
+        var useCase = TrocarTipoDoUsuarioUseCase.create(usuarioGateway(),
+                TipoUsuarioGateway.create(tipoUsuarioDataSource), transacao);
+        return UsuarioPresenter.paraResposta(useCase.run(dados));
     }
 
     public void excluir(Long id) {

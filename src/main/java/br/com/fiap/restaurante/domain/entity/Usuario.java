@@ -63,6 +63,18 @@ public class Usuario {
         return tipo.ehDonoDeRestaurante();
     }
 
+    /**
+     * Troca o tipo na mesma conta. O documento vem junto porque o novo tipo pode
+     * exigir outro: o documento antigo é descartado.
+     */
+    public void trocarTipo(TipoUsuario novoTipo, Documento novoDocumento) {
+        definirTipo(novoTipo, novoDocumento);
+    }
+
+    public boolean temTipoEDocumento(TipoUsuario outroTipo, Documento outroDocumento) {
+        return tipo.equals(outroTipo) && documento.equals(outroDocumento);
+    }
+
     public void setNome(String nome) {
         if (nome == null || nome.trim().length() < 3 || nome.trim().length() > 120) {
             throw new ValidacaoDeDominioException("O nome deve ter entre 3 e 120 caracteres.");

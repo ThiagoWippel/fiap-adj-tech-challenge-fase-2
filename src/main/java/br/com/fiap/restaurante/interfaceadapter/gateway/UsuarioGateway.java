@@ -86,6 +86,21 @@ public class UsuarioGateway implements IUsuarioGateway {
     }
 
     @Override
+    public boolean existeDocumentoEmOutroUsuario(String numero, Long id) {
+        return dataSource.existeDocumentoEmOutroUsuario(numero, id);
+    }
+
+    @Override
+    public long contarAtivosPorTipo(Long tipoId) {
+        return dataSource.contarAtivosPorTipo(tipoId);
+    }
+
+    @Override
+    public Pagina<Usuario> buscarPorTipo(Long tipoId, PedidoDePagina pedido) {
+        return dataSource.buscarPorTipo(tipoId, pedido).map(UsuarioGateway::paraUsuario);
+    }
+
+    @Override
     public void anonimizar(Long id) {
         dataSource.anonimizar(id);
     }

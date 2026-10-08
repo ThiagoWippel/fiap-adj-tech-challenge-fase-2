@@ -89,6 +89,66 @@ public final class ExemplosDeProblema {
               "momento": "2026-10-08T10:30:00"
             }""";
 
+    public static final String TIPO_INEXISTENTE = """
+            {
+              "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+              "title": "Recurso não encontrado",
+              "status": 404,
+              "detail": "Tipo de usuário 99 não encontrado.",
+              "instance": "/api/v1/tipos-usuario/99",
+              "momento": "2026-10-08T10:30:00"
+            }""";
+
+    public static final String NOME_DE_TIPO_EM_USO = """
+            {
+              "type": "http://localhost:8080/problemas/conflito-de-dados",
+              "title": "Conflito de dados",
+              "status": 409,
+              "detail": "Já existe um tipo de usuário com o nome Entregador.",
+              "instance": "/api/v1/tipos-usuario",
+              "momento": "2026-10-08T10:30:00"
+            }""";
+
+    public static final String TIPO_EM_USO = """
+            {
+              "type": "http://localhost:8080/problemas/conflito-de-dados",
+              "title": "Conflito de dados",
+              "status": 409,
+              "detail": "O tipo Entregador não pode ser excluído: 2 usuários ativos o usam.",
+              "instance": "/api/v1/tipos-usuario/3",
+              "momento": "2026-10-08T10:30:00"
+            }""";
+
+    public static final String TIPO_DE_SISTEMA = """
+            {
+              "type": "http://localhost:8080/problemas/conflito-de-dados",
+              "title": "Conflito de dados",
+              "status": 409,
+              "detail": "O tipo Cliente é um tipo de sistema e não pode ser excluído.",
+              "instance": "/api/v1/tipos-usuario/1",
+              "momento": "2026-10-08T10:30:00"
+            }""";
+
+    public static final String DOCUMENTO_DO_TIPO = """
+            {
+              "type": "http://localhost:8080/problemas/regra-de-negocio",
+              "title": "Regra de negócio violada",
+              "status": 400,
+              "detail": "Usuário do tipo Dono de Restaurante deve informar CNPJ.",
+              "instance": "/api/v1/usuarios/1/tipo",
+              "momento": "2026-10-08T10:30:00"
+            }""";
+
+    public static final String DOCUMENTO_EM_USO = """
+            {
+              "type": "http://localhost:8080/problemas/conflito-de-dados",
+              "title": "Conflito de dados",
+              "status": 409,
+              "detail": "O documento informado já está cadastrado.",
+              "instance": "/api/v1/usuarios/1/tipo",
+              "momento": "2026-10-08T10:30:00"
+            }""";
+
     private ExemplosDeProblema() {
     }
 }
