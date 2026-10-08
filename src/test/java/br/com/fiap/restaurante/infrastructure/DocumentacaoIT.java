@@ -61,7 +61,7 @@ class DocumentacaoIT {
         }));
 
         /* assert */
-        assertThat(operacoes).hasSize(21);
+        assertThat(operacoes).hasSize(26);
         assertThat(semExemplo).isEmpty();
     }
 

@@ -4,8 +4,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * Deixa o banco dos testes de integração como o script de schema criou: sem
- * restaurantes nem usuários, só com os dois tipos de sistema e com os nomes
- * originais.
+ * itens, restaurantes nem usuários, só com os dois tipos de sistema e com os
+ * nomes originais.
  */
 public final class LimpezaDoBanco {
 
@@ -13,6 +13,7 @@ public final class LimpezaDoBanco {
     }
 
     public static void limpar(JdbcTemplate jdbc) {
+        jdbc.update("DELETE FROM item_cardapio");
         // Os horários saem junto com o restaurante (ON DELETE CASCADE)
         jdbc.update("DELETE FROM restaurante");
         jdbc.update("DELETE FROM usuario");

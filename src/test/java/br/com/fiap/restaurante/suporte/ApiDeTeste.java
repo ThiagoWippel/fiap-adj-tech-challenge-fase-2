@@ -78,6 +78,26 @@ public final class ApiDeTeste {
                 }""".formatted(nome, ENDERECO, tipoCozinha, donoId, horarios);
     }
 
+    /** Cadastra o item no restaurante pela API e devolve o id. */
+    public long cadastrarItem(long restauranteId, String corpo) {
+        return requisicao().body(corpo)
+                .post("/api/v1/restaurantes/{id}/itens-cardapio", restauranteId)
+                .then().statusCode(201)
+                .extract().jsonPath().getLong("id");
+    }
+
+    /** O preço vai como número JSON, do jeito que é escrito aqui (39.9, 42.00...). */
+    public static String item(String nome, String preco, boolean apenasNoLocal, String caminhoFoto) {
+        return """
+                {
+                  "nome": "%s",
+                  "descricao": "Prato da casa, servido com acompanhamentos.",
+                  "preco": %s,
+                  "apenasNoLocal": %s,
+                  "caminhoFoto": "%s"
+                }""".formatted(nome, preco, apenasNoLocal, caminhoFoto);
+    }
+
     public static String cliente(String nome, String email, String login, String cpf) {
         return usuarioComCpf("CLIENTE", nome, email, login, cpf);
     }

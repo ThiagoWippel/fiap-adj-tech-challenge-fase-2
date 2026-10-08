@@ -1,11 +1,13 @@
 package br.com.fiap.restaurante.suporte;
 
 import br.com.fiap.restaurante.interfaceadapter.datasource.DadosEndereco;
+import br.com.fiap.restaurante.interfaceadapter.datasource.DadosItemCardapio;
 import br.com.fiap.restaurante.interfaceadapter.datasource.DadosRestaurante;
 import br.com.fiap.restaurante.interfaceadapter.datasource.DadosTipoUsuario;
 import br.com.fiap.restaurante.interfaceadapter.datasource.DadosTurno;
 import br.com.fiap.restaurante.interfaceadapter.datasource.DadosUsuario;
 
+import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -37,6 +39,11 @@ public final class DadosDeExemplo {
                 List.of(new DadosTurno("SEXTA", LocalTime.of(18, 0), LocalTime.of(2, 0)),
                         new DadosTurno("SEGUNDA", LocalTime.of(11, 0), LocalTime.of(15, 0))),
                 ana(), CRIACAO, ALTERACAO);
+    }
+
+    public static DadosItemCardapio feijoada() {
+        return new DadosItemCardapio(5L, 9L, "Feijoada", "Feijoada completa com farofa e couve.",
+                new BigDecimal("39.90"), true, "fotos/feijoada.jpg", CRIACAO, ALTERACAO);
     }
 
     private static DadosEndereco endereco() {

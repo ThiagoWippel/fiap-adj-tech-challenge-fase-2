@@ -98,16 +98,19 @@ class RestauranteGatewayTest {
     }
 
     @Test
-    @DisplayName("EXC-07 · a contagem por dono e a remoção são repassadas à origem de dados")
+    @DisplayName("EXC-07 · ITE-22 · a contagem por dono, a verificação de ativo e a remoção são repassadas")
     void deveRepassarContagemERemocao() {
         /* arrange */
         when(dataSource.contarAtivosPorDono(8L)).thenReturn(2L);
+        when(dataSource.existeAtivo(9L)).thenReturn(true);
 
         /* act */
         gateway.remover(9L);
 
         /* assert */
         assertThat(gateway.contarAtivosPorDono(8L)).isEqualTo(2L);
+        assertThat(gateway.existeAtivo(9L)).isTrue();
+        assertThat(gateway.existeAtivo(99L)).isFalse();
         verify(dataSource).remover(9L);
     }
 }

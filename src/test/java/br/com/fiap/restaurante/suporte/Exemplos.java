@@ -2,6 +2,7 @@ package br.com.fiap.restaurante.suporte;
 
 import br.com.fiap.restaurante.application.dto.EnderecoDTO;
 import br.com.fiap.restaurante.application.dto.TurnoDTO;
+import br.com.fiap.restaurante.domain.entity.ItemCardapio;
 import br.com.fiap.restaurante.domain.entity.Restaurante;
 import br.com.fiap.restaurante.domain.entity.TipoUsuario;
 import br.com.fiap.restaurante.domain.entity.Usuario;
@@ -9,9 +10,11 @@ import br.com.fiap.restaurante.domain.enums.DiaSemana;
 import br.com.fiap.restaurante.domain.enums.TipoCozinha;
 import br.com.fiap.restaurante.domain.valueobject.Documento;
 import br.com.fiap.restaurante.domain.valueobject.Endereco;
+import br.com.fiap.restaurante.domain.valueobject.Preco;
 import br.com.fiap.restaurante.domain.valueobject.QuadroDeHorarios;
 import br.com.fiap.restaurante.domain.valueobject.Turno;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -69,6 +72,12 @@ public final class Exemplos {
     public static Restaurante cantina() {
         return Restaurante.create(9L, "Cantina da Nona", endereco(), TipoCozinha.ITALIANA, horarios(), ana(),
                 CRIACAO, ALTERACAO);
+    }
+
+    /** Feijoada (item 5) da Cantina da Nona (restaurante 9). */
+    public static ItemCardapio feijoada() {
+        return ItemCardapio.create(5L, 9L, "Feijoada", "Feijoada completa com farofa e couve.",
+                new Preco(new BigDecimal("39.90")), true, "fotos/feijoada.jpg", CRIACAO, ALTERACAO);
     }
 
     public static Usuario joao() {
