@@ -24,6 +24,10 @@
             "description": "Busca de usuários com paginação"
         },
         {
+            "name": "Tipos de usuário",
+            "description": "Cadastro dos tipos de usuário e consulta dos usuários de cada tipo"
+        },
+        {
             "name": "Usuários",
             "description": "Cadastro, consulta, atualização, troca de senha e exclusão de usuários"
         },
@@ -352,6 +356,237 @@
                 }
             }
         },
+        "/api/v1/tipos-usuario/{id}": {
+            "get": {
+                "tags": [
+                    "Tipos de usuário"
+                ],
+                "summary": "Consulta um tipo de usuário pelo id",
+                "operationId": "buscarPorId_1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id do tipo",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 3
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tipo encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TipoUsuarioResponse"
+                                },
+                                "example": {
+                                    "id": 3,
+                                    "nome": "Entregador",
+                                    "codigo": "ENTREGADOR",
+                                    "sistema": false
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Tipo inexistente",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Tipo de usuário 99 não encontrado.",
+                                    "instance": "/api/v1/tipos-usuario/99",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Tipos de usuário"
+                ],
+                "summary": "Renomeia um tipo de usuário",
+                "description": "Muda só o nome; o código continua o mesmo. Os tipos de sistema também podem ser renomeados.",
+                "operationId": "renomear",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id do tipo",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 3
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TipoUsuarioRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Tipo renomeado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TipoUsuarioResponse"
+                                },
+                                "example": {
+                                    "id": 3,
+                                    "nome": "Entregador",
+                                    "codigo": "ENTREGADOR",
+                                    "sistema": false
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Nome ausente ou fora de 3 a 50 caracteres",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/dados-invalidos",
+                                    "title": "Dados inválidos",
+                                    "status": 400,
+                                    "detail": "Um ou mais campos da requisição não passaram na validação.",
+                                    "instance": "/api/v1/usuarios",
+                                    "momento": "2026-10-08T10:30:00",
+                                    "erros": [
+                                        {
+                                            "campo": "email",
+                                            "mensagem": "O e-mail informado não é válido."
+                                        },
+                                        {
+                                            "campo": "senha",
+                                            "mensagem": "A senha deve ter entre 8 e 72 caracteres."
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Tipo inexistente",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Tipo de usuário 99 não encontrado.",
+                                    "instance": "/api/v1/tipos-usuario/99",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Nome de outro tipo",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/conflito-de-dados",
+                                    "title": "Conflito de dados",
+                                    "status": 409,
+                                    "detail": "Já existe um tipo de usuário com o nome Entregador.",
+                                    "instance": "/api/v1/tipos-usuario",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Tipos de usuário"
+                ],
+                "summary": "Exclui um tipo de usuário",
+                "description": "A exclusão é definitiva. Cliente e Dono de Restaurante são tipos de sistema e não podem ser excluídos; um tipo usado por algum usuário ativo também não.",
+                "operationId": "excluir_1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id do tipo",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 3
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Tipo excluído"
+                    },
+                    "404": {
+                        "description": "Tipo inexistente",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Tipo de usuário 99 não encontrado.",
+                                    "instance": "/api/v1/tipos-usuario/99",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Tipo de sistema, ou em uso por usuários ativos",
+                        "content": {
+                            "application/problem+json": {
+                                "examples": {
+                                    "Em uso": {
+                                        "description": "Em uso",
+                                        "value": {
+                                            "type": "http://localhost:8080/problemas/conflito-de-dados",
+                                            "title": "Conflito de dados",
+                                            "status": 409,
+                                            "detail": "O tipo Entregador não pode ser excluído: 2 usuários ativos o usam.",
+                                            "instance": "/api/v1/tipos-usuario/3",
+                                            "momento": "2026-10-08T10:30:00"
+                                        }
+                                    },
+                                    "Tipo de sistema": {
+                                        "description": "Tipo de sistema",
+                                        "value": {
+                                            "type": "http://localhost:8080/problemas/conflito-de-dados",
+                                            "title": "Conflito de dados",
+                                            "status": 409,
+                                            "detail": "O tipo Cliente é um tipo de sistema e não pode ser excluído.",
+                                            "instance": "/api/v1/tipos-usuario/1",
+                                            "momento": "2026-10-08T10:30:00"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/usuarios": {
             "get": {
                 "tags": [
@@ -555,6 +790,175 @@
                 }
             }
         },
+        "/api/v1/tipos-usuario": {
+            "get": {
+                "tags": [
+                    "Tipos de usuário"
+                ],
+                "summary": "Lista os tipos de usuário",
+                "description": "Paginada: 10 por página por padrão, no máximo 50, em ordem de nome. O sort aceita id, nome e codigo.",
+                "operationId": "listar",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número da página, a partir de 0",
+                        "schema": {
+                            "type": "integer",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "description": "Itens por página, no máximo 50",
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Campo e direção, como nome,desc",
+                        "schema": {
+                            "type": "string",
+                            "default": "nome,asc"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Página de tipos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginaResponse"
+                                },
+                                "example": {
+                                    "conteudo": [
+                                        {
+                                            "id": 1,
+                                            "nome": "Cliente",
+                                            "codigo": "CLIENTE",
+                                            "sistema": true
+                                        },
+                                        {
+                                            "id": 2,
+                                            "nome": "Dono de Restaurante",
+                                            "codigo": "DONO_RESTAURANTE",
+                                            "sistema": true
+                                        },
+                                        {
+                                            "id": 3,
+                                            "nome": "Entregador",
+                                            "codigo": "ENTREGADOR",
+                                            "sistema": false
+                                        }
+                                    ],
+                                    "pagina": 0,
+                                    "tamanho": 10,
+                                    "totalElementos": 3,
+                                    "totalPaginas": 1,
+                                    "ultima": true
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Ordenação por campo não aceito",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/requisicao-invalida",
+                                    "title": "Requisição inválida",
+                                    "status": 400,
+                                    "detail": "Não é possível ordenar por senha. Campos aceitos: dataCriacao, dataUltimaAlteracao, email, id, login, nome.",
+                                    "instance": "/api/v2/usuarios",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Tipos de usuário"
+                ],
+                "summary": "Cadastra um tipo de usuário",
+                "description": "Recebe só o nome. O código é gerado a partir dele, sem acentos, em maiúsculas e com espaços trocados por sublinhado (\"Ajudante de Cozinha\" vira AJUDANTE_DE_COZINHA), e nunca muda. Nome e código são únicos, sem diferenciar maiúsculas nem acentos.",
+                "operationId": "cadastrar_1",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TipoUsuarioRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Tipo cadastrado. O cabeçalho Location aponta para ele.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TipoUsuarioResponse"
+                                },
+                                "example": {
+                                    "id": 3,
+                                    "nome": "Entregador",
+                                    "codigo": "ENTREGADOR",
+                                    "sistema": false
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Nome ausente ou fora de 3 a 50 caracteres",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/dados-invalidos",
+                                    "title": "Dados inválidos",
+                                    "status": 400,
+                                    "detail": "Um ou mais campos da requisição não passaram na validação.",
+                                    "instance": "/api/v1/usuarios",
+                                    "momento": "2026-10-08T10:30:00",
+                                    "erros": [
+                                        {
+                                            "campo": "email",
+                                            "mensagem": "O e-mail informado não é válido."
+                                        },
+                                        {
+                                            "campo": "senha",
+                                            "mensagem": "A senha deve ter entre 8 e 72 caracteres."
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Nome já usado, ou nome que gera o código de outro tipo",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/conflito-de-dados",
+                                    "title": "Conflito de dados",
+                                    "status": 409,
+                                    "detail": "Já existe um tipo de usuário com o nome Entregador.",
+                                    "instance": "/api/v1/tipos-usuario",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/auth/login": {
             "post": {
                 "tags": [
@@ -626,6 +1030,141 @@
                                     "status": 401,
                                     "detail": "Login ou senha inválidos.",
                                     "instance": "/api/v1/auth/login",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/usuarios/{id}/tipo": {
+            "patch": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Troca o tipo do usuário",
+                "description": "A troca acontece na mesma conta: id, login, senha e data de criação continuam iguais; mudam o tipo e o documento. Dono de Restaurante informa CNPJ; os demais tipos, CPF. O documento antigo é descartado. Pedir o tipo e o documento que o usuário já tem devolve 200 sem alterar nada.",
+                "operationId": "trocarTipo",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TrocarTipoRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Tipo trocado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UsuarioResponse"
+                                },
+                                "example": {
+                                    "id": 1,
+                                    "nome": "Maria Silva",
+                                    "email": "maria.silva@exemplo.com",
+                                    "login": "maria.silva",
+                                    "tipo": "DONO_RESTAURANTE",
+                                    "documento": "11222333000181",
+                                    "endereco": {
+                                        "rua": "Rua das Flores",
+                                        "numero": "123",
+                                        "complemento": "Apto 45",
+                                        "bairro": "Centro",
+                                        "cidade": "Itajaí",
+                                        "estado": "SC",
+                                        "cep": "88301000"
+                                    },
+                                    "dataCriacao": "2026-10-08T10:30:00",
+                                    "dataUltimaAlteracao": "2026-10-09T08:15:00"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Documento ausente, inválido ou incompatível com o tipo",
+                        "content": {
+                            "application/problem+json": {
+                                "examples": {
+                                    "Documento do tipo": {
+                                        "description": "Documento do tipo",
+                                        "value": {
+                                            "type": "http://localhost:8080/problemas/regra-de-negocio",
+                                            "title": "Regra de negócio violada",
+                                            "status": 400,
+                                            "detail": "Usuário do tipo Dono de Restaurante deve informar CNPJ.",
+                                            "instance": "/api/v1/usuarios/1/tipo",
+                                            "momento": "2026-10-08T10:30:00"
+                                        }
+                                    },
+                                    "Campos inválidos": {
+                                        "description": "Campos inválidos",
+                                        "value": {
+                                            "type": "http://localhost:8080/problemas/dados-invalidos",
+                                            "title": "Dados inválidos",
+                                            "status": 400,
+                                            "detail": "Um ou mais campos da requisição não passaram na validação.",
+                                            "instance": "/api/v1/usuarios",
+                                            "momento": "2026-10-08T10:30:00",
+                                            "erros": [
+                                                {
+                                                    "campo": "email",
+                                                    "mensagem": "O e-mail informado não é válido."
+                                                },
+                                                {
+                                                    "campo": "senha",
+                                                    "mensagem": "A senha deve ter entre 8 e 72 caracteres."
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuário ou tipo inexistente",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Usuário 99 não encontrado.",
+                                    "instance": "/api/v1/usuarios/99",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Documento usado por outro usuário",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/conflito-de-dados",
+                                    "title": "Conflito de dados",
+                                    "status": 409,
+                                    "detail": "O documento informado já está cadastrado.",
+                                    "instance": "/api/v1/usuarios/1/tipo",
                                     "momento": "2026-10-08T10:30:00"
                                 }
                             }
@@ -730,6 +1269,111 @@
                                     "status": 400,
                                     "detail": "Não é possível ordenar por senha. Campos aceitos: dataCriacao, dataUltimaAlteracao, email, id, login, nome.",
                                     "instance": "/api/v2/usuarios",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tipos-usuario/{id}/usuarios": {
+            "get": {
+                "tags": [
+                    "Tipos de usuário"
+                ],
+                "summary": "Lista os usuários de um tipo",
+                "description": "Só os usuários ativos, paginados como as demais listagens. O sort aceita os mesmos campos da busca de usuários.",
+                "operationId": "listarUsuarios",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id do tipo",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 3
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número da página, a partir de 0",
+                        "schema": {
+                            "type": "integer",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "description": "Itens por página, no máximo 50",
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Campo e direção, como nome,desc",
+                        "schema": {
+                            "type": "string",
+                            "default": "nome,asc"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Página de usuários do tipo",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginaResponse"
+                                },
+                                "example": {
+                                    "conteudo": [
+                                        {
+                                            "id": 7,
+                                            "nome": "Bruno Lima",
+                                            "email": "bruno@exemplo.com",
+                                            "login": "bruno.lima",
+                                            "tipo": "ENTREGADOR",
+                                            "documento": "52998224725",
+                                            "endereco": {
+                                                "rua": "Rua das Flores",
+                                                "numero": "123",
+                                                "complemento": null,
+                                                "bairro": "Centro",
+                                                "cidade": "Itajaí",
+                                                "estado": "SC",
+                                                "cep": "88301000"
+                                            },
+                                            "dataCriacao": "2026-10-08T10:30:00",
+                                            "dataUltimaAlteracao": "2026-10-08T10:30:00"
+                                        }
+                                    ],
+                                    "pagina": 0,
+                                    "tamanho": 10,
+                                    "totalElementos": 1,
+                                    "totalPaginas": 1,
+                                    "ultima": true
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Tipo inexistente",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Tipo de usuário 99 não encontrado.",
+                                    "instance": "/api/v1/tipos-usuario/99",
                                     "momento": "2026-10-08T10:30:00"
                                 }
                             }
@@ -912,6 +1556,38 @@
                     "senhaAtual"
                 ]
             },
+            "TipoUsuarioRequest": {
+                "type": "object",
+                "properties": {
+                    "nome": {
+                        "type": "string",
+                        "example": "Entregador",
+                        "maxLength": 50,
+                        "minLength": 3
+                    }
+                },
+                "required": [
+                    "nome"
+                ]
+            },
+            "TipoUsuarioResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "nome": {
+                        "type": "string"
+                    },
+                    "codigo": {
+                        "type": "string"
+                    },
+                    "sistema": {
+                        "type": "boolean"
+                    }
+                }
+            },
             "CriarUsuarioRequest": {
                 "type": "object",
                 "properties": {
@@ -1009,6 +1685,27 @@
                         "format": "date-time"
                     }
                 }
+            },
+            "TrocarTipoRequest": {
+                "type": "object",
+                "properties": {
+                    "tipo": {
+                        "type": "string",
+                        "description": "Código do novo tipo",
+                        "example": "DONO_RESTAURANTE",
+                        "minLength": 1
+                    },
+                    "documento": {
+                        "type": "string",
+                        "description": "CNPJ para DONO_RESTAURANTE, CPF para os demais",
+                        "example": "11.222.333/0001-81",
+                        "minLength": 1
+                    }
+                },
+                "required": [
+                    "documento",
+                    "tipo"
+                ]
             },
             "PaginaResponse": {
                 "type": "object",
