@@ -1,18 +1,5 @@
--- =============================================================
--- Estrutura do banco de dados - Tech Challenge Fase 2
+-- Schema do banco - Tech Challenge Fase 2
 --
--- Executado automaticamente pelo MySQL na PRIMEIRA inicialização
--- do contêiner, quando o volume de dados ainda está vazio. O mesmo
--- script é copiado para o MySQL dos testes de integração
--- (Testcontainers), de modo que testes e aplicação usam exatamente
--- as mesmas tabelas e restrições.
---
--- A criação do esquema é responsabilidade do banco, não da aplicação.
--- Em todos os perfis o Hibernate opera em modo "validate": confere se
--- a estrutura corresponde ao mapeamento das entidades, sem criá-la
--- nem alterá-la.
---
--- As tabelas entram junto com a fatia que as usa: tipo de usuário e
--- usuário na fatia 1, restaurante e horários na fatia 3, itens do
--- cardápio na fatia 4.
--- =============================================================
+-- O MySQL executa este script na primeira inicialização do contêiner, com o
+-- volume vazio. Os testes de integração usam o mesmo script. O Hibernate não
+-- cria tabelas, só confere o mapeamento.

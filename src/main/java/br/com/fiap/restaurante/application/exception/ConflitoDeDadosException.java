@@ -1,9 +1,8 @@
 package br.com.fiap.restaurante.application.exception;
 
 /**
- * Lançada por um caso de uso quando a operação conflita com o estado atual dos
- * dados: um e-mail já cadastrado, um tipo de usuário em uso, um dono que não é
- * do tipo Dono de Restaurante.
+ * A operação conflita com os dados atuais: e-mail já cadastrado, tipo de usuário
+ * em uso, dono que não é do tipo Dono de Restaurante etc.
  */
 public class ConflitoDeDadosException extends RuntimeException {
 

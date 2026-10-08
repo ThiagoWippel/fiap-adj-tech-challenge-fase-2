@@ -7,12 +7,8 @@ import java.util.Arrays;
 import java.util.Optional;
 
 /**
- * Catálogo dos tipos de problema que a API devolve.
- *
- * <p>Cada tipo tem um identificador estável, usado no campo {@code type} das
- * respostas de erro, um título fixo, o status HTTP e uma descrição que a
- * aplicação serve em {@code /problemas/{identificador}}. O título é constante
- * para o tipo; o que muda de uma ocorrência para outra vai no {@code detail}.
+ * Tipos de problema das respostas de erro. O identificador compõe o campo
+ * {@code type}, e a descrição é servida em {@code /problemas/{identificador}}.
  */
 public enum TipoDeProblema {
 
@@ -79,7 +75,6 @@ public enum TipoDeProblema {
         return descricao;
     }
 
-    /** Endereço absoluto deste tipo de problema, a partir da base configurada. */
     public URI uri(URI base) {
         return UriComponentsBuilder.fromUri(base).path(CAMINHO).build(identificador);
     }
@@ -90,11 +85,7 @@ public enum TipoDeProblema {
                 .findFirst();
     }
 
-    /**
-     * Tipo usado para os erros gerados pelo próprio Spring, que só informam o
-     * status. Cada status do framework tem um tipo; os demais caem no tipo
-     * genérico da sua faixa.
-     */
+    /** Tipo dos erros gerados pelo próprio Spring, que só informam o status. */
     public static TipoDeProblema paraErroDoFramework(int status) {
         return switch (status) {
             case 404 -> RECURSO_NAO_ENCONTRADO;

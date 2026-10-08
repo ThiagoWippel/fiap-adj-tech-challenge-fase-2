@@ -1,8 +1,5 @@
-# Integração contínua: a cada push e pull request, roda a suíte inteira
-# numa máquina limpa. "mvn verify" executa os testes unitários, os testes
-# de integração (com MySQL em contêiner, via Testcontainers), as regras de
-# arquitetura e os dois cortes de cobertura. Se qualquer um falhar, o
-# build fica vermelho.
+# A cada push e pull request: testes unitários, testes de integração
+# (MySQL via Testcontainers), regras do ArchUnit e cortes de cobertura.
 
 name: CI
 

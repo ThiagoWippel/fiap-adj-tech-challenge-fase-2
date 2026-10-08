@@ -7,17 +7,8 @@ import org.testcontainers.mysql.MySQLContainer;
 import org.testcontainers.utility.MountableFile;
 
 /**
- * MySQL descartável para os testes de integração.
- *
- * <p>Usa a mesma imagem do docker-compose e o mesmo script de schema, copiado
- * para a pasta que o MySQL executa na primeira inicialização. Assim os testes
- * rodam contra as mesmas tabelas e restrições da aplicação em contêiner.
- *
- * <p>O contêiner fica num campo estático para ser um só em toda a suíte: o
- * Spring reaproveita os contextos entre classes de teste, e quando um teste
- * precisa de contexto próprio, recebe o mesmo banco em vez de subir outro.
- * {@code @ServiceConnection} entrega ao Spring a URL, o usuário e a senha do
- * contêiner, dispensando qualquer propriedade de conexão.
+ * MySQL dos testes de integração: mesma imagem e mesmo script de schema do
+ * docker-compose. O contêiner é estático para ser um só em toda a suíte.
  */
 @TestConfiguration(proxyBeanMethods = false)
 public class ContainersDeTeste {

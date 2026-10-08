@@ -1,15 +1,11 @@
 package br.com.fiap.restaurante.domain.exception;
 
 /**
- * Lançada quando um dado viola uma regra de formato ou de consistência de uma
- * entidade ou de um objeto de valor: nome vazio, CPF inválido, horário que se
- * sobrepõe a outro.
+ * Dado inválido em uma entidade ou objeto de valor (nome vazio, CPF inválido etc.).
  *
  * <p>Estende {@link IllegalArgumentException}, como as validações do material do
- * curso, de modo que um teste que espera essa exceção continua valendo. Por ser
- * uma classe própria, o tratador de erros a distingue de uma
- * {@code IllegalArgumentException} lançada por engano em outra parte do código:
- * esta vira 400, aquela vira 500.
+ * curso. Sendo uma classe própria, o tratador de erros consegue diferenciá-la de
+ * uma {@code IllegalArgumentException} causada por bug: esta vira 400, aquela 500.
  */
 public class ValidacaoDeDominioException extends IllegalArgumentException {
 

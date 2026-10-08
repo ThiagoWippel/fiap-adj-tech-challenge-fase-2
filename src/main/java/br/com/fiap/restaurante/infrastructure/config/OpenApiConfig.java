@@ -8,11 +8,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Metadados da documentação OpenAPI.
- *
- * <p>Define o cabeçalho da interface Swagger. A descrição registra a política de
- * versionamento e o formato dos erros, para que quem abre a documentação entenda
- * as convenções sem consultar o relatório.
+ * Cabeçalho da documentação OpenAPI, com a política de versionamento e o formato
+ * dos erros.
  */
 @Configuration
 public class OpenApiConfig {

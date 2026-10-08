@@ -11,11 +11,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marca um teste de integração: aplicação inteira de pé, numa porta aleatória,
- * contra o MySQL do Testcontainers, no perfil {@code test}.
- *
- * <p>Todas as classes anotadas compartilham a mesma configuração, e por isso o
- * mesmo contexto do Spring e o mesmo contêiner.
+ * Aplicação inteira numa porta aleatória, com o MySQL do Testcontainers e o
+ * perfil {@code test}. As classes anotadas compartilham o mesmo contexto.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

@@ -8,12 +8,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.function.Supplier;
 
 /**
- * Implementação da porta de transação com o {@link TransactionTemplate} do
- * Spring.
- *
- * <p>É a forma programática do mesmo mecanismo que o {@code @Transactional} usa
- * por anotação. O template desfaz a transação quando a operação lança uma
- * exceção de runtime e devolve o resultado quando ela termina sem erro.
+ * Implementação da porta de transação com o {@link TransactionTemplate}, a versão
+ * programática do {@code @Transactional}.
  */
 @Component
 public class GerenciadorDeTransacaoSpring implements ITransactionManager {

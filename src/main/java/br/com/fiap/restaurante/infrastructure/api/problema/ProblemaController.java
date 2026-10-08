@@ -11,12 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Descreve os tipos de problema das respostas de erro.
- *
- * <p>Faz do campo {@code type} um endereço que responde: quem recebe um erro pode
- * consultar o que aquele tipo significa. Fica fora da versão da API, porque os
- * identificadores de problema valem para todas as versões, e fora do Swagger,
- * porque não é um recurso de negócio.
+ * Descreve os tipos de problema, no endereço apontado pelo campo {@code type}.
+ * Fica fora do versionamento (vale para todas as versões) e fora do Swagger.
  */
 @Hidden
 @RestController

@@ -30,26 +30,14 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Tratamento centralizado de erros, no formato ProblemDetail (RFC 9457, que
- * atualiza a RFC 7807).
- *
- * <p>Toda resposta de erro da API passa por aqui, inclusive as geradas pelo
- * próprio Spring, como JSON malformado, verbo não suportado e rota inexistente.
- * Os cinco campos da RFC são preenchidos sempre: {@code type} aponta para a
- * descrição do problema servida pela aplicação, {@code title} é fixo para cada
- * tipo, {@code detail} descreve a ocorrência, {@code status} e {@code instance}
- * identificam a resposta. Duas extensões completam: {@code momento}, para
- * correlacionar a resposta com o log, e {@code erros}, com os campos rejeitados
- * numa falha de validação.
- *
- * <p>Os campos comuns e as extensões são completados num único método,
- * {@link #createResponseEntity}, por onde passam tanto os erros tratados aqui
- * quanto os tratados pela classe base.
+ * Converte as exceções da aplicação e do Spring em respostas ProblemDetail
+ * (RFC 9457). Além dos campos da RFC, toda resposta leva a extensão
+ * {@code momento}, para cruzar com o log, e as falhas de validação levam
+ * {@code erros}, com os campos rejeitados.
  */
 @RestControllerAdvice
-// Precedência máxima. Com spring.mvc.problemdetails.enabled=true, o Spring Boot
-// registra o próprio tratador de ProblemDetail; sem a ordem explícita, os dois
-// disputariam as mesmas exceções.
+// Com spring.mvc.problemdetails.enabled=true o Spring Boot registra outro tratador;
+// a ordem garante que este seja usado.
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class TratadorDeErros extends ResponseEntityExceptionHandler {
 
@@ -86,15 +74,9 @@ public class TratadorDeErros extends ResponseEntityExceptionHandler {
         return responder(TipoDeProblema.CONFLITO_DE_DADOS, excecao.getMessage(), excecao, requisicao);
     }
 
-    /**
-     * Rede de segurança para as restrições do banco.
-     *
-     * <p>Os casos de uso verificam unicidade e referências antes de gravar, mas
-     * duas requisições simultâneas podem passar juntas por essa verificação. A
-     * restrição do banco resolve a disputa, e este método converte a falha numa
-     * resposta 409. A mensagem do banco vai só para o log, porque revela nomes de
-     * tabelas e de restrições.
-     */
+    // Duas requisições simultâneas podem passar juntas pela verificação de unicidade
+    // dos casos de uso; nesse caso é a restrição do banco que barra a segunda.
+    // A mensagem do banco fica só no log.
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Object> tratarViolacaoDeIntegridade(DataIntegrityViolationException excecao,
                                                               WebRequest requisicao) {
@@ -103,13 +85,8 @@ public class TratadorDeErros extends ResponseEntityExceptionHandler {
                 "Os dados informados conflitam com um registro existente.", excecao, requisicao);
     }
 
-    /**
-     * Última barreira: qualquer falha que nenhum outro método previu.
-     *
-     * <p>O rastro vai para o log, nunca para a resposta, porque revela estrutura
-     * interna. Uma {@code IllegalArgumentException} lançada fora do domínio também
-     * cai aqui: ela indica um defeito, não um dado inválido do cliente.
-     */
+    // Qualquer outra falha, inclusive IllegalArgumentException fora do domínio, é
+    // tratada como erro interno. O rastro fica só no log.
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> tratarFalhaInesperada(Exception excecao, WebRequest requisicao) {
         LOGGER.error("Falha inesperada ao processar {}", requisicao.getDescription(false), excecao);
@@ -117,10 +94,6 @@ public class TratadorDeErros extends ResponseEntityExceptionHandler {
                 "Ocorreu uma falha inesperada ao processar a requisição.", excecao, requisicao);
     }
 
-    /**
-     * Falhas de Bean Validation nos DTOs de requisição: a resposta lista cada
-     * campo rejeitado, em ordem alfabética, na extensão {@code erros}.
-     */
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException excecao,
                                                                   HttpHeaders cabecalhos,
@@ -137,14 +110,9 @@ public class TratadorDeErros extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(excecao, problema, cabecalhos, status, requisicao);
     }
 
-    /**
-     * O único lugar que completa as respostas de erro.
-     *
-     * <p>Os erros do próprio Spring chegam sem {@code type} (no Spring 7 o campo
-     * fica nulo) e com o título padrão em inglês; recebem aqui o tipo e o título
-     * correspondentes ao status. Todos recebem {@code instance}, com a rota chamada, e
-     * {@code momento}.
-     */
+    // Todas as respostas de erro passam por aqui. Os erros do próprio Spring chegam
+    // sem type (nulo no Spring 7) e com título em inglês; recebem o tipo e o título
+    // pelo status.
     @Override
     protected ResponseEntity<Object> createResponseEntity(Object corpo,
                                                           HttpHeaders cabecalhos,

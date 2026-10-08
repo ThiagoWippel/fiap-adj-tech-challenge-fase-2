@@ -12,10 +12,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/**
- * A porta de transação contra o MySQL real: o que foi gravado dentro de uma
- * operação que falha não pode sobrar no banco.
- */
 @TesteDeIntegracao
 @DisplayName("Gerenciador de transação")
 class GerenciadorDeTransacaoIT {

@@ -5,12 +5,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementação da porta de senha com BCrypt.
- *
- * <p>Usa só a biblioteca de criptografia do Spring Security, sem a cadeia de
- * filtros. O BCrypt é de mão única e embute um valor aleatório em cada hash: a
- * mesma senha gera hashes diferentes, e senhas repetidas não aparecem iguais no
- * banco. A verificação compara hashes, nunca textos.
+ * Implementação da porta de senha com BCrypt (spring-security-crypto).
  */
 @Component
 public class CodificadorDeSenhaBCrypt implements IPasswordEncoder {

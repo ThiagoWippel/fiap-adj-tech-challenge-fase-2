@@ -11,13 +11,8 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 
 /**
- * Regras de dependência entre as camadas, verificadas sobre o bytecode de
- * produção.
- *
- * <p>Transformam a Clean Architecture de afirmação do relatório em teste: se uma
- * classe do núcleo importar o Spring, o build falha. As regras aceitam camadas
- * ainda vazias porque o projeto é construído em fatias; sem essa permissão, o
- * ArchUnit reprovaria uma regra que ainda não tem classe para verificar.
+ * Regras de dependência entre as camadas. {@code allowEmptyShould} deixa a regra
+ * passar enquanto uma camada ainda não tem classes.
  */
 @DisplayName("Arquitetura")
 class ArquiteturaTest {

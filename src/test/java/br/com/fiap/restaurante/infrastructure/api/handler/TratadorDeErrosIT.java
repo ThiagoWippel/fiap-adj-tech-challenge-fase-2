@@ -33,12 +33,9 @@ import org.springframework.web.bind.annotation.RestController;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Formato de todas as respostas de erro da API.
- *
- * <p>Um controller que só existe neste teste lança cada tipo de exceção, e as
- * verificações conferem o que o cliente recebe. A fatia do Spring MVC sobe sem
- * banco, então estes testes são rápidos. Como essa fatia não registra as
- * classes de configuração, a de tipos de problema é habilitada aqui.
+ * Um controller de teste lança cada tipo de exceção e os testes conferem a
+ * resposta. O {@code @WebMvcTest} não carrega as propriedades da aplicação, por
+ * isso o {@code @EnableConfigurationProperties}.
  */
 @WebMvcTest(controllers = {TratadorDeErrosIT.ControllerDeErros.class, ProblemaController.class})
 @Import(TratadorDeErrosIT.ControllerDeErros.class)
@@ -259,9 +256,6 @@ class TratadorDeErrosIT {
         assertThat(verboNaoSuportado).bodyJson().extractingPath("$.momento").asString().matches(FORMATO_DO_MOMENTO);
     }
 
-    /**
-     * Controller que existe só neste teste, para provocar cada tipo de erro.
-     */
     @RestController
     @RequestMapping("/teste-de-erros")
     static class ControllerDeErros {

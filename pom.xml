@@ -20,7 +20,7 @@
 		<archunit.version>1.5.1</archunit.version>
 		<rest-assured.version>6.0.1</rest-assured.version>
 		<jacoco.version>0.8.15</jacoco.version>
-		<!-- Corte de cobertura exigido pelo enunciado, aplicado a linha e a ramo -->
+		<!-- Cobertura mínima de linhas e de ramos -->
 		<cobertura.minima>0.80</cobertura.minima>
 	</properties>
 
@@ -31,45 +31,45 @@
 			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
 
-		<!-- Persistência: JPA + Hibernate -->
+		<!-- JPA + Hibernate -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 
-		<!-- Saúde da aplicação: usada pelo healthcheck do docker-compose -->
+		<!-- /actuator/health, usado no healthcheck do compose -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
-		<!-- Validação dos DTOs de requisição -->
+		<!-- Bean Validation nos DTOs de requisição -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
-		<!-- Documentação OpenAPI / Swagger UI -->
+		<!-- Swagger -->
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>${springdoc.version}</version>
 		</dependency>
 
-		<!-- BCrypt isolado, sem a cadeia de filtros do Spring Security -->
+		<!-- Só o BCrypt, sem o Spring Security completo -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-crypto</artifactId>
 		</dependency>
 
-		<!-- Driver MySQL: o mesmo banco em desenvolvimento, testes e contêiner -->
+		<!-- MySQL em todos os perfis -->
 		<dependency>
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- Redução de código repetitivo -->
+		<!-- Lombok -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -92,7 +92,7 @@
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- MySQL descartável nos testes de integração, ligado por @ServiceConnection -->
+		<!-- MySQL em contêiner nos testes de integração -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-testcontainers</artifactId>
@@ -103,14 +103,14 @@
 			<artifactId>testcontainers-mysql</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- Testes dos endpoints no estilo given/when/then, como no material de testes -->
+		<!-- Testes dos endpoints -->
 		<dependency>
 			<groupId>io.rest-assured</groupId>
 			<artifactId>rest-assured</artifactId>
 			<version>${rest-assured.version}</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- Regras de arquitetura escritas como teste -->
+		<!-- Regras de arquitetura -->
 		<dependency>
 			<groupId>com.tngtech.archunit</groupId>
 			<artifactId>archunit</artifactId>
@@ -163,10 +163,9 @@
 			</plugin>
 
 			<!--
-				Unitários (*Test) rodam no Surefire, com "mvn test", sem banco nem Docker.
-				Integração (*IT) roda no Failsafe, com "mvn verify".
-				Os dois são declarados antes do JaCoCo para que, dentro de cada fase,
-				os testes rodem antes da medição de cobertura.
+				Testes unitários (*Test) no Surefire, com "mvn test".
+				Testes de integração (*IT) no Failsafe, com "mvn verify".
+				Declarados antes do JaCoCo para os testes rodarem antes da medição.
 			-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -176,8 +175,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<configuration>
-					<!-- Só as classes terminadas em IT. O padrão do Failsafe também pega
-					     nomes que começam com IT, como ITransactionManagerTest. -->
+					<!-- O padrão do Failsafe também pegaria classes que começam com IT -->
 					<includes>
 						<include>**/*IT.java</include>
 					</includes>
@@ -185,10 +183,9 @@
 			</plugin>
 
 			<!--
-				Dois cortes de cobertura, ambos travando o build:
-				- unitário: só os testes unitários, sobre domain, application e
-				  interfaceadapter, que é o código testável de forma unitária;
-				- total: unitários e integração juntos, sobre o projeto inteiro.
+				Dois cortes de cobertura, os dois travando o build:
+				- unitário: só testes unitários, sobre domain, application e interfaceadapter;
+				- total: unitários e integração, sobre o projeto inteiro.
 			-->
 			<plugin>
 				<groupId>org.jacoco</groupId>
