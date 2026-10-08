@@ -18,6 +18,7 @@
 		<java.version>21</java.version>
 		<springdoc.version>3.1.0</springdoc.version>
 		<archunit.version>1.5.1</archunit.version>
+		<rest-assured.version>6.0.1</rest-assured.version>
 		<jacoco.version>0.8.15</jacoco.version>
 		<!-- Corte de cobertura exigido pelo enunciado, aplicado a linha e a ramo -->
 		<cobertura.minima>0.80</cobertura.minima>
@@ -34,6 +35,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+
+		<!-- Saúde da aplicação: usada pelo healthcheck do docker-compose -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
 		<!-- Validação dos DTOs de requisição -->
@@ -83,6 +90,24 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- MySQL descartável nos testes de integração, ligado por @ServiceConnection -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-testcontainers</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers-mysql</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- Testes dos endpoints no estilo given/when/then, como no material de testes -->
+		<dependency>
+			<groupId>io.rest-assured</groupId>
+			<artifactId>rest-assured</artifactId>
+			<version>${rest-assured.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- Regras de arquitetura escritas como teste -->
@@ -150,6 +175,13 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<!-- Só as classes terminadas em IT. O padrão do Failsafe também pega
+					     nomes que começam com IT, como ITransactionManagerTest. -->
+					<includes>
+						<include>**/*IT.java</include>
+					</includes>
+				</configuration>
 			</plugin>
 
 			<!--
