@@ -1,0 +1,1701 @@
+{
+	"info": {
+		"name": "Tech Challenge Fase 2 - API de Restaurantes",
+		"description": "Coleção de testes da API de gestão de restaurantes.\n\n## Pastas 1 a 8: a coleção da Fase 1 (cenário ACE-01)\n\nAs oito primeiras pastas são a coleção entregue na Fase 1, rodando contra a Fase 2. As requisições são as mesmas, e as verificações também, com três ajustes deliberados:\n\n1. **type dos erros:** a Fase 1 apontava para o README no GitHub (`README.md#...`). Por causa do feedback, a Fase 2 usa `{base}/problemas/{identificador}`, que a própria aplicação responde. A verificação passou a conferir `/problemas/`.\n2. **Títulos com acento:** \"Regra de negocio violada\" e \"Credenciais invalidas\" viraram \"Regra de negócio violada\" e \"Credenciais inválidas\".\n3. **Login inexistente:** a verificação de que a mensagem não revela se o login existe agora procura \"não encontrado\", com acento, como escrevem as mensagens da Fase 2.\n\nAs descrições que contavam o comportamento da Fase 1 e mudaram foram atualizadas: não há mais herança entre cliente e dono, e a exclusão anonimiza o usuário em vez de apagar a linha. Cada requisição cita os cenários do catálogo (`docs/catalogo-de-cenarios.md`) que ela cobre.\n\n## Como executar\n\nCom a aplicação no ar (`docker compose up -d`):\n\n- **Postman:** importe a coleção e o ambiente **Local** e execute no Runner, na ordem.\n- **Newman:** `npx newman run postman/tech-challenge-fase-2.postman_collection.json -e postman/Local.postman_environment.json`\n\nAs requisições se encadeiam por variáveis: o cadastro grava o id do usuário criado, e as demais o usam. A última pasta exclui os usuários criados; como a exclusão libera e-mail, login e documento, a coleção pode ser executada de novo, quantas vezes for preciso. O CI roda a coleção duas vezes seguidas a cada push (cenário ACE-02).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "idCliente",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "idDono",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Cadastro de usuario valido",
+			"description": "Criacao de usuarios dos dois tipos exigidos pelo enunciado. Os identificadores retornados sao gravados em variaveis e utilizados pelas pastas seguintes.",
+			"item": [
+				{
+					"name": "Cadastrar cliente (CPF)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios"
+							],
+							"query": []
+						},
+						"description": "Cria um usuario do tipo CLIENTE. O CPF e enviado com pontuacao e armazenado apenas com digitos; a sigla do estado e convertida para maiusculas.\n\nCenarios do catalogo: USU-18 · USU-29 · DOC-01 · END-04.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Maria Silva\",\n  \"email\": \"maria.silva@exemplo.com\",\n  \"login\": \"maria.silva\",\n  \"senha\": \"SenhaSegura123\",\n  \"tipo\": \"CLIENTE\",\n  \"cpf\": \"123.456.789-09\",\n  \"endereco\": {\n    \"rua\": \"Rua das Flores\",\n    \"numero\": \"123\",\n    \"complemento\": \"Apto 45\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"Camboriu\",\n    \"estado\": \"sc\",\n    \"cep\": \"88340-000\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 201 Created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"// Convencao REST para respostas 201: informar onde o recurso",
+									"// recem-criado pode ser consultado.",
+									"pm.test('Cabecalho Location aponta para o recurso', function () {",
+									"    pm.expect(pm.response.headers.get('Location')).to.include('/api/v1/usuarios/');",
+									"});",
+									"",
+									"const corpo = pm.response.json();",
+									"",
+									"pm.test('Tipo retornado e CLIENTE', function () {",
+									"    pm.expect(corpo.tipo).to.eql('CLIENTE');",
+									"});",
+									"",
+									"// Sem normalizacao, '123.456.789-09' e '12345678909' coexistiriam",
+									"// como registros distintos e a unicidade nao teria efeito.",
+									"pm.test('CPF normalizado para apenas digitos', function () {",
+									"    pm.expect(corpo.documento).to.eql('12345678909');",
+									"});",
+									"",
+									"pm.test('CEP normalizado e estado em maiusculas', function () {",
+									"    pm.expect(corpo.endereco.cep).to.eql('88340000');",
+									"    pm.expect(corpo.endereco.estado).to.eql('SC');",
+									"});",
+									"",
+									"pm.test('Datas de auditoria preenchidas', function () {",
+									"    pm.expect(corpo.dataCriacao).to.not.be.empty;",
+									"    pm.expect(corpo.dataUltimaAlteracao).to.not.be.empty;",
+									"});",
+									"",
+									"// A senha nao existe no DTO de resposta - o vazamento e impossivel",
+									"// por construcao, e nao por ocultacao.",
+									"pm.test('A resposta nao expoe a senha', function () {",
+									"    pm.expect(pm.response.text()).to.not.include('\"senha\"');",
+									"});",
+									"",
+									"// Encadeamento: as proximas requisicoes usam este identificador.",
+									"pm.collectionVariables.set('idCliente', corpo.id);",
+									"console.log('idCliente =', corpo.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Cadastrar dono de restaurante (CNPJ)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios"
+							],
+							"query": []
+						},
+						"description": "Cria um usuario do tipo DONO_RESTAURANTE. Mesma rota do cliente; o tipo define o documento exigido, aqui o CNPJ.\n\nCenarios do catalogo: USU-19 · DOC-03 · END-02.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Joao Pereira\",\n  \"email\": \"joao.pereira@exemplo.com\",\n  \"login\": \"joao.pereira\",\n  \"senha\": \"OutraSenha456\",\n  \"tipo\": \"DONO_RESTAURANTE\",\n  \"cnpj\": \"11.222.333/0001-81\",\n  \"endereco\": {\n    \"rua\": \"Avenida Brasil\",\n    \"numero\": \"S/N\",\n    \"bairro\": \"Nacoes\",\n    \"cidade\": \"Balneario Camboriu\",\n    \"estado\": \"SC\",\n    \"cep\": \"88330100\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 201 Created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"const corpo = pm.response.json();",
+									"",
+									"pm.test('Tipo retornado e DONO_RESTAURANTE', function () {",
+									"    pm.expect(corpo.tipo).to.eql('DONO_RESTAURANTE');",
+									"});",
+									"",
+									"pm.test('CNPJ normalizado para apenas digitos', function () {",
+									"    pm.expect(corpo.documento).to.eql('11222333000181');",
+									"});",
+									"",
+									"// Valores como 'S/N' justificam o campo ser texto, e nao numero.",
+									"pm.test('Numero do endereco aceita texto', function () {",
+									"    pm.expect(corpo.endereco.numero).to.eql('S/N');",
+									"});",
+									"",
+									"pm.collectionVariables.set('idDono', corpo.id);",
+									"console.log('idDono =', corpo.id);"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "2. Tentativa de cadastro invalido",
+			"description": "Cenarios de rejeicao no cadastro. Todas as respostas seguem a RFC 7807.",
+			"item": [
+				{
+					"name": "E-mail duplicado",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios"
+							],
+							"query": []
+						},
+						"description": "Repete o cadastro da pasta 1. A verificacao previa no caso de uso produz mensagem legivel; as restricoes do banco garantem a integridade sob concorrencia.\n\nCenarios do catalogo: USU-20 · ERR-01.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Maria Silva\",\n  \"email\": \"maria.silva@exemplo.com\",\n  \"login\": \"maria.silva\",\n  \"senha\": \"SenhaSegura123\",\n  \"tipo\": \"CLIENTE\",\n  \"cpf\": \"123.456.789-09\",\n  \"endereco\": {\n    \"rua\": \"Rua das Flores\",\n    \"numero\": \"123\",\n    \"complemento\": \"Apto 45\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"Camboriu\",\n    \"estado\": \"sc\",\n    \"cep\": \"88340-000\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 409 Conflict', function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"",
+									"// A RFC 7807 define o tipo de midia application/problem+json.",
+									"pm.test('Content-Type e application/problem+json', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"});",
+									"",
+									"const corpo = pm.response.json();",
+									"",
+									"pm.test('Traz os cinco campos da RFC 7807', function () {",
+									"    ['type', 'title', 'status', 'detail', 'instance'].forEach(function (campo) {",
+									"        pm.expect(corpo).to.have.property(campo);",
+									"    });",
+									"});",
+									"",
+									"// Extensoes proprias definidas pelo projeto.",
+									"pm.test('Traz o instante da falha', function () {",
+									"    pm.expect(corpo).to.have.property('momento');",
+									"});",
+									"",
+									"// O comportamento padrao do Spring preenche type com 'about:blank'.",
+									"pm.test('O campo type identifica a categoria do erro', function () {",
+									"    pm.expect(corpo.type).to.not.equal('about:blank');",
+									"    pm.expect(corpo.type).to.include('/problemas/');",
+									"});",
+									"",
+									"pm.test('Identifica o conflito de dados', function () {",
+									"    pm.expect(pm.response.json().title).to.eql('Conflito de dados');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Campos obrigatorios ausentes ou invalidos",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios"
+							],
+							"query": []
+						},
+						"description": "Nome curto demais, e-mail malformado, login curto, senha abaixo do minimo e endereco ausente. A resposta relaciona todos os campos rejeitados.\n\nCenarios do catalogo: USU-22.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Ab\",\n  \"email\": \"invalido\",\n  \"login\": \"x\",\n  \"senha\": \"123\",\n  \"tipo\": \"CLIENTE\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 400 Bad Request', function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"// A RFC 7807 define o tipo de midia application/problem+json.",
+									"pm.test('Content-Type e application/problem+json', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"});",
+									"",
+									"const corpo = pm.response.json();",
+									"",
+									"pm.test('Traz os cinco campos da RFC 7807', function () {",
+									"    ['type', 'title', 'status', 'detail', 'instance'].forEach(function (campo) {",
+									"        pm.expect(corpo).to.have.property(campo);",
+									"    });",
+									"});",
+									"",
+									"// Extensoes proprias definidas pelo projeto.",
+									"pm.test('Traz o instante da falha', function () {",
+									"    pm.expect(corpo).to.have.property('momento');",
+									"});",
+									"",
+									"// O comportamento padrao do Spring preenche type com 'about:blank'.",
+									"pm.test('O campo type identifica a categoria do erro', function () {",
+									"    pm.expect(corpo.type).to.not.equal('about:blank');",
+									"    pm.expect(corpo.type).to.include('/problemas/');",
+									"});",
+									"",
+									"// Extensao propria: sem ela, uma requisicao com cinco campos invalidos",
+									"// teria de espremer tudo em uma unica frase.",
+									"pm.test('Relaciona os campos rejeitados', function () {",
+									"    pm.expect(corpo.erros).to.be.an('array').that.is.not.empty;",
+									"    corpo.erros.forEach(function (erro) {",
+									"        pm.expect(erro).to.have.property('campo');",
+									"        pm.expect(erro).to.have.property('mensagem');",
+									"    });",
+									"});",
+									"",
+									"pm.test('Aponta os cinco campos invalidos', function () {",
+									"    const campos = corpo.erros.map(function (e) { return e.campo; });",
+									"    ['nome', 'email', 'login', 'senha', 'endereco'].forEach(function (c) {",
+									"        pm.expect(campos).to.include(c);",
+									"    });",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CPF ausente para tipo CLIENTE",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios"
+							],
+							"query": []
+						},
+						"description": "Regra que depende da combinacao de campos: o documento exigido varia conforme o tipo. Nao e expressavel de forma declarativa nas anotacoes de validacao, por isso e verificada na entidade de dominio.\n\nCenarios do catalogo: USU-23 · DOC-06.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Sem Documento\",\n  \"email\": \"sem.doc@exemplo.com\",\n  \"login\": \"sem.doc\",\n  \"senha\": \"SenhaSegura123\",\n  \"tipo\": \"CLIENTE\",\n  \"endereco\": {\n    \"rua\": \"Rua A\",\n    \"numero\": \"1\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"Itajai\",\n    \"estado\": \"SC\",\n    \"cep\": \"88300000\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 400 Bad Request', function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"// A RFC 7807 define o tipo de midia application/problem+json.",
+									"pm.test('Content-Type e application/problem+json', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"});",
+									"",
+									"const corpo = pm.response.json();",
+									"",
+									"pm.test('Traz os cinco campos da RFC 7807', function () {",
+									"    ['type', 'title', 'status', 'detail', 'instance'].forEach(function (campo) {",
+									"        pm.expect(corpo).to.have.property(campo);",
+									"    });",
+									"});",
+									"",
+									"// Extensoes proprias definidas pelo projeto.",
+									"pm.test('Traz o instante da falha', function () {",
+									"    pm.expect(corpo).to.have.property('momento');",
+									"});",
+									"",
+									"// O comportamento padrao do Spring preenche type com 'about:blank'.",
+									"pm.test('O campo type identifica a categoria do erro', function () {",
+									"    pm.expect(corpo.type).to.not.equal('about:blank');",
+									"    pm.expect(corpo.type).to.include('/problemas/');",
+									"});",
+									"",
+									"pm.test('Identifica a violacao de regra de negocio', function () {",
+									"    pm.expect(pm.response.json().title).to.eql('Regra de negócio violada');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "CPF com digitos verificadores invalidos",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios"
+							],
+							"query": []
+						},
+						"description": "O CPF e validado com @CPF do Hibernate Validator, que confere os digitos verificadores - e nao apenas o formato.\n\nCenarios do catalogo: USU-22 · DOC-02.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Maria Silva\",\n  \"email\": \"outro@exemplo.com\",\n  \"login\": \"outro.login\",\n  \"senha\": \"SenhaSegura123\",\n  \"tipo\": \"CLIENTE\",\n  \"cpf\": \"111.111.111-11\",\n  \"endereco\": {\n    \"rua\": \"Rua das Flores\",\n    \"numero\": \"123\",\n    \"complemento\": \"Apto 45\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"Camboriu\",\n    \"estado\": \"sc\",\n    \"cep\": \"88340-000\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 400 Bad Request', function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test('Aponta o campo cpf', function () {",
+									"    const campos = pm.response.json().erros.map(function (e) { return e.campo; });",
+									"    pm.expect(campos).to.include('cpf');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "3. Alteracao de senha (endpoint exclusivo)",
+			"description": "Endpoint separado da atualizacao dos demais dados, conforme exige o enunciado.\n\n**A senha atual e obrigatoria.** O enunciado nao menciona essa exigencia; trata-se de decisao de seguranca do projeto, adotada como protecao contra alteracao indevida em sessao deixada aberta.\n\nO verbo PUT foi escolhido por substituir a senha integralmente.",
+			"item": [
+				{
+					"name": "Senha atual incorreta",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idCliente}}/senha",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idCliente}}",
+								"senha"
+							],
+							"query": []
+						},
+						"description": "Rejeicao por credencial invalida.\n\nCenarios do catalogo: USU-26.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"senhaAtual\": \"SenhaErrada999\",\n  \"novaSenha\": \"SenhaNova456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 401 Unauthorized', function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"// A RFC 7807 define o tipo de midia application/problem+json.",
+									"pm.test('Content-Type e application/problem+json', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"});",
+									"",
+									"const corpo = pm.response.json();",
+									"",
+									"pm.test('Traz os cinco campos da RFC 7807', function () {",
+									"    ['type', 'title', 'status', 'detail', 'instance'].forEach(function (campo) {",
+									"        pm.expect(corpo).to.have.property(campo);",
+									"    });",
+									"});",
+									"",
+									"// Extensoes proprias definidas pelo projeto.",
+									"pm.test('Traz o instante da falha', function () {",
+									"    pm.expect(corpo).to.have.property('momento');",
+									"});",
+									"",
+									"// O comportamento padrao do Spring preenche type com 'about:blank'.",
+									"pm.test('O campo type identifica a categoria do erro', function () {",
+									"    pm.expect(corpo.type).to.not.equal('about:blank');",
+									"    pm.expect(corpo.type).to.include('/problemas/');",
+									"});",
+									"",
+									"pm.test('Identifica credenciais invalidas', function () {",
+									"    pm.expect(pm.response.json().title).to.eql('Credenciais inválidas');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Nova senha fora das regras",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idCliente}}/senha",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idCliente}}",
+								"senha"
+							],
+							"query": []
+						},
+						"description": "A nova senha precisa ter entre 8 e 72 caracteres. O limite superior nao e arbitrario: o BCrypt processa no maximo 72 bytes e descarta silenciosamente o excedente - sem essa validacao, uma senha mais longa permitiria autenticacao usando apenas o seu inicio.\n\nCenarios do catalogo: USU-26.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"senhaAtual\": \"SenhaSegura123\",\n  \"novaSenha\": \"123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 400 Bad Request', function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test('Aponta o campo novaSenha', function () {",
+									"    const campos = pm.response.json().erros.map(function (e) { return e.campo; });",
+									"    pm.expect(campos).to.include('novaSenha');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Usuario inexistente",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/999999/senha",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"999999",
+								"senha"
+							],
+							"query": []
+						},
+						"description": "Identificador que nao corresponde a nenhum registro.\n\nCenarios do catalogo: USU-26.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"senhaAtual\": \"SenhaSegura123\",\n  \"novaSenha\": \"SenhaNova456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 404 Not Found', function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"// A RFC 7807 define o tipo de midia application/problem+json.",
+									"pm.test('Content-Type e application/problem+json', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"});",
+									"",
+									"const corpo = pm.response.json();",
+									"",
+									"pm.test('Traz os cinco campos da RFC 7807', function () {",
+									"    ['type', 'title', 'status', 'detail', 'instance'].forEach(function (campo) {",
+									"        pm.expect(corpo).to.have.property(campo);",
+									"    });",
+									"});",
+									"",
+									"// Extensoes proprias definidas pelo projeto.",
+									"pm.test('Traz o instante da falha', function () {",
+									"    pm.expect(corpo).to.have.property('momento');",
+									"});",
+									"",
+									"// O comportamento padrao do Spring preenche type com 'about:blank'.",
+									"pm.test('O campo type identifica a categoria do erro', function () {",
+									"    pm.expect(corpo.type).to.not.equal('about:blank');",
+									"    pm.expect(corpo.type).to.include('/problemas/');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Troca de senha com sucesso",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idCliente}}/senha",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idCliente}}",
+								"senha"
+							],
+							"query": []
+						},
+						"description": "Substitui a senha. Retorna 204 sem corpo: nao ha o que devolver, e retornar qualquer informacao relacionada a senha seria indesejavel.\n\nA verificacao efetiva de que a troca funcionou esta na pasta 6, que tenta autenticar com a senha antiga e espera falha.\n\nCenarios do catalogo: USU-26.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"senhaAtual\": \"SenhaSegura123\",\n  \"novaSenha\": \"SenhaNova456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									"",
+									"pm.test('Resposta sem corpo', function () {",
+									"    pm.expect(pm.response.text()).to.be.empty;",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "4. Atualizacao de dados (endpoint distinto)",
+			"description": "Endpoint separado do de senha, conforme exige o enunciado.\n\nNao aceita senha, tipo nem documento: altera so os dados de contato.",
+			"item": [
+				{
+					"name": "Usuario inexistente",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"999999"
+							],
+							"query": []
+						},
+						"description": "Cenarios do catalogo: USU-14.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Maria Silva Souza\",\n  \"email\": \"maria.souza@exemplo.com\",\n  \"login\": \"maria.souza\",\n  \"endereco\": {\n    \"rua\": \"Rua Nova\",\n    \"numero\": \"456\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"Itajai\",\n    \"estado\": \"SC\",\n    \"cep\": \"88300000\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 404 Not Found', function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"// A RFC 7807 define o tipo de midia application/problem+json.",
+									"pm.test('Content-Type e application/problem+json', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"});",
+									"",
+									"const corpo = pm.response.json();",
+									"",
+									"pm.test('Traz os cinco campos da RFC 7807', function () {",
+									"    ['type', 'title', 'status', 'detail', 'instance'].forEach(function (campo) {",
+									"        pm.expect(corpo).to.have.property(campo);",
+									"    });",
+									"});",
+									"",
+									"// Extensoes proprias definidas pelo projeto.",
+									"pm.test('Traz o instante da falha', function () {",
+									"    pm.expect(corpo).to.have.property('momento');",
+									"});",
+									"",
+									"// O comportamento padrao do Spring preenche type com 'about:blank'.",
+									"pm.test('O campo type identifica a categoria do erro', function () {",
+									"    pm.expect(corpo.type).to.not.equal('about:blank');",
+									"    pm.expect(corpo.type).to.include('/problemas/');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "E-mail pertencente a outro usuario",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idCliente}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idCliente}}"
+							],
+							"query": []
+						},
+						"description": "Tenta assumir o e-mail do dono cadastrado na pasta 1.\n\nEste cenario tambem verifica o oposto: a checagem pergunta se existe OUTRO usuario com aquele e-mail. Sem excluir o proprio registro da busca, salvar o cadastro sem alterar o e-mail resultaria em conflito do usuario consigo mesmo - o que a requisicao seguinte comprova nao acontecer.\n\nCenarios do catalogo: USU-12.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Maria Silva\",\n  \"email\": \"joao.pereira@exemplo.com\",\n  \"login\": \"maria.silva\",\n  \"endereco\": {\n    \"rua\": \"Rua A\",\n    \"numero\": \"1\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"Itajai\",\n    \"estado\": \"SC\",\n    \"cep\": \"88300000\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 409 Conflict', function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"",
+									"// A RFC 7807 define o tipo de midia application/problem+json.",
+									"pm.test('Content-Type e application/problem+json', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"});",
+									"",
+									"const corpo = pm.response.json();",
+									"",
+									"pm.test('Traz os cinco campos da RFC 7807', function () {",
+									"    ['type', 'title', 'status', 'detail', 'instance'].forEach(function (campo) {",
+									"        pm.expect(corpo).to.have.property(campo);",
+									"    });",
+									"});",
+									"",
+									"// Extensoes proprias definidas pelo projeto.",
+									"pm.test('Traz o instante da falha', function () {",
+									"    pm.expect(corpo).to.have.property('momento');",
+									"});",
+									"",
+									"// O comportamento padrao do Spring preenche type com 'about:blank'.",
+									"pm.test('O campo type identifica a categoria do erro', function () {",
+									"    pm.expect(corpo.type).to.not.equal('about:blank');",
+									"    pm.expect(corpo.type).to.include('/problemas/');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Atualizacao com sucesso",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idCliente}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idCliente}}"
+							],
+							"query": []
+						},
+						"description": "Altera nome, e-mail, login e endereco.\n\nCenarios do catalogo: USU-25 · USU-29.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Maria Silva Souza\",\n  \"email\": \"maria.souza@exemplo.com\",\n  \"login\": \"maria.souza\",\n  \"endereco\": {\n    \"rua\": \"Rua Nova\",\n    \"numero\": \"456\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"Itajai\",\n    \"estado\": \"SC\",\n    \"cep\": \"88300000\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const corpo = pm.response.json();",
+									"",
+									"pm.test('Dados atualizados', function () {",
+									"    pm.expect(corpo.nome).to.eql('Maria Silva Souza');",
+									"    pm.expect(corpo.email).to.eql('maria.souza@exemplo.com');",
+									"    pm.expect(corpo.endereco.cidade).to.eql('Itajai');",
+									"});",
+									"",
+									"// A auditoria do JPA preenche a data automaticamente ao sincronizar",
+									"// a entidade com o banco. Nao ha atribuicao manual no servico.",
+									"pm.test('Data de alteracao posterior a de criacao', function () {",
+									"    pm.expect(new Date(corpo.dataUltimaAlteracao).getTime())",
+									"        .to.be.at.least(new Date(corpo.dataCriacao).getTime());",
+									"});",
+									"",
+									"// Tipo e documento sao imutaveis apos o cadastro.",
+									"pm.test('Tipo e documento preservados', function () {",
+									"    pm.expect(corpo.tipo).to.eql('CLIENTE');",
+									"    pm.expect(corpo.documento).to.eql('12345678909');",
+									"});",
+									"",
+									"// A senha nao existe no DTO de resposta - o vazamento e impossivel",
+									"// por construcao, e nao por ocultacao.",
+									"pm.test('A resposta nao expoe a senha', function () {",
+									"    pm.expect(pm.response.text()).to.not.include('\"senha\"');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "5. Busca de usuarios pelo nome",
+			"description": "Busca por conteudo, sem diferenciar maiusculas de minusculas.\n\nInclui a versao 2 do endpoint, que demonstra a estrategia de versionamento: onde a v1 devolve um vetor, a v2 devolve um objeto com metadados de paginacao. Alterar a forma da resposta quebra consumidores existentes - e essa e a razao pela qual o versionamento existe. Acrescentar um campo, ao contrario, seria mudanca compativel e permaneceria na v1.",
+			"item": [
+				{
+					"name": "Busca com resultados",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios?nome=maria",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios"
+							],
+							"query": [
+								{
+									"key": "nome",
+									"value": "maria"
+								}
+							]
+						},
+						"description": "O termo e buscado em qualquer posicao do nome.\n\nCenarios do catalogo: USU-27."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const corpo = pm.response.json();",
+									"",
+									"pm.test('Retorna um vetor com resultados', function () {",
+									"    pm.expect(corpo).to.be.an('array').that.is.not.empty;",
+									"});",
+									"",
+									"pm.test('Busca sem distincao de maiusculas', function () {",
+									"    pm.expect(corpo[0].nome.toLowerCase()).to.include('maria');",
+									"});",
+									"",
+									"// A senha nao existe no DTO de resposta - o vazamento e impossivel",
+									"// por construcao, e nao por ocultacao.",
+									"pm.test('A resposta nao expoe a senha', function () {",
+									"    pm.expect(pm.response.text()).to.not.include('\"senha\"');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Busca sem resultados",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios?nome=zzzzzzz",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios"
+							],
+							"query": [
+								{
+									"key": "nome",
+									"value": "zzzzzzz"
+								}
+							]
+						},
+						"description": "Quando nada corresponde ao termo, a resposta e 200 com vetor vazio.\n\nResponder 404 seria incorreto: a colecao filtrada existe como recurso, apenas nao contem elementos. O 404 afirmaria que a rota nao existe.\n\nCenarios do catalogo: USU-27."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK, e nao 404', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Retorna vetor vazio', function () {",
+									"    pm.expect(pm.response.json()).to.be.an('array').that.is.empty;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Busca sem filtro",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios"
+							],
+							"query": []
+						},
+						"description": "Omitindo o parametro, retorna todos os usuarios.\n\nCenarios do catalogo: USU-27."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Retorna ao menos os dois usuarios cadastrados', function () {",
+									"    pm.expect(pm.response.json().length).to.be.at.least(2);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Busca paginada (v2)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v2/usuarios?nome=a&page=0&size=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v2",
+								"usuarios"
+							],
+							"query": [
+								{
+									"key": "nome",
+									"value": "a"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Mesma consulta, formato de resposta distinto. Um consumidor da v1 nao consegue processar este corpo, o que caracteriza a quebra de contrato que motiva o incremento de versao.\n\nCenarios do catalogo: USU-28."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const corpo = pm.response.json();",
+									"",
+									"pm.test('Resposta e objeto, nao vetor', function () {",
+									"    pm.expect(corpo).to.be.an('object');",
+									"    pm.expect(corpo).to.not.be.an('array');",
+									"});",
+									"",
+									"pm.test('Traz os metadados de paginacao', function () {",
+									"    ['conteudo', 'pagina', 'tamanho', 'totalElementos', 'totalPaginas', 'ultima']",
+									"        .forEach(function (campo) {",
+									"            pm.expect(corpo).to.have.property(campo);",
+									"        });",
+									"});",
+									"",
+									"pm.test('O vetor de usuarios esta em conteudo', function () {",
+									"    pm.expect(corpo.conteudo).to.be.an('array');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "6. Validacao de login (obrigatoria)",
+			"description": "Verificacao de credenciais contra os dados do banco, sem Spring Security - conforme faculta o enunciado. A senha e conferida por comparacao de hashes BCrypt, jamais em texto.\n\n**Nota de seguranca:** a resposta de falha e identica para login inexistente e senha incorreta, tanto em mensagem quanto em tempo de processamento. Diferenciar os dois casos permitiria descobrir quais logins existem por tentativa e erro.\n\nA primeira requisicao usa a senha anterior a troca realizada na pasta 3: a falha comprova que a substituicao foi efetivada.",
+			"item": [
+				{
+					"name": "Senha antiga apos a troca (deve falhar)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							],
+							"query": []
+						},
+						"description": "Comprova que a troca de senha da pasta 3 gravou o novo hash.\n\nCenarios do catalogo: LOG-05.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"maria.souza\",\n  \"senha\": \"SenhaSegura123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 401 Unauthorized', function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"// A RFC 7807 define o tipo de midia application/problem+json.",
+									"pm.test('Content-Type e application/problem+json', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"});",
+									"",
+									"const corpo = pm.response.json();",
+									"",
+									"pm.test('Traz os cinco campos da RFC 7807', function () {",
+									"    ['type', 'title', 'status', 'detail', 'instance'].forEach(function (campo) {",
+									"        pm.expect(corpo).to.have.property(campo);",
+									"    });",
+									"});",
+									"",
+									"// Extensoes proprias definidas pelo projeto.",
+									"pm.test('Traz o instante da falha', function () {",
+									"    pm.expect(corpo).to.have.property('momento');",
+									"});",
+									"",
+									"// O comportamento padrao do Spring preenche type com 'about:blank'.",
+									"pm.test('O campo type identifica a categoria do erro', function () {",
+									"    pm.expect(corpo.type).to.not.equal('about:blank');",
+									"    pm.expect(corpo.type).to.include('/problemas/');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Login inexistente",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							],
+							"query": []
+						},
+						"description": "A resposta e deliberadamente indistinguivel da de senha incorreta.\n\nCenarios do catalogo: LOG-02.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"usuario.inexistente\",\n  \"senha\": \"QualquerSenha1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 401 Unauthorized', function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"// Mensagem generica: distinguir permitiria enumerar os logins cadastrados.",
+									"pm.test('Mensagem nao revela se o login existe', function () {",
+									"    const detalhe = pm.response.json().detail.toLowerCase();",
+									"    pm.expect(detalhe).to.not.include('não encontrado');",
+									"    pm.expect(detalhe).to.not.include('inexistente');",
+									"});",
+									"",
+									"pm.collectionVariables.set('detalheLoginInexistente', pm.response.json().detail);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Campos obrigatorios ausentes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							],
+							"query": []
+						},
+						"description": "Cenarios do catalogo: LOG-07.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 400 Bad Request', function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Credenciais validas",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							],
+							"query": []
+						},
+						"description": "Autenticacao com a senha definida na pasta 3 e o login definido na pasta 4.\n\nCenarios do catalogo: LOG-01 · USU-29.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"maria.souza\",\n  \"senha\": \"SenhaNova456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const corpo = pm.response.json();",
+									"",
+									"pm.test('Identifica o usuario autenticado', function () {",
+									"    pm.expect(corpo.id).to.eql(Number(pm.collectionVariables.get('idCliente')));",
+									"    pm.expect(corpo.nome).to.eql('Maria Silva Souza');",
+									"    pm.expect(corpo.tipo).to.eql('CLIENTE');",
+									"});",
+									"",
+									"// A operacao responde se as credenciais conferem, nao quem e o usuario.",
+									"pm.test('Nao devolve dados de perfil', function () {",
+									"    pm.expect(corpo).to.not.have.property('email');",
+									"    pm.expect(corpo).to.not.have.property('endereco');",
+									"    pm.expect(corpo).to.not.have.property('documento');",
+									"});",
+									"",
+									"// A senha nao existe no DTO de resposta - o vazamento e impossivel",
+									"// por construcao, e nao por ocultacao.",
+									"pm.test('A resposta nao expoe a senha', function () {",
+									"    pm.expect(pm.response.text()).to.not.include('\"senha\"');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "7. Consulta por identificador",
+			"description": "Cenarios complementares, alem dos seis exigidos pelo enunciado.",
+			"item": [
+				{
+					"name": "Consulta de usuario existente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idCliente}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idCliente}}"
+							],
+							"query": []
+						},
+						"description": "Cenarios do catalogo: USU-24."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Retorna o usuario solicitado', function () {",
+									"    pm.expect(pm.response.json().id)",
+									"        .to.eql(Number(pm.collectionVariables.get('idCliente')));",
+									"});",
+									"",
+									"// A senha nao existe no DTO de resposta - o vazamento e impossivel",
+									"// por construcao, e nao por ocultacao.",
+									"pm.test('A resposta nao expoe a senha', function () {",
+									"    pm.expect(pm.response.text()).to.not.include('\"senha\"');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Consulta de usuario inexistente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"999999"
+							],
+							"query": []
+						},
+						"description": "Cenarios do catalogo: USU-24 · ERR-01."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 404 Not Found', function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"// A RFC 7807 define o tipo de midia application/problem+json.",
+									"pm.test('Content-Type e application/problem+json', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"});",
+									"",
+									"const corpo = pm.response.json();",
+									"",
+									"pm.test('Traz os cinco campos da RFC 7807', function () {",
+									"    ['type', 'title', 'status', 'detail', 'instance'].forEach(function (campo) {",
+									"        pm.expect(corpo).to.have.property(campo);",
+									"    });",
+									"});",
+									"",
+									"// Extensoes proprias definidas pelo projeto.",
+									"pm.test('Traz o instante da falha', function () {",
+									"    pm.expect(corpo).to.have.property('momento');",
+									"});",
+									"",
+									"// O comportamento padrao do Spring preenche type com 'about:blank'.",
+									"pm.test('O campo type identifica a categoria do erro', function () {",
+									"    pm.expect(corpo.type).to.not.equal('about:blank');",
+									"    pm.expect(corpo.type).to.include('/problemas/');",
+									"});",
+									"",
+									"pm.test('O campo instance registra a requisicao que falhou', function () {",
+									"    pm.expect(pm.response.json().instance).to.eql('/api/v1/usuarios/999999');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "8. Exclusao (e limpeza da base)",
+			"description": "Exclui os usuarios criados pela colecao.\n\nA exclusao anonimiza o usuario: a linha continua no banco, com o nome \"Usuario removido\" e sem dados pessoais. Ele some das consultas e do login, e o e-mail, o login e o documento ficam livres. Por isso a colecao pode ser executada de novo: o cadastro da pasta 1 volta a ser aceito.",
+			"item": [
+				{
+					"name": "Excluir o dono de restaurante",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idDono}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idDono}}"
+							],
+							"query": []
+						},
+						"description": "Cenarios do catalogo: EXC-01."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									"",
+									"pm.test('Resposta sem corpo', function () {",
+									"    pm.expect(pm.response.text()).to.be.empty;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Excluir novamente (deve falhar)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idDono}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idDono}}"
+							],
+							"query": []
+						},
+						"description": "Confirma que o usuario excluido nao e mais encontrado.\n\nCenarios do catalogo: EXC-02."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 404 Not Found', function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"// A RFC 7807 define o tipo de midia application/problem+json.",
+									"pm.test('Content-Type e application/problem+json', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"});",
+									"",
+									"const corpo = pm.response.json();",
+									"",
+									"pm.test('Traz os cinco campos da RFC 7807', function () {",
+									"    ['type', 'title', 'status', 'detail', 'instance'].forEach(function (campo) {",
+									"        pm.expect(corpo).to.have.property(campo);",
+									"    });",
+									"});",
+									"",
+									"// Extensoes proprias definidas pelo projeto.",
+									"pm.test('Traz o instante da falha', function () {",
+									"    pm.expect(corpo).to.have.property('momento');",
+									"});",
+									"",
+									"// O comportamento padrao do Spring preenche type com 'about:blank'.",
+									"pm.test('O campo type identifica a categoria do erro', function () {",
+									"    pm.expect(corpo.type).to.not.equal('about:blank');",
+									"    pm.expect(corpo.type).to.include('/problemas/');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Excluir o cliente",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idCliente}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idCliente}}"
+							],
+							"query": []
+						},
+						"description": "Ultima requisicao da colecao. Depois dela, a colecao pode ser executada de novo.\n\nCenarios do catalogo: EXC-01."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									"",
+									"pm.collectionVariables.unset('idCliente');",
+									"pm.collectionVariables.unset('idDono');",
+									"pm.collectionVariables.unset('detalheLoginInexistente');",
+									"console.log('Base restaurada - a colecao pode ser executada novamente.');"
+								]
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}
