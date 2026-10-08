@@ -10,6 +10,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,5 +30,15 @@ class TratadorDeErrosTest {
 
         /* assert */
         assertThat(resposta.getBody()).isEqualTo("texto simples");
+    }
+
+    @Test
+    @DisplayName("ERR-01 · o momento sai sempre com os segundos, mesmo quando são zero, e sem frações")
+    void deveFormatarOMomentoSempreComSegundos() {
+        /* act + assert */
+        assertThat(TratadorDeErros.momento(LocalDateTime.of(2026, 10, 8, 10, 15, 0, 500_000_000)))
+                .isEqualTo("2026-10-08T10:15:00");
+        assertThat(TratadorDeErros.momento(LocalDateTime.of(2026, 10, 8, 10, 15, 42)))
+                .isEqualTo("2026-10-08T10:15:42");
     }
 }
