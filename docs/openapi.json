@@ -1,50 +1,50 @@
 {
     "openapi": "3.1.0",
     "info": {
-        "title": "API de Gestao de Usuarios - Restaurantes",
-        "description": "Sistema compartilhado de gestao para restaurantes - Fase 1.\n\nContempla o cadastro de usuarios em dois tipos (cliente e dono de restaurante), atualizacao de dados, troca de senha em endpoint proprio, busca por nome e validacao de credenciais.\n\n**Versionamento:** a versao integra o caminho da rota (/api/v1/...). Alteracoes compativeis - como a inclusao de um campo na resposta - permanecem na versao corrente. Apenas mudancas que quebram consumidores existentes originam uma nova versao, como ocorre em /api/v2/usuarios, cuja busca por nome devolve um objeto paginado no lugar de uma lista.\n\n**Erros:** todas as respostas de erro seguem a RFC 7807 (ProblemDetail).",
+        "title": "API de Gestão de Restaurantes",
+        "description": "Sistema compartilhado de gestão para restaurantes - Fase 2.\n\nGerencia usuários e seus tipos, restaurantes com horários de funcionamento e os itens do cardápio de cada restaurante.\n\n**Versionamento:** a versão faz parte da rota (/api/v1/...). Mudanças compatíveis, como um campo novo na resposta, ficam na versão atual. Só uma mudança que quebra quem já consome a API gera versão nova, como /api/v2/usuarios, cuja busca por nome devolve uma página em vez de uma lista. Recursos novos nascem em v1.\n\n**Erros:** todas as respostas de erro seguem a RFC 9457 (ProblemDetail). O campo type aponta para /problemas/{identificador}, que descreve o problema.",
         "contact": {
             "name": "Thiago Wippel Chaves",
             "email": "thiagowippel@hotmail.com"
         },
         "license": {
-            "name": "Uso academico - FIAP Pos Tech"
+            "name": "Uso acadêmico - FIAP Pós Tech"
         },
         "version": "v1"
     },
     "servers": [
         {
             "url": "http://localhost:8080",
-            "description": "Generated server url"
+            "description": "docker compose (APP_PORT padrão)"
         }
     ],
     "tags": [
         {
-            "name": "Usuarios",
-            "description": "Cadastro, consulta, atualizacao e exclusao de usuarios"
+            "name": "Usuários v2",
+            "description": "Busca de usuários com paginação"
         },
         {
-            "name": "Autenticacao",
-            "description": "Validacao de login e senha"
+            "name": "Usuários",
+            "description": "Cadastro, consulta, atualização, troca de senha e exclusão de usuários"
         },
         {
-            "name": "Usuarios v2",
-            "description": "Busca de usuarios com paginacao"
+            "name": "Autenticação",
+            "description": "Validação de login e senha"
         }
     ],
     "paths": {
         "/api/v1/usuarios/{id}": {
             "get": {
                 "tags": [
-                    "Usuarios"
+                    "Usuários"
                 ],
-                "summary": "Consulta um usuario pelo identificador",
+                "summary": "Consulta um usuário pelo id",
                 "operationId": "buscarPorId",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Identificador do usuario",
+                        "description": "Id do usuário",
                         "required": true,
                         "schema": {
                             "type": "integer",
@@ -55,271 +55,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Usuario encontrado",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/UsuarioResponse"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Usuario inexistente",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
-                                "example": {
-                                    "type": "https://github.com/ThiagoWippel/fiap-adj-tech-challenge-fase-1/blob/main/README.md#recurso-nao-encontrado",
-                                    "title": "Recurso nao encontrado",
-                                    "status": 404,
-                                    "detail": "Usuario nao encontrado para o id 99",
-                                    "instance": "/api/v1/usuarios/99",
-                                    "momento": "2026-08-21T10:30:00"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "Usuarios"
-                ],
-                "summary": "Atualiza os dados de um usuario",
-                "description": "Atualiza nome, e-mail, login e endereco.\n\nNao aceita senha - a troca possui endpoint proprio. Nao aceita tipo nem documento: sao imutaveis apos o cadastro, por decorrerem da identidade do usuario e nao de seus dados de contato.",
-                "operationId": "atualizar",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/AtualizarUsuarioRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Usuario atualizado",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/UsuarioResponse"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Campos invalidos",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Usuario inexistente",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                }
-                            }
-                        }
-                    },
-                    "409": {
-                        "description": "E-mail ou login pertencente a outro usuario",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Usuarios"
-                ],
-                "summary": "Exclui um usuario",
-                "description": "Remove definitivamente o registro.\n\nA exclusao logica foi avaliada e descartada: manter o registro inativo preservaria o e-mail ocupado na restricao de unicidade, impedindo que a mesma pessoa se recadastrasse.",
-                "operationId": "excluir",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Usuario excluido"
-                    },
-                    "404": {
-                        "description": "Usuario inexistente",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/usuarios/{id}/senha": {
-            "put": {
-                "tags": [
-                    "Usuarios"
-                ],
-                "summary": "Troca a senha do usuario",
-                "description": "Endpoint exclusivo para troca de senha, separado da atualizacao dos demais dados conforme exige o enunciado.\n\n**Exige o envio da senha atual.** Trata-se de decisao de seguranca do projeto - o enunciado nao a menciona - adotada como protecao contra alteracao indevida em sessao deixada aberta.\n\nO verbo PUT foi escolhido por substituir a senha integralmente. PATCH nao consta do material da disciplina e nao se aplica: nao ha modificacao parcial de uma senha.",
-                "operationId": "trocarSenha",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/TrocarSenhaRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "204": {
-                        "description": "Senha alterada"
-                    },
-                    "400": {
-                        "description": "Nova senha fora das regras",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Senha atual incorreta",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
-                                "example": {
-                                    "type": "https://github.com/ThiagoWippel/fiap-adj-tech-challenge-fase-1/blob/main/README.md#credenciais-invalidas",
-                                    "title": "Credenciais invalidas",
-                                    "status": 401,
-                                    "detail": "A senha atual informada esta incorreta",
-                                    "instance": "/api/v1/usuarios/1/senha",
-                                    "momento": "2026-08-21T10:30:00"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Usuario inexistente",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/usuarios": {
-            "get": {
-                "tags": [
-                    "Usuarios"
-                ],
-                "summary": "Busca usuarios pelo nome",
-                "description": "Retorna os usuarios cujo nome contem o termo informado, sem diferenciar maiusculas de minusculas. Omitindo o parametro, retorna todos.\n\nQuando nenhum usuario corresponde ao termo, a resposta e 200 com lista vazia: a colecao filtrada existe como recurso, apenas nao contem elementos.",
-                "operationId": "buscarPorNome",
-                "parameters": [
-                    {
-                        "name": "nome",
-                        "in": "query",
-                        "description": "Termo de busca",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "maria"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Lista de usuarios, possivelmente vazia",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/UsuarioResponse"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Usuarios"
-                ],
-                "summary": "Cadastra um novo usuario",
-                "description": "Cria um usuario do tipo CLIENTE ou DONO_RESTAURANTE.\n\nO documento exigido depende do tipo: CPF para cliente, CNPJ para dono de restaurante. Ambos sao gravados apenas com digitos, sem pontuacao.\n\nE-mail, login e documento sao unicos no sistema.",
-                "operationId": "cadastrar",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CriarUsuarioRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "201": {
-                        "description": "Usuario cadastrado. O cabecalho Location aponta para o recurso criado.",
+                        "description": "Usuário encontrado",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -337,58 +73,481 @@
                                         "numero": "123",
                                         "complemento": "Apto 45",
                                         "bairro": "Centro",
-                                        "cidade": "Camboriu",
+                                        "cidade": "Itajaí",
                                         "estado": "SC",
-                                        "cep": "88340000"
+                                        "cep": "88301000"
                                     },
-                                    "dataCriacao": "2026-08-21T10:30:00",
-                                    "dataUltimaAlteracao": "2026-08-21T10:30:00"
+                                    "dataCriacao": "2026-10-08T10:30:00",
+                                    "dataUltimaAlteracao": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuário inexistente ou removido",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Usuário 99 não encontrado.",
+                                    "instance": "/api/v1/usuarios/99",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Atualiza os dados de um usuário",
+                "description": "Altera nome, e-mail, login e endereço. A senha e o tipo têm endpoints próprios.",
+                "operationId": "atualizar",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AtualizarUsuarioRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Usuário atualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UsuarioResponse"
+                                },
+                                "example": {
+                                    "id": 1,
+                                    "nome": "Maria Silva",
+                                    "email": "maria.silva@exemplo.com",
+                                    "login": "maria.silva",
+                                    "tipo": "CLIENTE",
+                                    "documento": "12345678909",
+                                    "endereco": {
+                                        "rua": "Rua das Flores",
+                                        "numero": "123",
+                                        "complemento": "Apto 45",
+                                        "bairro": "Centro",
+                                        "cidade": "Itajaí",
+                                        "estado": "SC",
+                                        "cep": "88301000"
+                                    },
+                                    "dataCriacao": "2026-10-08T10:30:00",
+                                    "dataUltimaAlteracao": "2026-10-08T10:30:00"
                                 }
                             }
                         }
                     },
                     "400": {
-                        "description": "Campos invalidos ou documento incompativel com o tipo informado",
+                        "description": "Campo inválido",
                         "content": {
                             "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
                                 "example": {
-                                    "type": "https://github.com/ThiagoWippel/fiap-adj-tech-challenge-fase-1/blob/main/README.md#dados-invalidos",
-                                    "title": "Dados invalidos",
+                                    "type": "http://localhost:8080/problemas/dados-invalidos",
+                                    "title": "Dados inválidos",
                                     "status": 400,
-                                    "detail": "Um ou mais campos da requisicao nao passaram na validacao",
+                                    "detail": "Um ou mais campos da requisição não passaram na validação.",
                                     "instance": "/api/v1/usuarios",
-                                    "momento": "2026-08-21T10:30:00",
+                                    "momento": "2026-10-08T10:30:00",
                                     "erros": [
                                         {
                                             "campo": "email",
-                                            "mensagem": "O e-mail informado nao e valido"
+                                            "mensagem": "O e-mail informado não é válido."
                                         },
                                         {
                                             "campo": "senha",
-                                            "mensagem": "A senha deve ter entre 8 e 72 caracteres"
+                                            "mensagem": "A senha deve ter entre 8 e 72 caracteres."
                                         }
                                     ]
                                 }
                             }
                         }
                     },
-                    "409": {
-                        "description": "E-mail, login ou documento ja cadastrado",
+                    "404": {
+                        "description": "Usuário inexistente ou removido",
                         "content": {
                             "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
                                 "example": {
-                                    "type": "https://github.com/ThiagoWippel/fiap-adj-tech-challenge-fase-1/blob/main/README.md#conflito-de-dados",
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Usuário 99 não encontrado.",
+                                    "instance": "/api/v1/usuarios/99",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "E-mail ou login de outro usuário",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/conflito-de-dados",
                                     "title": "Conflito de dados",
                                     "status": 409,
-                                    "detail": "O e-mail informado ja esta cadastrado",
+                                    "detail": "O e-mail informado já está cadastrado.",
                                     "instance": "/api/v1/usuarios",
-                                    "momento": "2026-08-21T10:30:00"
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Exclui um usuário",
+                "description": "Anonimiza o registro: o nome vira \"Usuário removido\" e os dados pessoais são apagados. Depois disso o usuário não aparece nas buscas, não faz login, e o e-mail, o login e o documento ficam livres para um novo cadastro.",
+                "operationId": "excluir",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Usuário excluído"
+                    },
+                    "404": {
+                        "description": "Usuário inexistente ou já removido",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Usuário 99 não encontrado.",
+                                    "instance": "/api/v1/usuarios/99",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/usuarios/{id}/senha": {
+            "put": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Troca a senha",
+                "description": "Exige a senha atual. A nova senha deve ter de 8 a 72 caracteres.",
+                "operationId": "trocarSenha",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TrocarSenhaRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "204": {
+                        "description": "Senha trocada"
+                    },
+                    "400": {
+                        "description": "Nova senha fora das regras",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/dados-invalidos",
+                                    "title": "Dados inválidos",
+                                    "status": 400,
+                                    "detail": "Um ou mais campos da requisição não passaram na validação.",
+                                    "instance": "/api/v1/usuarios",
+                                    "momento": "2026-10-08T10:30:00",
+                                    "erros": [
+                                        {
+                                            "campo": "email",
+                                            "mensagem": "O e-mail informado não é válido."
+                                        },
+                                        {
+                                            "campo": "senha",
+                                            "mensagem": "A senha deve ter entre 8 e 72 caracteres."
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Senha atual incorreta",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/credenciais-invalidas",
+                                    "title": "Credenciais inválidas",
+                                    "status": 401,
+                                    "detail": "A senha atual informada está incorreta.",
+                                    "instance": "/api/v1/usuarios/1/senha",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuário inexistente ou removido",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Usuário 99 não encontrado.",
+                                    "instance": "/api/v1/usuarios/99",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/usuarios": {
+            "get": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Busca usuários pelo nome",
+                "description": "Devolve os usuários cujo nome contém o termo, sem diferenciar maiúsculas nem acentos, em ordem alfabética. Sem o termo, devolve todos. Nenhum resultado é uma lista vazia, não um 404. A versão paginada fica em /api/v2/usuarios.",
+                "operationId": "buscarPorNome",
+                "parameters": [
+                    {
+                        "name": "nome",
+                        "in": "query",
+                        "description": "Trecho do nome",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "maria"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de usuários, possivelmente vazia",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/UsuarioResponse"
+                                    }
+                                },
+                                "example": [
+                                    {
+                                        "id": 1,
+                                        "nome": "Maria Silva",
+                                        "email": "maria.silva@exemplo.com",
+                                        "login": "maria.silva",
+                                        "tipo": "CLIENTE",
+                                        "documento": "12345678909",
+                                        "endereco": {
+                                            "rua": "Rua das Flores",
+                                            "numero": "123",
+                                            "complemento": "Apto 45",
+                                            "bairro": "Centro",
+                                            "cidade": "Itajaí",
+                                            "estado": "SC",
+                                            "cep": "88301000"
+                                        },
+                                        "dataCriacao": "2026-10-08T10:30:00",
+                                        "dataUltimaAlteracao": "2026-10-08T10:30:00"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Parâmetro em formato inválido",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/dados-invalidos",
+                                    "title": "Dados inválidos",
+                                    "status": 400,
+                                    "detail": "Um ou mais campos da requisição não passaram na validação.",
+                                    "instance": "/api/v1/usuarios",
+                                    "momento": "2026-10-08T10:30:00",
+                                    "erros": [
+                                        {
+                                            "campo": "email",
+                                            "mensagem": "O e-mail informado não é válido."
+                                        },
+                                        {
+                                            "campo": "senha",
+                                            "mensagem": "A senha deve ter entre 8 e 72 caracteres."
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Cadastra um usuário",
+                "description": "O tipo é o código de um tipo de usuário, como CLIENTE ou DONO_RESTAURANTE. Dono de restaurante informa CNPJ; os demais tipos informam CPF. Os documentos são aceitos com ou sem pontuação e gravados só com dígitos. E-mail, login e documento são únicos.",
+                "operationId": "cadastrar",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CriarUsuarioRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuário cadastrado. O cabeçalho Location aponta para ele.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UsuarioResponse"
+                                },
+                                "example": {
+                                    "id": 1,
+                                    "nome": "Maria Silva",
+                                    "email": "maria.silva@exemplo.com",
+                                    "login": "maria.silva",
+                                    "tipo": "CLIENTE",
+                                    "documento": "12345678909",
+                                    "endereco": {
+                                        "rua": "Rua das Flores",
+                                        "numero": "123",
+                                        "complemento": "Apto 45",
+                                        "bairro": "Centro",
+                                        "cidade": "Itajaí",
+                                        "estado": "SC",
+                                        "cep": "88301000"
+                                    },
+                                    "dataCriacao": "2026-10-08T10:30:00",
+                                    "dataUltimaAlteracao": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Campo inválido, ou documento que não corresponde ao tipo",
+                        "content": {
+                            "application/problem+json": {
+                                "examples": {
+                                    "Campos inválidos": {
+                                        "description": "Campos inválidos",
+                                        "value": {
+                                            "type": "http://localhost:8080/problemas/dados-invalidos",
+                                            "title": "Dados inválidos",
+                                            "status": 400,
+                                            "detail": "Um ou mais campos da requisição não passaram na validação.",
+                                            "instance": "/api/v1/usuarios",
+                                            "momento": "2026-10-08T10:30:00",
+                                            "erros": [
+                                                {
+                                                    "campo": "email",
+                                                    "mensagem": "O e-mail informado não é válido."
+                                                },
+                                                {
+                                                    "campo": "senha",
+                                                    "mensagem": "A senha deve ter entre 8 e 72 caracteres."
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "Documento exigido pelo tipo": {
+                                        "description": "Documento exigido pelo tipo",
+                                        "value": {
+                                            "type": "http://localhost:8080/problemas/regra-de-negocio",
+                                            "title": "Regra de negócio violada",
+                                            "status": 400,
+                                            "detail": "O CPF é obrigatório para usuários do tipo Cliente.",
+                                            "instance": "/api/v1/usuarios",
+                                            "momento": "2026-10-08T10:30:00"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Código de tipo inexistente",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Tipo de usuário ENTREGADOR não encontrado.",
+                                    "instance": "/api/v1/usuarios",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "E-mail, login ou documento já cadastrado",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/conflito-de-dados",
+                                    "title": "Conflito de dados",
+                                    "status": 409,
+                                    "detail": "O e-mail informado já está cadastrado.",
+                                    "instance": "/api/v1/usuarios",
+                                    "momento": "2026-10-08T10:30:00"
                                 }
                             }
                         }
@@ -399,10 +558,10 @@
         "/api/v1/auth/login": {
             "post": {
                 "tags": [
-                    "Autenticacao"
+                    "Autenticação"
                 ],
-                "summary": "Valida as credenciais de um usuario",
-                "description": "Confere se login e senha correspondem a um usuario cadastrado.\n\nO retorno traz apenas identificador, nome e tipo. Nao e uma consulta de perfil: a operacao responde se as credenciais conferem, e nao quem e o usuario.\n\n**Nota de seguranca:** a resposta de falha e identica para login inexistente e senha incorreta, tanto em mensagem quanto em tempo de processamento. Diferenciar os dois casos permitiria descobrir quais logins existem por tentativa e erro.",
+                "summary": "Valida login e senha e emite um token",
+                "description": "Devolve quem autenticou e um JWT assinado, com a data de expiração. Nesta fase nenhum endpoint exige o token. Login inexistente e senha errada recebem a mesma resposta, para não revelar quais logins existem.",
                 "operationId": "autenticar",
                 "requestBody": {
                     "content": {
@@ -416,7 +575,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Credenciais validas",
+                        "description": "Credenciais válidas",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -425,7 +584,9 @@
                                 "example": {
                                     "id": 1,
                                     "nome": "Maria Silva",
-                                    "tipo": "CLIENTE"
+                                    "tipo": "CLIENTE",
+                                    "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidGlwbyI6IkNMSUVOVEUifQ.assinatura",
+                                    "expiraEm": "2026-10-08T11:30:00"
                                 }
                             }
                         }
@@ -434,26 +595,38 @@
                         "description": "Login ou senha ausente",
                         "content": {
                             "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/dados-invalidos",
+                                    "title": "Dados inválidos",
+                                    "status": 400,
+                                    "detail": "Um ou mais campos da requisição não passaram na validação.",
+                                    "instance": "/api/v1/usuarios",
+                                    "momento": "2026-10-08T10:30:00",
+                                    "erros": [
+                                        {
+                                            "campo": "email",
+                                            "mensagem": "O e-mail informado não é válido."
+                                        },
+                                        {
+                                            "campo": "senha",
+                                            "mensagem": "A senha deve ter entre 8 e 72 caracteres."
+                                        }
+                                    ]
                                 }
                             }
                         }
                     },
                     "401": {
-                        "description": "Credenciais invalidas",
+                        "description": "Login ou senha inválidos",
                         "content": {
                             "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
                                 "example": {
-                                    "type": "https://github.com/ThiagoWippel/fiap-adj-tech-challenge-fase-1/blob/main/README.md#credenciais-invalidas",
-                                    "title": "Credenciais invalidas",
+                                    "type": "http://localhost:8080/problemas/credenciais-invalidas",
+                                    "title": "Credenciais inválidas",
                                     "status": 401,
-                                    "detail": "Login ou senha invalidos",
+                                    "detail": "Login ou senha inválidos.",
                                     "instance": "/api/v1/auth/login",
-                                    "momento": "2026-08-21T10:30:00"
+                                    "momento": "2026-10-08T10:30:00"
                                 }
                             }
                         }
@@ -464,16 +637,16 @@
         "/api/v2/usuarios": {
             "get": {
                 "tags": [
-                    "Usuarios v2"
+                    "Usuários v2"
                 ],
-                "summary": "Busca usuarios pelo nome, com paginacao",
-                "description": "Mesma consulta da versao 1, com resposta em formato distinto.\n\n**Mudanca incompativel em relacao a v1:** onde a versao anterior devolve um vetor de usuarios, esta devolve um objeto contendo o vetor no campo \"conteudo\" acompanhado dos metadados de paginacao. Um consumidor da v1 nao consegue processar esta resposta, o que caracteriza a quebra de contrato que motiva o incremento de versao.",
+                "summary": "Busca usuários pelo nome, com paginação",
+                "description": "Mesma busca da v1, com outra resposta: em vez da lista, um objeto com a lista em \"conteudo\" e os dados da página. Por isso é uma versão nova: quem consome a v1 não lê esta resposta. São 10 itens por página por padrão, no máximo 50, em ordem de nome. O sort aceita id, nome, email, login, dataCriacao e dataUltimaAlteracao.",
                 "operationId": "buscarPorNome_1",
                 "parameters": [
                     {
                         "name": "nome",
                         "in": "query",
-                        "description": "Termo de busca",
+                        "description": "Trecho do nome",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -481,19 +654,41 @@
                         "example": "maria"
                     },
                     {
-                        "name": "paginacao",
+                        "name": "page",
                         "in": "query",
-                        "required": true,
+                        "description": "Número da página, a partir de 0",
                         "schema": {
-                            "$ref": "#/components/schemas/Pageable"
+                            "type": "integer",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "description": "Itens por página, no máximo 50",
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Campo e direção, como nome,desc",
+                        "schema": {
+                            "type": "string",
+                            "default": "nome,asc"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Pagina de resultados",
+                        "description": "Página de usuários",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginaResponse"
+                                },
                                 "example": {
                                     "conteudo": [
                                         {
@@ -508,12 +703,12 @@
                                                 "numero": "123",
                                                 "complemento": "Apto 45",
                                                 "bairro": "Centro",
-                                                "cidade": "Camboriu",
+                                                "cidade": "Itajaí",
                                                 "estado": "SC",
-                                                "cep": "88340000"
+                                                "cep": "88301000"
                                             },
-                                            "dataCriacao": "2026-08-21T10:30:00",
-                                            "dataUltimaAlteracao": "2026-08-21T10:30:00"
+                                            "dataCriacao": "2026-10-08T10:30:00",
+                                            "dataUltimaAlteracao": "2026-10-08T10:30:00"
                                         }
                                     ],
                                     "pagina": 0,
@@ -521,6 +716,21 @@
                                     "totalElementos": 1,
                                     "totalPaginas": 1,
                                     "ultima": true
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Ordenação por campo não aceito",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/requisicao-invalida",
+                                    "title": "Requisição inválida",
+                                    "status": 400,
+                                    "detail": "Não é possível ordenar por senha. Campos aceitos: dataCriacao, dataUltimaAlteracao, email, id, login, nome.",
+                                    "instance": "/api/v2/usuarios",
+                                    "momento": "2026-10-08T10:30:00"
                                 }
                             }
                         }
@@ -533,7 +743,6 @@
         "schemas": {
             "AtualizarUsuarioRequest": {
                 "type": "object",
-                "description": "Dados para atualizacao de um usuario existente",
                 "properties": {
                     "nome": {
                         "type": "string",
@@ -551,9 +760,8 @@
                     "login": {
                         "type": "string",
                         "example": "maria.souza",
-                        "maxLength": 50,
-                        "minLength": 4,
-                        "pattern": "^[A-Za-z0-9._-]+$"
+                        "minLength": 1,
+                        "pattern": "[A-Za-z0-9._-]{4,50}"
                     },
                     "endereco": {
                         "$ref": "#/components/schemas/EnderecoRequest"
@@ -568,7 +776,6 @@
             },
             "EnderecoRequest": {
                 "type": "object",
-                "description": "Endereco do usuario",
                 "properties": {
                     "rua": {
                         "type": "string",
@@ -597,7 +804,7 @@
                     },
                     "cidade": {
                         "type": "string",
-                        "example": "Camboriu",
+                        "example": "Itajaí",
                         "maxLength": 80,
                         "minLength": 0
                     },
@@ -605,14 +812,14 @@
                         "type": "string",
                         "example": "SC",
                         "minLength": 1,
-                        "pattern": "^[A-Za-z]{2}$"
+                        "pattern": "[A-Za-z]{2}"
                     },
                     "cep": {
                         "type": "string",
-                        "description": "Aceita com ou sem pontuacao",
-                        "example": "88340-000",
+                        "description": "Com ou sem hífen",
+                        "example": "88301-000",
                         "minLength": 1,
-                        "pattern": "^\\d{5}-?\\d{3}$"
+                        "pattern": "\\d{5}-?\\d{3}"
                     }
                 },
                 "required": [
@@ -624,36 +831,8 @@
                     "rua"
                 ]
             },
-            "ProblemDetail": {
-                "type": "object",
-                "properties": {
-                    "type": {
-                        "type": "string",
-                        "format": "uri"
-                    },
-                    "title": {
-                        "type": "string"
-                    },
-                    "status": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "detail": {
-                        "type": "string"
-                    },
-                    "instance": {
-                        "type": "string",
-                        "format": "uri"
-                    },
-                    "properties": {
-                        "type": "object",
-                        "additionalProperties": {}
-                    }
-                }
-            },
             "EnderecoResponse": {
                 "type": "object",
-                "description": "Endereco do usuario",
                 "properties": {
                     "rua": {
                         "type": "string"
@@ -680,60 +859,45 @@
             },
             "UsuarioResponse": {
                 "type": "object",
-                "description": "Dados publicos de um usuario",
                 "properties": {
                     "id": {
                         "type": "integer",
-                        "format": "int64",
-                        "example": 1
+                        "format": "int64"
                     },
                     "nome": {
-                        "type": "string",
-                        "example": "Maria Silva"
+                        "type": "string"
                     },
                     "email": {
-                        "type": "string",
-                        "example": "maria.silva@exemplo.com"
+                        "type": "string"
                     },
                     "login": {
-                        "type": "string",
-                        "example": "maria.silva"
+                        "type": "string"
                     },
                     "tipo": {
-                        "type": "string",
-                        "enum": [
-                            "CLIENTE",
-                            "DONO_RESTAURANTE"
-                        ],
-                        "example": "CLIENTE"
+                        "type": "string"
                     },
                     "documento": {
-                        "type": "string",
-                        "description": "CPF para cliente, CNPJ para dono de restaurante",
-                        "example": "12345678909"
+                        "type": "string"
                     },
                     "endereco": {
                         "$ref": "#/components/schemas/EnderecoResponse"
                     },
                     "dataCriacao": {
                         "type": "string",
-                        "format": "date-time",
-                        "example": "2026-08-21T10:30:00"
+                        "format": "date-time"
                     },
                     "dataUltimaAlteracao": {
                         "type": "string",
-                        "format": "date-time",
-                        "example": "2026-08-21T14:45:00"
+                        "format": "date-time"
                     }
                 }
             },
             "TrocarSenhaRequest": {
                 "type": "object",
-                "description": "Dados para troca de senha",
                 "properties": {
                     "senhaAtual": {
                         "type": "string",
-                        "example": "SenhaAntiga123",
+                        "example": "SenhaSegura123",
                         "minLength": 1
                     },
                     "novaSenha": {
@@ -750,7 +914,6 @@
             },
             "CriarUsuarioRequest": {
                 "type": "object",
-                "description": "Dados para cadastro de um novo usuario",
                 "properties": {
                     "nome": {
                         "type": "string",
@@ -768,9 +931,8 @@
                     "login": {
                         "type": "string",
                         "example": "maria.silva",
-                        "maxLength": 50,
-                        "minLength": 4,
-                        "pattern": "^[A-Za-z0-9._-]+$"
+                        "minLength": 1,
+                        "pattern": "[A-Za-z0-9._-]{4,50}"
                     },
                     "senha": {
                         "type": "string",
@@ -780,21 +942,19 @@
                     },
                     "tipo": {
                         "type": "string",
-                        "enum": [
-                            "CLIENTE",
-                            "DONO_RESTAURANTE"
-                        ],
-                        "example": "CLIENTE"
+                        "description": "Código do tipo de usuário",
+                        "example": "CLIENTE",
+                        "minLength": 1
                     },
                     "cpf": {
                         "type": "string",
-                        "description": "Obrigatorio quando o tipo e CLIENTE",
-                        "example": "12345678909"
+                        "description": "Obrigatório para todos os tipos, menos DONO_RESTAURANTE",
+                        "example": "123.456.789-09"
                     },
                     "cnpj": {
                         "type": "string",
-                        "description": "Obrigatorio quando o tipo e DONO_RESTAURANTE",
-                        "example": "11222333000181"
+                        "description": "Obrigatório para DONO_RESTAURANTE",
+                        "example": "11.222.333/0001-81"
                     },
                     "endereco": {
                         "$ref": "#/components/schemas/EnderecoRequest"
@@ -811,7 +971,6 @@
             },
             "LoginRequest": {
                 "type": "object",
-                "description": "Credenciais para validacao de login",
                 "properties": {
                     "login": {
                         "type": "string",
@@ -831,45 +990,51 @@
             },
             "LoginResponse": {
                 "type": "object",
-                "description": "Resultado da validacao de credenciais",
                 "properties": {
                     "id": {
                         "type": "integer",
-                        "format": "int64",
-                        "example": 1
+                        "format": "int64"
                     },
                     "nome": {
-                        "type": "string",
-                        "example": "Maria Silva"
+                        "type": "string"
                     },
                     "tipo": {
+                        "type": "string"
+                    },
+                    "token": {
+                        "type": "string"
+                    },
+                    "expiraEm": {
                         "type": "string",
-                        "enum": [
-                            "CLIENTE",
-                            "DONO_RESTAURANTE"
-                        ],
-                        "example": "CLIENTE"
+                        "format": "date-time"
                     }
                 }
             },
-            "Pageable": {
+            "PaginaResponse": {
                 "type": "object",
                 "properties": {
-                    "page": {
-                        "type": "integer",
-                        "format": "int32",
-                        "minimum": 0
-                    },
-                    "size": {
-                        "type": "integer",
-                        "format": "int32",
-                        "minimum": 1
-                    },
-                    "sort": {
+                    "conteudo": {
                         "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
+                        "items": {}
+                    },
+                    "pagina": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "tamanho": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalElementos": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalPaginas": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "ultima": {
+                        "type": "boolean"
                     }
                 }
             }

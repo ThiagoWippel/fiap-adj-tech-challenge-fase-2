@@ -1,5 +1,7 @@
 # API de Gestão de Usuários — Restaurantes
 
+[![CI](https://github.com/ThiagoWippel/fiap-adj-tech-challenge-fase-2/actions/workflows/ci.yml/badge.svg)](https://github.com/ThiagoWippel/fiap-adj-tech-challenge-fase-2/actions/workflows/ci.yml)
+
 > **Fase 2 em desenvolvimento.** Este repositório continua o projeto da Fase 1,
 > agora reescrito em Clean Architecture. A versão entregue e avaliada da Fase 1
 > está na tag [`fase-1-entregue`](https://github.com/ThiagoWippel/fiap-adj-tech-challenge-fase-2/tree/fase-1-entregue), e é ela que o
