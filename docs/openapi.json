@@ -24,6 +24,10 @@
             "description": "Busca de usuários com paginação"
         },
         {
+            "name": "Restaurantes",
+            "description": "Cadastro de restaurantes, com tipo de cozinha, horários e dono"
+        },
+        {
             "name": "Tipos de usuário",
             "description": "Cadastro dos tipos de usuário e consulta dos usuários de cada tipo"
         },
@@ -226,7 +230,7 @@
                     "Usuários"
                 ],
                 "summary": "Exclui um usuário",
-                "description": "Anonimiza o registro: o nome vira \"Usuário removido\" e os dados pessoais são apagados. Depois disso o usuário não aparece nas buscas, não faz login, e o e-mail, o login e o documento ficam livres para um novo cadastro.",
+                "description": "Anonimiza o registro: o nome vira \"Usuário removido\" e os dados pessoais são apagados. Depois disso o usuário não aparece nas buscas, não faz login, e o e-mail, o login e o documento ficam livres para um novo cadastro. Quem é responsável por restaurante ativo precisa transferir ou excluir o restaurante antes.",
                 "operationId": "excluir",
                 "parameters": [
                     {
@@ -255,6 +259,21 @@
                                     "status": 404,
                                     "detail": "Usuário 99 não encontrado.",
                                     "instance": "/api/v1/usuarios/99",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Responsável por restaurante ativo",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/conflito-de-dados",
+                                    "title": "Conflito de dados",
+                                    "status": 409,
+                                    "detail": "O usuário 7 é responsável por 1 restaurante ativo. Transfira ou exclua o restaurante antes de excluir o usuário.",
+                                    "instance": "/api/v1/usuarios/7",
                                     "momento": "2026-10-08T10:30:00"
                                 }
                             }
@@ -580,6 +599,258 @@
                                             "momento": "2026-10-08T10:30:00"
                                         }
                                     }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/restaurantes/{id}": {
+            "get": {
+                "tags": [
+                    "Restaurantes"
+                ],
+                "summary": "Consulta um restaurante pelo id",
+                "operationId": "buscarPorId_2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id do restaurante",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 9
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Restaurante encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RestauranteResponse"
+                                },
+                                "example": {
+                                    "id": 9,
+                                    "nome": "Cantina da Nona",
+                                    "endereco": {
+                                        "rua": "Rua Hercílio Luz",
+                                        "numero": "120",
+                                        "complemento": null,
+                                        "bairro": "Centro",
+                                        "cidade": "Itajaí",
+                                        "estado": "SC",
+                                        "cep": "88301000"
+                                    },
+                                    "tipoCozinha": "ITALIANA",
+                                    "horarios": [
+                                        {
+                                            "diaSemana": "SEGUNDA",
+                                            "abertura": "11:00",
+                                            "fechamento": "15:00"
+                                        },
+                                        {
+                                            "diaSemana": "SEGUNDA",
+                                            "abertura": "18:00",
+                                            "fechamento": "23:00"
+                                        },
+                                        {
+                                            "diaSemana": "SEXTA",
+                                            "abertura": "18:00",
+                                            "fechamento": "02:00"
+                                        }
+                                    ],
+                                    "dono": {
+                                        "id": 7,
+                                        "nome": "Maria Silva"
+                                    },
+                                    "dataCriacao": "2026-10-08T10:30:00",
+                                    "dataUltimaAlteracao": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Restaurante inexistente ou removido",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Restaurante 99 não encontrado.",
+                                    "instance": "/api/v1/restaurantes/99",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Restaurantes"
+                ],
+                "summary": "Atualiza um restaurante",
+                "description": "Substitui os dados e a lista inteira de turnos. Um donoId diferente transfere o restaurante, com as mesmas exigências do cadastro.",
+                "operationId": "atualizar_1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id do restaurante",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 9
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RestauranteRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Restaurante atualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RestauranteResponse"
+                                },
+                                "example": {
+                                    "id": 9,
+                                    "nome": "Cantina da Nona",
+                                    "endereco": {
+                                        "rua": "Rua Hercílio Luz",
+                                        "numero": "120",
+                                        "complemento": null,
+                                        "bairro": "Centro",
+                                        "cidade": "Itajaí",
+                                        "estado": "SC",
+                                        "cep": "88301000"
+                                    },
+                                    "tipoCozinha": "ITALIANA",
+                                    "horarios": [
+                                        {
+                                            "diaSemana": "SEGUNDA",
+                                            "abertura": "11:00",
+                                            "fechamento": "15:00"
+                                        },
+                                        {
+                                            "diaSemana": "SEGUNDA",
+                                            "abertura": "18:00",
+                                            "fechamento": "23:00"
+                                        },
+                                        {
+                                            "diaSemana": "SEXTA",
+                                            "abertura": "18:00",
+                                            "fechamento": "02:00"
+                                        }
+                                    ],
+                                    "dono": {
+                                        "id": 7,
+                                        "nome": "Maria Silva"
+                                    },
+                                    "dataCriacao": "2026-10-08T10:30:00",
+                                    "dataUltimaAlteracao": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Campo inválido, tipo de cozinha fora da lista ou turnos sobrepostos",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/regra-de-negocio",
+                                    "title": "Regra de negócio violada",
+                                    "status": 400,
+                                    "detail": "Os turnos SEXTA 18:00–02:00 e SABADO 01:00–10:00 se sobrepõem.",
+                                    "instance": "/api/v1/restaurantes",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Restaurante ou novo dono inexistente",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Restaurante 99 não encontrado.",
+                                    "instance": "/api/v1/restaurantes/99",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "O novo dono não é do tipo Dono de Restaurante",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/conflito-de-dados",
+                                    "title": "Conflito de dados",
+                                    "status": 409,
+                                    "detail": "O usuário 7 não é Dono de Restaurante. Troque o tipo dele antes de cadastrar o restaurante.",
+                                    "instance": "/api/v1/restaurantes",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Restaurantes"
+                ],
+                "summary": "Exclui um restaurante",
+                "description": "A exclusão é lógica: o restaurante some das consultas, e a linha fica no banco para o histórico de pedidos e avaliações das próximas fases.",
+                "operationId": "excluir_2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id do restaurante",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 9
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Restaurante excluído"
+                    },
+                    "404": {
+                        "description": "Restaurante inexistente ou já removido",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Restaurante 99 não encontrado.",
+                                    "instance": "/api/v1/restaurantes/99",
+                                    "momento": "2026-10-08T10:30:00"
                                 }
                             }
                         }
@@ -959,6 +1230,303 @@
                 }
             }
         },
+        "/api/v1/restaurantes": {
+            "get": {
+                "tags": [
+                    "Restaurantes"
+                ],
+                "summary": "Lista os restaurantes",
+                "description": "Só os restaurantes ativos, paginados: 10 por página por padrão, no máximo 50, em ordem de nome. Filtros opcionais: trecho do nome, sem diferenciar maiúsculas nem acentos, e tipo de cozinha. O sort aceita id, nome, tipoCozinha, dataCriacao e dataUltimaAlteracao.",
+                "operationId": "listar_1",
+                "parameters": [
+                    {
+                        "name": "nome",
+                        "in": "query",
+                        "description": "Trecho do nome",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "nona"
+                    },
+                    {
+                        "name": "tipoCozinha",
+                        "in": "query",
+                        "description": "Tipo de cozinha",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ITALIANA"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número da página, a partir de 0",
+                        "schema": {
+                            "type": "integer",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "description": "Itens por página, no máximo 50",
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Campo e direção, como nome,desc",
+                        "schema": {
+                            "type": "string",
+                            "default": "nome,asc"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Página de restaurantes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginaResponse"
+                                },
+                                "example": {
+                                    "conteudo": [
+                                        {
+                                            "id": 9,
+                                            "nome": "Cantina da Nona",
+                                            "endereco": {
+                                                "rua": "Rua Hercílio Luz",
+                                                "numero": "120",
+                                                "complemento": null,
+                                                "bairro": "Centro",
+                                                "cidade": "Itajaí",
+                                                "estado": "SC",
+                                                "cep": "88301000"
+                                            },
+                                            "tipoCozinha": "ITALIANA",
+                                            "horarios": [
+                                                {
+                                                    "diaSemana": "SEGUNDA",
+                                                    "abertura": "11:00",
+                                                    "fechamento": "15:00"
+                                                },
+                                                {
+                                                    "diaSemana": "SEGUNDA",
+                                                    "abertura": "18:00",
+                                                    "fechamento": "23:00"
+                                                },
+                                                {
+                                                    "diaSemana": "SEXTA",
+                                                    "abertura": "18:00",
+                                                    "fechamento": "02:00"
+                                                }
+                                            ],
+                                            "dono": {
+                                                "id": 7,
+                                                "nome": "Maria Silva"
+                                            },
+                                            "dataCriacao": "2026-10-08T10:30:00",
+                                            "dataUltimaAlteracao": "2026-10-08T10:30:00"
+                                        }
+                                    ],
+                                    "pagina": 0,
+                                    "tamanho": 10,
+                                    "totalElementos": 1,
+                                    "totalPaginas": 1,
+                                    "ultima": true
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Tipo de cozinha fora da lista, ou ordenação por campo não aceito",
+                        "content": {
+                            "application/problem+json": {
+                                "examples": {
+                                    "Tipo de cozinha": {
+                                        "description": "Tipo de cozinha",
+                                        "value": {
+                                            "type": "http://localhost:8080/problemas/dados-invalidos",
+                                            "title": "Dados inválidos",
+                                            "status": 400,
+                                            "detail": "O tipo de cozinha TAILANDESA não existe. Valores aceitos: BRASILEIRA, ITALIANA, PIZZARIA, JAPONESA, CHINESA, ARABE, MEXICANA, PORTUGUESA, FRANCESA, HAMBURGUERIA, LANCHES, CHURRASCARIA, FRUTOS_DO_MAR, VEGETARIANA, VEGANA, DOCES_E_SOBREMESAS, CAFETERIA, OUTRA.",
+                                            "instance": "/api/v1/restaurantes",
+                                            "momento": "2026-10-08T10:30:00"
+                                        }
+                                    },
+                                    "Ordenação": {
+                                        "description": "Ordenação",
+                                        "value": {
+                                            "type": "http://localhost:8080/problemas/requisicao-invalida",
+                                            "title": "Requisição inválida",
+                                            "status": 400,
+                                            "detail": "Não é possível ordenar por senha. Campos aceitos: dataCriacao, dataUltimaAlteracao, email, id, login, nome.",
+                                            "instance": "/api/v2/usuarios",
+                                            "momento": "2026-10-08T10:30:00"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Restaurantes"
+                ],
+                "summary": "Cadastra um restaurante",
+                "description": "O dono precisa ser um usuário ativo do tipo Dono de Restaurante. Os horários são turnos por dia da semana, vários por dia, sem sobreposição; fechamento antes da abertura quer dizer que o turno termina no dia seguinte (sexta 18:00–02:00 vai até as 2h de sábado). Dia sem turno é dia fechado. Um restaurante 24 horas cadastra 00:00–23:59.",
+                "operationId": "cadastrar_2",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RestauranteRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Restaurante cadastrado. O cabeçalho Location aponta para ele.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RestauranteResponse"
+                                },
+                                "example": {
+                                    "id": 9,
+                                    "nome": "Cantina da Nona",
+                                    "endereco": {
+                                        "rua": "Rua Hercílio Luz",
+                                        "numero": "120",
+                                        "complemento": null,
+                                        "bairro": "Centro",
+                                        "cidade": "Itajaí",
+                                        "estado": "SC",
+                                        "cep": "88301000"
+                                    },
+                                    "tipoCozinha": "ITALIANA",
+                                    "horarios": [
+                                        {
+                                            "diaSemana": "SEGUNDA",
+                                            "abertura": "11:00",
+                                            "fechamento": "15:00"
+                                        },
+                                        {
+                                            "diaSemana": "SEGUNDA",
+                                            "abertura": "18:00",
+                                            "fechamento": "23:00"
+                                        },
+                                        {
+                                            "diaSemana": "SEXTA",
+                                            "abertura": "18:00",
+                                            "fechamento": "02:00"
+                                        }
+                                    ],
+                                    "dono": {
+                                        "id": 7,
+                                        "nome": "Maria Silva"
+                                    },
+                                    "dataCriacao": "2026-10-08T10:30:00",
+                                    "dataUltimaAlteracao": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Campo inválido, tipo de cozinha fora da lista ou turnos sobrepostos",
+                        "content": {
+                            "application/problem+json": {
+                                "examples": {
+                                    "Campos inválidos": {
+                                        "description": "Campos inválidos",
+                                        "value": {
+                                            "type": "http://localhost:8080/problemas/dados-invalidos",
+                                            "title": "Dados inválidos",
+                                            "status": 400,
+                                            "detail": "Um ou mais campos da requisição não passaram na validação.",
+                                            "instance": "/api/v1/usuarios",
+                                            "momento": "2026-10-08T10:30:00",
+                                            "erros": [
+                                                {
+                                                    "campo": "email",
+                                                    "mensagem": "O e-mail informado não é válido."
+                                                },
+                                                {
+                                                    "campo": "senha",
+                                                    "mensagem": "A senha deve ter entre 8 e 72 caracteres."
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "Tipo de cozinha": {
+                                        "description": "Tipo de cozinha",
+                                        "value": {
+                                            "type": "http://localhost:8080/problemas/dados-invalidos",
+                                            "title": "Dados inválidos",
+                                            "status": 400,
+                                            "detail": "O tipo de cozinha TAILANDESA não existe. Valores aceitos: BRASILEIRA, ITALIANA, PIZZARIA, JAPONESA, CHINESA, ARABE, MEXICANA, PORTUGUESA, FRANCESA, HAMBURGUERIA, LANCHES, CHURRASCARIA, FRUTOS_DO_MAR, VEGETARIANA, VEGANA, DOCES_E_SOBREMESAS, CAFETERIA, OUTRA.",
+                                            "instance": "/api/v1/restaurantes",
+                                            "momento": "2026-10-08T10:30:00"
+                                        }
+                                    },
+                                    "Turnos sobrepostos": {
+                                        "description": "Turnos sobrepostos",
+                                        "value": {
+                                            "type": "http://localhost:8080/problemas/regra-de-negocio",
+                                            "title": "Regra de negócio violada",
+                                            "status": 400,
+                                            "detail": "Os turnos SEXTA 18:00–02:00 e SABADO 01:00–10:00 se sobrepõem.",
+                                            "instance": "/api/v1/restaurantes",
+                                            "momento": "2026-10-08T10:30:00"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Dono inexistente",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Usuário 99 não encontrado.",
+                                    "instance": "/api/v1/usuarios/99",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "O dono não é do tipo Dono de Restaurante",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/conflito-de-dados",
+                                    "title": "Conflito de dados",
+                                    "status": 409,
+                                    "detail": "O usuário 7 não é Dono de Restaurante. Troque o tipo dele antes de cadastrar o restaurante.",
+                                    "instance": "/api/v1/restaurantes",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/auth/login": {
             "post": {
                 "tags": [
@@ -1156,16 +1724,32 @@
                         }
                     },
                     "409": {
-                        "description": "Documento usado por outro usuário",
+                        "description": "Documento usado por outro usuário, ou Dono de Restaurante com restaurante ativo tentando mudar para outro tipo",
                         "content": {
                             "application/problem+json": {
-                                "example": {
-                                    "type": "http://localhost:8080/problemas/conflito-de-dados",
-                                    "title": "Conflito de dados",
-                                    "status": 409,
-                                    "detail": "O documento informado já está cadastrado.",
-                                    "instance": "/api/v1/usuarios/1/tipo",
-                                    "momento": "2026-10-08T10:30:00"
+                                "examples": {
+                                    "Documento em uso": {
+                                        "description": "Documento em uso",
+                                        "value": {
+                                            "type": "http://localhost:8080/problemas/conflito-de-dados",
+                                            "title": "Conflito de dados",
+                                            "status": 409,
+                                            "detail": "O documento informado já está cadastrado.",
+                                            "instance": "/api/v1/usuarios/1/tipo",
+                                            "momento": "2026-10-08T10:30:00"
+                                        }
+                                    },
+                                    "Dono com restaurante ativo": {
+                                        "description": "Dono com restaurante ativo",
+                                        "value": {
+                                            "type": "http://localhost:8080/problemas/conflito-de-dados",
+                                            "title": "Conflito de dados",
+                                            "status": 409,
+                                            "detail": "O usuário 7 é responsável por 1 restaurante ativo e só deixa de ser Dono de Restaurante depois de transferir ou excluir o restaurante.",
+                                            "instance": "/api/v1/usuarios/7/tipo",
+                                            "momento": "2026-10-08T10:30:00"
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -1269,6 +1853,129 @@
                                     "status": 400,
                                     "detail": "Não é possível ordenar por senha. Campos aceitos: dataCriacao, dataUltimaAlteracao, email, id, login, nome.",
                                     "instance": "/api/v2/usuarios",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/usuarios/{id}/restaurantes": {
+            "get": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Lista os restaurantes de um usuário",
+                "description": "Só os restaurantes ativos do usuário, paginados como as demais listagens.",
+                "operationId": "listarRestaurantes",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 7
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número da página, a partir de 0",
+                        "schema": {
+                            "type": "integer",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "description": "Itens por página, no máximo 50",
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Campo e direção, como nome,desc",
+                        "schema": {
+                            "type": "string",
+                            "default": "nome,asc"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Página de restaurantes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginaResponse"
+                                },
+                                "example": {
+                                    "conteudo": [
+                                        {
+                                            "id": 9,
+                                            "nome": "Cantina da Nona",
+                                            "endereco": {
+                                                "rua": "Rua Hercílio Luz",
+                                                "numero": "120",
+                                                "complemento": null,
+                                                "bairro": "Centro",
+                                                "cidade": "Itajaí",
+                                                "estado": "SC",
+                                                "cep": "88301000"
+                                            },
+                                            "tipoCozinha": "ITALIANA",
+                                            "horarios": [
+                                                {
+                                                    "diaSemana": "SEGUNDA",
+                                                    "abertura": "11:00",
+                                                    "fechamento": "15:00"
+                                                },
+                                                {
+                                                    "diaSemana": "SEGUNDA",
+                                                    "abertura": "18:00",
+                                                    "fechamento": "23:00"
+                                                },
+                                                {
+                                                    "diaSemana": "SEXTA",
+                                                    "abertura": "18:00",
+                                                    "fechamento": "02:00"
+                                                }
+                                            ],
+                                            "dono": {
+                                                "id": 7,
+                                                "nome": "Maria Silva"
+                                            },
+                                            "dataCriacao": "2026-10-08T10:30:00",
+                                            "dataUltimaAlteracao": "2026-10-08T10:30:00"
+                                        }
+                                    ],
+                                    "pagina": 0,
+                                    "tamanho": 10,
+                                    "totalElementos": 1,
+                                    "totalPaginas": 1,
+                                    "ultima": true
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuário inexistente ou removido",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Usuário 99 não encontrado.",
+                                    "instance": "/api/v1/usuarios/99",
                                     "momento": "2026-10-08T10:30:00"
                                 }
                             }
@@ -1585,6 +2292,135 @@
                     },
                     "sistema": {
                         "type": "boolean"
+                    }
+                }
+            },
+            "RestauranteRequest": {
+                "type": "object",
+                "properties": {
+                    "nome": {
+                        "type": "string",
+                        "example": "Cantina da Nona",
+                        "maxLength": 120,
+                        "minLength": 2
+                    },
+                    "endereco": {
+                        "$ref": "#/components/schemas/EnderecoRequest"
+                    },
+                    "tipoCozinha": {
+                        "type": "string",
+                        "description": "BRASILEIRA, ITALIANA, PIZZARIA, JAPONESA, CHINESA, ARABE, MEXICANA, PORTUGUESA, FRANCESA, HAMBURGUERIA, LANCHES, CHURRASCARIA, FRUTOS_DO_MAR, VEGETARIANA, VEGANA, DOCES_E_SOBREMESAS, CAFETERIA ou OUTRA",
+                        "example": "ITALIANA",
+                        "minLength": 1
+                    },
+                    "donoId": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Usuário do tipo Dono de Restaurante",
+                        "example": 7
+                    },
+                    "horarios": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TurnoRequest"
+                        },
+                        "minItems": 1
+                    }
+                },
+                "required": [
+                    "donoId",
+                    "endereco",
+                    "horarios",
+                    "nome",
+                    "tipoCozinha"
+                ]
+            },
+            "TurnoRequest": {
+                "type": "object",
+                "properties": {
+                    "diaSemana": {
+                        "type": "string",
+                        "description": "SEGUNDA, TERCA, QUARTA, QUINTA, SEXTA, SABADO ou DOMINGO",
+                        "example": "SEXTA",
+                        "minLength": 1
+                    },
+                    "abertura": {
+                        "type": "string",
+                        "example": "18:00",
+                        "minLength": 1,
+                        "pattern": "([01]\\d|2[0-3]):[0-5]\\d"
+                    },
+                    "fechamento": {
+                        "type": "string",
+                        "example": "02:00",
+                        "minLength": 1,
+                        "pattern": "([01]\\d|2[0-3]):[0-5]\\d"
+                    }
+                },
+                "required": [
+                    "abertura",
+                    "diaSemana",
+                    "fechamento"
+                ]
+            },
+            "DonoResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "nome": {
+                        "type": "string"
+                    }
+                }
+            },
+            "RestauranteResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "nome": {
+                        "type": "string"
+                    },
+                    "endereco": {
+                        "$ref": "#/components/schemas/EnderecoResponse"
+                    },
+                    "tipoCozinha": {
+                        "type": "string"
+                    },
+                    "horarios": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TurnoResponse"
+                        }
+                    },
+                    "dono": {
+                        "$ref": "#/components/schemas/DonoResponse"
+                    },
+                    "dataCriacao": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "dataUltimaAlteracao": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "TurnoResponse": {
+                "type": "object",
+                "properties": {
+                    "diaSemana": {
+                        "type": "string"
+                    },
+                    "abertura": {
+                        "type": "string"
+                    },
+                    "fechamento": {
+                        "type": "string"
                     }
                 }
             },
