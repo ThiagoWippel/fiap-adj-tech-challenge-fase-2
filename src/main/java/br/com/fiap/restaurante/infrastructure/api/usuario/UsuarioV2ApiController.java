@@ -18,6 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Set;
 
+/**
+ * Busca paginada de usuários (v2). Só aceita ordenar pelos campos que a resposta
+ * mostra.
+ */
 @RestController
 @RequestMapping("/api/v2/usuarios")
 public class UsuarioV2ApiController implements UsuarioV2Api {

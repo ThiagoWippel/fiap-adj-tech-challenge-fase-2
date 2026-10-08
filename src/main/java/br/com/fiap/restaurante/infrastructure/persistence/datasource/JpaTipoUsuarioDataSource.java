@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+/**
+ * Origem de dados de tipos de usuário com Spring Data JPA.
+ */
 @Component
 public class JpaTipoUsuarioDataSource implements ITipoUsuarioDataSource {
 

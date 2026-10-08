@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Endpoint de login. Valida o corpo da requisição e repassa ao controller de
+ * autenticação; a documentação OpenAPI fica em {@link AutenticacaoApi}.
+ */
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AutenticacaoApiController implements AutenticacaoApi {

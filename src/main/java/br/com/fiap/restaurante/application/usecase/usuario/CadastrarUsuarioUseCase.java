@@ -13,6 +13,10 @@ import br.com.fiap.restaurante.domain.valueobject.Documento;
 import br.com.fiap.restaurante.domain.valueobject.Endereco;
 import br.com.fiap.restaurante.domain.valueobject.SenhaEmTexto;
 
+/**
+ * Cadastra um usuário. Confere se o tipo existe e se e-mail, login e documento
+ * estão livres; a senha é gravada codificada, nunca em texto.
+ */
 public class CadastrarUsuarioUseCase {
 
     private final IUsuarioGateway usuarios;

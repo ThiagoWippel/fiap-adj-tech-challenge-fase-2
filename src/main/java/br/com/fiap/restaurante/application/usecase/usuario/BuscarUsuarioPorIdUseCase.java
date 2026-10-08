@@ -4,6 +4,9 @@ import br.com.fiap.restaurante.application.exception.RecursoNaoEncontradoExcepti
 import br.com.fiap.restaurante.application.gateway.IUsuarioGateway;
 import br.com.fiap.restaurante.domain.entity.Usuario;
 
+/**
+ * Consulta um usuário pelo id. Usuário removido é tratado como inexistente.
+ */
 public class BuscarUsuarioPorIdUseCase {
 
     private final IUsuarioGateway usuarios;

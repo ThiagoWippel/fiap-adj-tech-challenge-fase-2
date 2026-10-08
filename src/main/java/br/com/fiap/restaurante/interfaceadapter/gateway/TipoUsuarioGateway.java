@@ -7,6 +7,10 @@ import br.com.fiap.restaurante.interfaceadapter.datasource.ITipoUsuarioDataSourc
 
 import java.util.Optional;
 
+/**
+ * Gateway de tipos de usuário: busca na origem de dados e devolve a entidade de
+ * domínio.
+ */
 public class TipoUsuarioGateway implements ITipoUsuarioGateway {
 
     private final ITipoUsuarioDataSource dataSource;

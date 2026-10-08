@@ -9,6 +9,10 @@ import br.com.fiap.restaurante.interfaceadapter.gateway.UsuarioGateway;
 import br.com.fiap.restaurante.interfaceadapter.presenter.AutenticacaoPresenter;
 import br.com.fiap.restaurante.interfaceadapter.presenter.LoginResponse;
 
+/**
+ * Monta o gateway e o caso de uso de login e converte o resultado com o
+ * presenter.
+ */
 public class AutenticacaoController {
 
     private final IUsuarioDataSource usuarioDataSource;

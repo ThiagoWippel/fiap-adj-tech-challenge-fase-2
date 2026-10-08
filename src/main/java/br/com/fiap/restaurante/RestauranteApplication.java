@@ -4,6 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
+/**
+ * Inicializa a aplicação. As classes com {@code @ConfigurationProperties} são
+ * encontradas pelo {@code @ConfigurationPropertiesScan}.
+ */
 @SpringBootApplication
 @ConfigurationPropertiesScan
 public class RestauranteApplication {

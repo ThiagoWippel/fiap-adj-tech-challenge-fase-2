@@ -22,6 +22,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
+/**
+ * Endpoints de usuário da v1. Valida o corpo das requisições e repassa ao
+ * controller de usuário; a documentação OpenAPI fica em {@link UsuarioApi}.
+ */
 @RestController
 @RequestMapping("/api/v1/usuarios")
 public class UsuarioApiController implements UsuarioApi {

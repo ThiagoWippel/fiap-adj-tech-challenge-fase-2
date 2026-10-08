@@ -5,6 +5,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Corpo da troca de senha. O tamanho da nova senha também é conferido no domínio.
+ */
 public record TrocarSenhaRequest(
         @Schema(example = "SenhaSegura123")
         @NotBlank(message = "A senha atual é obrigatória.")

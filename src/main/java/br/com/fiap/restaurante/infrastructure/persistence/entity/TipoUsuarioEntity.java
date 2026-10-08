@@ -10,6 +10,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Linha da tabela tipo_usuario. O código não é atualizável: nasce com o tipo e
+ * nunca muda.
+ */
 @Entity
 @Table(name = "tipo_usuario")
 @Getter

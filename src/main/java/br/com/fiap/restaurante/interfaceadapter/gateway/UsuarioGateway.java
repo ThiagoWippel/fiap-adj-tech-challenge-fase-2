@@ -13,6 +13,11 @@ import br.com.fiap.restaurante.interfaceadapter.datasource.IUsuarioDataSource;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Gateway de usuários: converte entre a entidade de domínio e os dados da origem
+ * de dados. Ao reconstruir o usuário, o tipo do documento sai do número de
+ * dígitos: 11 para CPF, 14 para CNPJ.
+ */
 public class UsuarioGateway implements IUsuarioGateway {
 
     private final IUsuarioDataSource dataSource;

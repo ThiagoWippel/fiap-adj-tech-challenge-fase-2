@@ -8,6 +8,9 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+/**
+ * Converte usuários na resposta da API: um só, uma lista ou uma página.
+ */
 public final class UsuarioPresenter {
 
     private UsuarioPresenter() {

@@ -8,6 +8,9 @@ import br.com.fiap.restaurante.application.port.ITransactionManager;
 import br.com.fiap.restaurante.domain.entity.Usuario;
 import br.com.fiap.restaurante.domain.valueobject.SenhaEmTexto;
 
+/**
+ * Troca a senha do usuário, depois de conferir a senha atual.
+ */
 public class TrocarSenhaUseCase {
 
     private final IUsuarioGateway usuarios;

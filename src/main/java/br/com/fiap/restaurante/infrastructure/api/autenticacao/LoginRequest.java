@@ -4,6 +4,9 @@ import br.com.fiap.restaurante.application.dto.CredenciaisDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 
+/**
+ * Corpo da requisição de login.
+ */
 public record LoginRequest(
         @Schema(example = "maria.silva")
         @NotBlank(message = "O login é obrigatório.")

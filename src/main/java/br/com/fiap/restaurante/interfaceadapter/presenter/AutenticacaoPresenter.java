@@ -3,6 +3,9 @@ package br.com.fiap.restaurante.interfaceadapter.presenter;
 import br.com.fiap.restaurante.application.dto.Autenticacao;
 import br.com.fiap.restaurante.domain.entity.Usuario;
 
+/**
+ * Converte o resultado do login na resposta da API.
+ */
 public final class AutenticacaoPresenter {
 
     private AutenticacaoPresenter() {

@@ -15,6 +15,10 @@ import org.springframework.http.ResponseEntity;
 
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.ORDENACAO_INVALIDA;
 
+/**
+ * Documentação OpenAPI da busca paginada de usuários. O {@code Pageable} fica
+ * oculto e os parâmetros page, size e sort são descritos um a um, em português.
+ */
 @Tag(name = "Usuários v2", description = "Busca de usuários com paginação")
 interface UsuarioV2Api {
 

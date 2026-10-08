@@ -12,6 +12,9 @@ import org.springframework.http.ResponseEntity;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.CREDENCIAIS_INVALIDAS;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DADOS_INVALIDOS;
 
+/**
+ * Documentação OpenAPI do endpoint de login.
+ */
 @Tag(name = "Autenticação", description = "Validação de login e senha")
 interface AutenticacaoApi {
 
