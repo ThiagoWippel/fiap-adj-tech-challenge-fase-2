@@ -1,7 +1,7 @@
 {
 	"info": {
 		"name": "Tech Challenge Fase 2 - API de Restaurantes",
-		"description": "Coleção de testes da API de gestão de restaurantes.\n\n## Pastas 1 a 8: a coleção da Fase 1 (cenário ACE-01)\n\nAs oito primeiras pastas são a coleção entregue na Fase 1, rodando contra a Fase 2. As requisições são as mesmas, e as verificações também, com três ajustes deliberados:\n\n1. **type dos erros:** a Fase 1 apontava para o README no GitHub (`README.md#...`). Por causa do feedback, a Fase 2 usa `{base}/problemas/{identificador}`, que a própria aplicação responde. A verificação passou a conferir `/problemas/`.\n2. **Títulos com acento:** \"Regra de negocio violada\" e \"Credenciais invalidas\" viraram \"Regra de negócio violada\" e \"Credenciais inválidas\".\n3. **Login inexistente:** a verificação de que a mensagem não revela se o login existe agora procura \"não encontrado\", com acento, como escrevem as mensagens da Fase 2.\n\nAs descrições que contavam o comportamento da Fase 1 e mudaram foram atualizadas: não há mais herança entre cliente e dono, e a exclusão anonimiza o usuário em vez de apagar a linha. Cada requisição cita os cenários do catálogo (`docs/catalogo-de-cenarios.md`) que ela cobre.\n\n## Como executar\n\nCom a aplicação no ar (`docker compose up -d`):\n\n- **Postman:** importe a coleção e o ambiente **Local** e execute no Runner, na ordem.\n- **Newman:** `npx newman run postman/tech-challenge-fase-2.postman_collection.json -e postman/Local.postman_environment.json`\n\nAs requisições se encadeiam por variáveis: o cadastro grava o id do usuário criado, e as demais o usam. A última pasta exclui os usuários criados; como a exclusão libera e-mail, login e documento, a coleção pode ser executada de novo, quantas vezes for preciso. O CI roda a coleção duas vezes seguidas a cada push (cenário ACE-02).",
+		"description": "Coleção de testes da API de gestão de restaurantes.\n\n## Pastas 1 a 8: a coleção da Fase 1 (cenário ACE-01)\n\nAs oito primeiras pastas são a coleção entregue na Fase 1, rodando contra a Fase 2. As requisições são as mesmas, e as verificações também, com três ajustes deliberados:\n\n1. **type dos erros:** a Fase 1 apontava para o README no GitHub (`README.md#...`). Por causa do feedback, a Fase 2 usa `{base}/problemas/{identificador}`, que a própria aplicação responde. A verificação passou a conferir `/problemas/`.\n2. **Títulos com acento:** \"Regra de negocio violada\" e \"Credenciais invalidas\" viraram \"Regra de negócio violada\" e \"Credenciais inválidas\".\n3. **Login inexistente:** a verificação de que a mensagem não revela se o login existe agora procura \"não encontrado\", com acento, como escrevem as mensagens da Fase 2.\n\nAs descrições que contavam o comportamento da Fase 1 e mudaram foram atualizadas: não há mais herança entre cliente e dono, e a exclusão anonimiza o usuário em vez de apagar a linha. Cada requisição cita os cenários do catálogo (`docs/catalogo-de-cenarios.md`) que ela cobre.\n\n## Pastas 9 em diante: os recursos da Fase 2\n\nTipos de usuário, troca de tipo, restaurantes e itens do cardápio, com verificações em cada requisição. Cada bloco cria os próprios dados e os exclui no fim.\n\n## Como executar\n\nCom a aplicação no ar (`docker compose up -d`):\n\n- **Postman:** importe a coleção e o ambiente **Local** e execute no Runner, na ordem.\n- **Newman:** `npx newman run postman/tech-challenge-fase-2.postman_collection.json -e postman/Local.postman_environment.json`\n\nAs requisições se encadeiam por variáveis: o cadastro grava o id do usuário criado, e as demais o usam. A última pasta exclui os usuários criados; como a exclusão libera e-mail, login e documento, a coleção pode ser executada de novo, quantas vezes for preciso. O CI roda a coleção duas vezes seguidas a cada push (cenário ACE-02).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [
@@ -17,6 +17,21 @@
 		},
 		{
 			"key": "idDono",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "idTipo",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "idTipoCliente",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "idEntregador",
 			"value": "",
 			"type": "string"
 		}
@@ -1694,6 +1709,953 @@
 							}
 						}
 					]
+				}
+			]
+		},
+		{
+			"name": "9. Tipos de usuário",
+			"description": "CRUD de tipos de usuário (Fase 2). O cadastro recebe só o nome; o código é gerado a partir dele e não muda depois.\nCliente e Dono de Restaurante são tipos de sistema: podem ser renomeados, não excluídos.",
+			"item": [
+				{
+					"name": "Cadastrar tipo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 201 Created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"const tipo = pm.response.json();",
+									"pm.test('Location aponta para o tipo criado', function () {",
+									"    pm.expect(pm.response.headers.get('Location')).to.include('/api/v1/tipos-usuario/' + tipo.id);",
+									"});",
+									"pm.test('Código gerado do nome', function () {",
+									"    pm.expect(tipo.codigo).to.eql('ENTREGADOR');",
+									"    pm.expect(tipo.sistema).to.eql(false);",
+									"});",
+									"pm.collectionVariables.set('idTipo', tipo.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tipos-usuario",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tipos-usuario"
+							],
+							"query": []
+						},
+						"description": "Cria o tipo Entregador. A resposta traz o código gerado e se o tipo é de sistema.\n\nCenários do catálogo: TIP-01 · TIP-16.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Entregador\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar tipo com nome repetido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 409 Conflict', function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Conflito de dados\"', function () {",
+									"    pm.expect(problema.title).to.eql('Conflito de dados');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tipos-usuario",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tipos-usuario"
+							],
+							"query": []
+						},
+						"description": "Mesmo nome com outras maiúsculas: a comparação não diferencia maiúsculas nem acentos.\n\nCenários do catálogo: TIP-06.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"ENTREGADOR\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar tipo com nome curto",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 400 Bad Request', function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Dados inválidos\"', function () {",
+									"    pm.expect(problema.title).to.eql('Dados inválidos');",
+									"});",
+									"pm.test('Aponta o campo nome', function () {",
+									"    pm.expect(problema.erros.map(function (e) { return e.campo; })).to.include('nome');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tipos-usuario",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tipos-usuario"
+							],
+							"query": []
+						},
+						"description": "O nome precisa ter de 3 a 50 caracteres.\n\nCenários do catálogo: TIP-03 · TIP-16.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Ab\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar tipos",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"const pagina = pm.response.json();",
+									"pm.test('Página com conteudo e metadados', function () {",
+									"    ['conteudo', 'pagina', 'tamanho', 'totalElementos', 'totalPaginas', 'ultima'].forEach(function (campo) {",
+									"        pm.expect(pagina).to.have.property(campo);",
+									"    });",
+									"});",
+									"const cliente = pagina.conteudo.find(function (t) { return t.codigo === 'CLIENTE'; });",
+									"pm.test('Cliente e Dono de Restaurante são tipos de sistema', function () {",
+									"    pm.expect(cliente.sistema).to.eql(true);",
+									"    pm.expect(pagina.conteudo.find(function (t) { return t.codigo === 'DONO_RESTAURANTE'; }).sistema).to.eql(true);",
+									"});",
+									"pm.collectionVariables.set('idTipoCliente', cliente.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tipos-usuario",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tipos-usuario"
+							],
+							"query": []
+						},
+						"description": "Lista paginada, em ordem de nome.\n\nCenários do catálogo: TIP-15 · TIP-16 · PAG-01."
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar tipo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Devolve o tipo pedido', function () {",
+									"    pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('idTipo')));",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tipos-usuario/{{idTipo}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tipos-usuario",
+								"{{idTipo}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: TIP-16."
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar tipo inexistente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 404 Not Found', function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Recurso não encontrado\"', function () {",
+									"    pm.expect(problema.title).to.eql('Recurso não encontrado');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tipos-usuario/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tipos-usuario",
+								"999999"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: TIP-16."
+					},
+					"response": []
+				},
+				{
+					"name": "Renomear tipo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"const tipo = pm.response.json();",
+									"pm.test('O nome muda e o código não', function () {",
+									"    pm.expect(tipo.nome).to.eql('Entregador Parceiro');",
+									"    pm.expect(tipo.codigo).to.eql('ENTREGADOR');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tipos-usuario/{{idTipo}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tipos-usuario",
+								"{{idTipo}}"
+							],
+							"query": []
+						},
+						"description": "Renomear não muda o código.\n\nCenários do catálogo: TIP-04 · TIP-16.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Entregador Parceiro\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar usuário do tipo novo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 201 Created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"const usuario = pm.response.json();",
+									"pm.test('Usuário criado com o tipo do CRUD', function () {",
+									"    pm.expect(usuario.tipo).to.eql('ENTREGADOR');",
+									"    pm.expect(usuario.documento).to.eql('52998224725');",
+									"});",
+									"pm.collectionVariables.set('idEntregador', usuario.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios"
+							],
+							"query": []
+						},
+						"description": "Tipos criados pelo CRUD também são aceitos no cadastro de usuário, com CPF.\n\nCenários do catálogo: USU-18 · DOC-06.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Bruno Lima\",\n  \"email\": \"bruno.lima@exemplo.com\",\n  \"login\": \"bruno.lima\",\n  \"senha\": \"SenhaSegura123\",\n  \"tipo\": \"ENTREGADOR\",\n  \"cpf\": \"529.982.247-25\",\n  \"endereco\": {\n    \"rua\": \"Rua Hercílio Luz\",\n    \"numero\": \"45\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"Itajaí\",\n    \"estado\": \"SC\",\n    \"cep\": \"88301-000\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar usuários do tipo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Traz o usuário do tipo', function () {",
+									"    const nomes = pm.response.json().conteudo.map(function (u) { return u.nome; });",
+									"    pm.expect(nomes).to.eql(['Bruno Lima']);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tipos-usuario/{{idTipo}}/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tipos-usuario",
+								"{{idTipo}}",
+								"usuarios"
+							],
+							"query": []
+						},
+						"description": "Só os usuários ativos do tipo, paginados.\n\nCenários do catálogo: TIP-17."
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir tipo em uso",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 409 Conflict', function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Conflito de dados\"', function () {",
+									"    pm.expect(problema.title).to.eql('Conflito de dados');",
+									"});",
+									"pm.test('Informa quantos usuários usam o tipo', function () {",
+									"    pm.expect(problema.detail).to.include('1 usuário ativo');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tipos-usuario/{{idTipo}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tipos-usuario",
+								"{{idTipo}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: TIP-11."
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir tipo de sistema",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 409 Conflict', function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Conflito de dados\"', function () {",
+									"    pm.expect(problema.title).to.eql('Conflito de dados');",
+									"});",
+									"pm.test('Explica que é tipo de sistema', function () {",
+									"    pm.expect(problema.detail).to.include('tipo de sistema');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tipos-usuario/{{idTipoCliente}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tipos-usuario",
+								"{{idTipoCliente}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: TIP-12."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "10. Troca de tipo",
+			"description": "A troca de tipo acontece na mesma conta: mudam o tipo e o documento; id, login, senha e data de criação ficam.\nDono de Restaurante informa CNPJ; os demais tipos, CPF.",
+			"item": [
+				{
+					"name": "Trocar para Dono informando CPF",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 400 Bad Request', function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Regra de negócio violada\"', function () {",
+									"    pm.expect(problema.title).to.eql('Regra de negócio violada');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idEntregador}}/tipo",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idEntregador}}",
+								"tipo"
+							],
+							"query": []
+						},
+						"description": "Dono de Restaurante exige CNPJ.\n\nCenários do catálogo: TRO-02 · TRO-08.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tipo\": \"DONO_RESTAURANTE\",\n  \"documento\": \"529.982.247-25\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Trocar para tipo inexistente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 404 Not Found', function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Recurso não encontrado\"', function () {",
+									"    pm.expect(problema.title).to.eql('Recurso não encontrado');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idEntregador}}/tipo",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idEntregador}}",
+								"tipo"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: TRO-05 · TRO-08.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tipo\": \"ADMINISTRADOR\",\n  \"documento\": \"529.982.247-25\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Trocar para Dono de Restaurante",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"const usuario = pm.response.json();",
+									"pm.test('Mesma conta, com novo tipo e novo documento', function () {",
+									"    pm.expect(usuario.id).to.eql(Number(pm.collectionVariables.get('idEntregador')));",
+									"    pm.expect(usuario.login).to.eql('bruno.lima');",
+									"    pm.expect(usuario.tipo).to.eql('DONO_RESTAURANTE');",
+									"    pm.expect(usuario.documento).to.eql('45997418000153');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idEntregador}}/tipo",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idEntregador}}",
+								"tipo"
+							],
+							"query": []
+						},
+						"description": "O documento antigo é descartado.\n\nCenários do catálogo: TRO-01 · TRO-08.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tipo\": \"DONO_RESTAURANTE\",\n  \"documento\": \"45.997.418/0001-53\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar o usuário depois da troca",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Mostra o novo tipo', function () {",
+									"    pm.expect(pm.response.json().tipo).to.eql('DONO_RESTAURANTE');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idEntregador}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idEntregador}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: TRO-09."
+					},
+					"response": []
+				},
+				{
+					"name": "Usuários do tipo antigo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('O usuário saiu do tipo antigo', function () {",
+									"    pm.expect(pm.response.json().conteudo).to.be.an('array').that.is.empty;",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tipos-usuario/{{idTipo}}/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tipos-usuario",
+								"{{idTipo}}",
+								"usuarios"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: TRO-09."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "11. Limpeza dos tipos",
+			"description": "Exclui o usuário e o tipo criados nas pastas 9 e 10, para a collection poder rodar de novo.",
+			"item": [
+				{
+					"name": "Excluir o usuário",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idEntregador}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idEntregador}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: EXC-01."
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir o tipo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tipos-usuario/{{idTipo}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tipos-usuario",
+								"{{idTipo}}"
+							],
+							"query": []
+						},
+						"description": "Sem usuários ativos, o tipo pode ser excluído.\n\nCenários do catálogo: TIP-10 · TIP-16."
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar o tipo excluído",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 404 Not Found', function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Recurso não encontrado\"', function () {",
+									"    pm.expect(problema.title).to.eql('Recurso não encontrado');",
+									"});",
+									"pm.collectionVariables.unset('idTipo');",
+									"pm.collectionVariables.unset('idTipoCliente');",
+									"pm.collectionVariables.unset('idEntregador');"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tipos-usuario/{{idTipo}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tipos-usuario",
+								"{{idTipo}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: TIP-16."
+					},
+					"response": []
 				}
 			]
 		}
