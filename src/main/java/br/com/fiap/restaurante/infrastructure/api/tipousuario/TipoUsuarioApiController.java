@@ -2,6 +2,7 @@ package br.com.fiap.restaurante.infrastructure.api.tipousuario;
 
 import br.com.fiap.restaurante.application.dto.RenomeacaoDeTipoUsuarioDTO;
 import br.com.fiap.restaurante.application.port.ITransactionManager;
+import br.com.fiap.restaurante.infrastructure.api.comum.CamposOrdenaveis;
 import br.com.fiap.restaurante.infrastructure.api.comum.Paginacao;
 import br.com.fiap.restaurante.interfaceadapter.controller.TipoUsuarioController;
 import br.com.fiap.restaurante.interfaceadapter.datasource.ITipoUsuarioDataSource;
@@ -24,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Set;
 
 /**
  * Endpoints de tipo de usuário. Valida o corpo das requisições e repassa ao
@@ -33,10 +33,6 @@ import java.util.Set;
 @RestController
 @RequestMapping("/api/v1/tipos-usuario")
 public class TipoUsuarioApiController implements TipoUsuarioApi {
-
-    private static final Set<String> CAMPOS_DO_TIPO = Set.of("id", "nome", "codigo");
-    private static final Set<String> CAMPOS_DO_USUARIO =
-            Set.of("id", "nome", "email", "login", "dataCriacao", "dataUltimaAlteracao");
 
     private final TipoUsuarioController controller;
 
@@ -58,7 +54,7 @@ public class TipoUsuarioApiController implements TipoUsuarioApi {
     @GetMapping
     public ResponseEntity<PaginaResponse<TipoUsuarioResponse>> listar(
             @PageableDefault(sort = "nome") Pageable paginacao) {
-        return ResponseEntity.ok(controller.listar(Paginacao.pedido(paginacao, CAMPOS_DO_TIPO)));
+        return ResponseEntity.ok(controller.listar(Paginacao.pedido(paginacao, CamposOrdenaveis.TIPO_USUARIO)));
     }
 
     @Override
@@ -85,6 +81,6 @@ public class TipoUsuarioApiController implements TipoUsuarioApi {
     @GetMapping("/{id}/usuarios")
     public ResponseEntity<PaginaResponse<UsuarioResponse>> listarUsuarios(
             @PathVariable Long id, @PageableDefault(sort = "nome") Pageable paginacao) {
-        return ResponseEntity.ok(controller.listarUsuarios(id, Paginacao.pedido(paginacao, CAMPOS_DO_USUARIO)));
+        return ResponseEntity.ok(controller.listarUsuarios(id, Paginacao.pedido(paginacao, CamposOrdenaveis.USUARIO)));
     }
 }

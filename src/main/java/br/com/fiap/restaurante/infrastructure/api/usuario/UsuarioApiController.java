@@ -2,11 +2,18 @@ package br.com.fiap.restaurante.infrastructure.api.usuario;
 
 import br.com.fiap.restaurante.application.port.IPasswordEncoder;
 import br.com.fiap.restaurante.application.port.ITransactionManager;
+import br.com.fiap.restaurante.infrastructure.api.comum.CamposOrdenaveis;
+import br.com.fiap.restaurante.infrastructure.api.comum.Paginacao;
 import br.com.fiap.restaurante.interfaceadapter.controller.UsuarioController;
+import br.com.fiap.restaurante.interfaceadapter.datasource.IRestauranteDataSource;
 import br.com.fiap.restaurante.interfaceadapter.datasource.ITipoUsuarioDataSource;
 import br.com.fiap.restaurante.interfaceadapter.datasource.IUsuarioDataSource;
+import br.com.fiap.restaurante.interfaceadapter.presenter.PaginaResponse;
+import br.com.fiap.restaurante.interfaceadapter.presenter.RestauranteResponse;
 import br.com.fiap.restaurante.interfaceadapter.presenter.UsuarioResponse;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,9 +40,10 @@ public class UsuarioApiController implements UsuarioApi {
 
     private final UsuarioController controller;
 
-    public UsuarioApiController(IUsuarioDataSource usuarios, ITipoUsuarioDataSource tipos, IPasswordEncoder senhas,
+    public UsuarioApiController(IUsuarioDataSource usuarios, ITipoUsuarioDataSource tipos,
+                                IRestauranteDataSource restaurantes, IPasswordEncoder senhas,
                                 ITransactionManager transacao) {
-        this.controller = UsuarioController.create(usuarios, tipos, senhas, transacao);
+        this.controller = UsuarioController.create(usuarios, tipos, restaurantes, senhas, transacao);
     }
 
     @Override
@@ -78,6 +86,14 @@ public class UsuarioApiController implements UsuarioApi {
     public ResponseEntity<UsuarioResponse> trocarTipo(@PathVariable Long id,
                                                       @Valid @RequestBody TrocarTipoRequest requisicao) {
         return ResponseEntity.ok(controller.trocarTipo(requisicao.paraDTO(id)));
+    }
+
+    @Override
+    @GetMapping("/{id}/restaurantes")
+    public ResponseEntity<PaginaResponse<RestauranteResponse>> listarRestaurantes(
+            @PathVariable Long id, @PageableDefault(sort = "nome") Pageable paginacao) {
+        return ResponseEntity.ok(controller.listarRestaurantes(id,
+                Paginacao.pedido(paginacao, CamposOrdenaveis.RESTAURANTE)));
     }
 
     @Override

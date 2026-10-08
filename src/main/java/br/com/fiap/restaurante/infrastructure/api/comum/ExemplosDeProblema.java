@@ -149,6 +149,66 @@ public final class ExemplosDeProblema {
               "momento": "2026-10-08T10:30:00"
             }""";
 
+    public static final String RESTAURANTE_NAO_ENCONTRADO = """
+            {
+              "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+              "title": "Recurso não encontrado",
+              "status": 404,
+              "detail": "Restaurante 99 não encontrado.",
+              "instance": "/api/v1/restaurantes/99",
+              "momento": "2026-10-08T10:30:00"
+            }""";
+
+    public static final String DONO_NAO_E_DONO = """
+            {
+              "type": "http://localhost:8080/problemas/conflito-de-dados",
+              "title": "Conflito de dados",
+              "status": 409,
+              "detail": "O usuário 7 não é Dono de Restaurante. Troque o tipo dele antes de cadastrar o restaurante.",
+              "instance": "/api/v1/restaurantes",
+              "momento": "2026-10-08T10:30:00"
+            }""";
+
+    public static final String TURNOS_SOBREPOSTOS = """
+            {
+              "type": "http://localhost:8080/problemas/regra-de-negocio",
+              "title": "Regra de negócio violada",
+              "status": 400,
+              "detail": "Os turnos SEXTA 18:00–02:00 e SABADO 01:00–10:00 se sobrepõem.",
+              "instance": "/api/v1/restaurantes",
+              "momento": "2026-10-08T10:30:00"
+            }""";
+
+    public static final String COZINHA_INVALIDA = """
+            {
+              "type": "http://localhost:8080/problemas/dados-invalidos",
+              "title": "Dados inválidos",
+              "status": 400,
+              "detail": "O tipo de cozinha TAILANDESA não existe. Valores aceitos: BRASILEIRA, ITALIANA, PIZZARIA, JAPONESA, CHINESA, ARABE, MEXICANA, PORTUGUESA, FRANCESA, HAMBURGUERIA, LANCHES, CHURRASCARIA, FRUTOS_DO_MAR, VEGETARIANA, VEGANA, DOCES_E_SOBREMESAS, CAFETERIA, OUTRA.",
+              "instance": "/api/v1/restaurantes",
+              "momento": "2026-10-08T10:30:00"
+            }""";
+
+    public static final String USUARIO_COM_RESTAURANTE = """
+            {
+              "type": "http://localhost:8080/problemas/conflito-de-dados",
+              "title": "Conflito de dados",
+              "status": 409,
+              "detail": "O usuário 7 é responsável por 1 restaurante ativo. Transfira ou exclua o restaurante antes de excluir o usuário.",
+              "instance": "/api/v1/usuarios/7",
+              "momento": "2026-10-08T10:30:00"
+            }""";
+
+    public static final String DONO_COM_RESTAURANTE = """
+            {
+              "type": "http://localhost:8080/problemas/conflito-de-dados",
+              "title": "Conflito de dados",
+              "status": 409,
+              "detail": "O usuário 7 é responsável por 1 restaurante ativo e só deixa de ser Dono de Restaurante depois de transferir ou excluir o restaurante.",
+              "instance": "/api/v1/usuarios/7/tipo",
+              "momento": "2026-10-08T10:30:00"
+            }""";
+
     private ExemplosDeProblema() {
     }
 }

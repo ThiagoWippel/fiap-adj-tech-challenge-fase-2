@@ -1,14 +1,19 @@
 package br.com.fiap.restaurante.infrastructure.api.usuario;
 
+import br.com.fiap.restaurante.infrastructure.api.restaurante.ExemplosDeRestaurante;
+import br.com.fiap.restaurante.interfaceadapter.presenter.PaginaResponse;
+import br.com.fiap.restaurante.interfaceadapter.presenter.RestauranteResponse;
 import br.com.fiap.restaurante.interfaceadapter.presenter.UsuarioResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -16,11 +21,13 @@ import java.util.List;
 
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DADOS_INVALIDOS;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DOCUMENTO_DO_TIPO;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DONO_COM_RESTAURANTE;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DOCUMENTO_EM_USO;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.EMAIL_EM_USO;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.REGRA_DE_NEGOCIO;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.SENHA_ATUAL_INCORRETA;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.TIPO_NAO_ENCONTRADO;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.USUARIO_COM_RESTAURANTE;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.USUARIO_NAO_ENCONTRADO;
 
 /**
@@ -110,17 +117,41 @@ interface UsuarioApi {
                     @ExampleObject(name = "Campos inválidos", value = DADOS_INVALIDOS)}))
     @ApiResponse(responseCode = "404", description = "Usuário ou tipo inexistente",
             content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(USUARIO_NAO_ENCONTRADO)))
-    @ApiResponse(responseCode = "409", description = "Documento usado por outro usuário",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(DOCUMENTO_EM_USO)))
+    @ApiResponse(responseCode = "409", description = """
+            Documento usado por outro usuário, ou Dono de Restaurante com restaurante ativo tentando mudar para \
+            outro tipo""",
+            content = @Content(mediaType = PROBLEMA, examples = {
+                    @ExampleObject(name = "Documento em uso", value = DOCUMENTO_EM_USO),
+                    @ExampleObject(name = "Dono com restaurante ativo", value = DONO_COM_RESTAURANTE)}))
     ResponseEntity<UsuarioResponse> trocarTipo(@Parameter(description = "Id do usuário", example = "1") Long id,
                                                TrocarTipoRequest requisicao);
+
+    @Operation(summary = "Lista os restaurantes de um usuário", description = """
+            Só os restaurantes ativos do usuário, paginados como as demais listagens.""")
+    @ApiResponse(responseCode = "200", description = "Página de restaurantes",
+            content = @Content(mediaType = JSON, schema = @Schema(implementation = PaginaResponse.class),
+                    examples = @ExampleObject(ExemplosDeRestaurante.PAGINA)))
+    @ApiResponse(responseCode = "404", description = "Usuário inexistente ou removido",
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(USUARIO_NAO_ENCONTRADO)))
+    @Parameter(name = "page", in = ParameterIn.QUERY, description = "Número da página, a partir de 0",
+            schema = @Schema(type = "integer", defaultValue = "0"))
+    @Parameter(name = "size", in = ParameterIn.QUERY, description = "Itens por página, no máximo 50",
+            schema = @Schema(type = "integer", defaultValue = "10"))
+    @Parameter(name = "sort", in = ParameterIn.QUERY, description = "Campo e direção, como nome,desc",
+            schema = @Schema(type = "string", defaultValue = "nome,asc"))
+    ResponseEntity<PaginaResponse<RestauranteResponse>> listarRestaurantes(
+            @Parameter(description = "Id do usuário", example = "7") Long id,
+            @Parameter(hidden = true) Pageable paginacao);
 
     @Operation(summary = "Exclui um usuário", description = """
             Anonimiza o registro: o nome vira "Usuário removido" e os dados pessoais são apagados. Depois \
             disso o usuário não aparece nas buscas, não faz login, e o e-mail, o login e o documento ficam \
-            livres para um novo cadastro.""")
+            livres para um novo cadastro. Quem é responsável por restaurante ativo precisa transferir ou \
+            excluir o restaurante antes.""")
     @ApiResponse(responseCode = "204", description = "Usuário excluído")
     @ApiResponse(responseCode = "404", description = "Usuário inexistente ou já removido",
             content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(USUARIO_NAO_ENCONTRADO)))
+    @ApiResponse(responseCode = "409", description = "Responsável por restaurante ativo",
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(USUARIO_COM_RESTAURANTE)))
     ResponseEntity<Void> excluir(@Parameter(description = "Id do usuário", example = "1") Long id);
 }

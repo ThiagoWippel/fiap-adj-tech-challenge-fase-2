@@ -7,6 +7,7 @@ import br.com.fiap.restaurante.application.dto.TrocaDeSenhaDTO;
 import br.com.fiap.restaurante.application.dto.TrocaDeTipoDTO;
 import br.com.fiap.restaurante.application.port.IPasswordEncoder;
 import br.com.fiap.restaurante.application.port.ITransactionManager;
+import br.com.fiap.restaurante.application.usecase.restaurante.ListarRestaurantesDoUsuarioUseCase;
 import br.com.fiap.restaurante.application.usecase.usuario.AtualizarUsuarioUseCase;
 import br.com.fiap.restaurante.application.usecase.usuario.BuscarUsuarioPorIdUseCase;
 import br.com.fiap.restaurante.application.usecase.usuario.BuscarUsuariosPorNomePaginadoUseCase;
@@ -15,11 +16,15 @@ import br.com.fiap.restaurante.application.usecase.usuario.CadastrarUsuarioUseCa
 import br.com.fiap.restaurante.application.usecase.usuario.ExcluirUsuarioUseCase;
 import br.com.fiap.restaurante.application.usecase.usuario.TrocarSenhaUseCase;
 import br.com.fiap.restaurante.application.usecase.usuario.TrocarTipoDoUsuarioUseCase;
+import br.com.fiap.restaurante.interfaceadapter.datasource.IRestauranteDataSource;
 import br.com.fiap.restaurante.interfaceadapter.datasource.ITipoUsuarioDataSource;
 import br.com.fiap.restaurante.interfaceadapter.datasource.IUsuarioDataSource;
+import br.com.fiap.restaurante.interfaceadapter.gateway.RestauranteGateway;
 import br.com.fiap.restaurante.interfaceadapter.gateway.TipoUsuarioGateway;
 import br.com.fiap.restaurante.interfaceadapter.gateway.UsuarioGateway;
 import br.com.fiap.restaurante.interfaceadapter.presenter.PaginaResponse;
+import br.com.fiap.restaurante.interfaceadapter.presenter.RestaurantePresenter;
+import br.com.fiap.restaurante.interfaceadapter.presenter.RestauranteResponse;
 import br.com.fiap.restaurante.interfaceadapter.presenter.UsuarioPresenter;
 import br.com.fiap.restaurante.interfaceadapter.presenter.UsuarioResponse;
 
@@ -33,21 +38,26 @@ public class UsuarioController {
 
     private final IUsuarioDataSource usuarioDataSource;
     private final ITipoUsuarioDataSource tipoUsuarioDataSource;
+    private final IRestauranteDataSource restauranteDataSource;
     private final IPasswordEncoder senhas;
     private final ITransactionManager transacao;
 
     private UsuarioController(IUsuarioDataSource usuarioDataSource, ITipoUsuarioDataSource tipoUsuarioDataSource,
-                              IPasswordEncoder senhas, ITransactionManager transacao) {
+                              IRestauranteDataSource restauranteDataSource, IPasswordEncoder senhas,
+                              ITransactionManager transacao) {
         this.usuarioDataSource = usuarioDataSource;
         this.tipoUsuarioDataSource = tipoUsuarioDataSource;
+        this.restauranteDataSource = restauranteDataSource;
         this.senhas = senhas;
         this.transacao = transacao;
     }
 
     public static UsuarioController create(IUsuarioDataSource usuarioDataSource,
                                            ITipoUsuarioDataSource tipoUsuarioDataSource,
+                                           IRestauranteDataSource restauranteDataSource,
                                            IPasswordEncoder senhas, ITransactionManager transacao) {
-        return new UsuarioController(usuarioDataSource, tipoUsuarioDataSource, senhas, transacao);
+        return new UsuarioController(usuarioDataSource, tipoUsuarioDataSource, restauranteDataSource, senhas,
+                transacao);
     }
 
     public UsuarioResponse cadastrar(NovoUsuarioDTO dados) {
@@ -82,15 +92,24 @@ public class UsuarioController {
 
     public UsuarioResponse trocarTipo(TrocaDeTipoDTO dados) {
         var useCase = TrocarTipoDoUsuarioUseCase.create(usuarioGateway(),
-                TipoUsuarioGateway.create(tipoUsuarioDataSource), transacao);
+                TipoUsuarioGateway.create(tipoUsuarioDataSource), restauranteGateway(), transacao);
         return UsuarioPresenter.paraResposta(useCase.run(dados));
     }
 
     public void excluir(Long id) {
-        ExcluirUsuarioUseCase.create(usuarioGateway(), transacao).run(id);
+        ExcluirUsuarioUseCase.create(usuarioGateway(), restauranteGateway(), transacao).run(id);
+    }
+
+    public PaginaResponse<RestauranteResponse> listarRestaurantes(Long id, PedidoDePagina pedido) {
+        var useCase = ListarRestaurantesDoUsuarioUseCase.create(usuarioGateway(), restauranteGateway());
+        return RestaurantePresenter.paraPagina(useCase.run(id, pedido));
     }
 
     private UsuarioGateway usuarioGateway() {
         return UsuarioGateway.create(usuarioDataSource);
+    }
+
+    private RestauranteGateway restauranteGateway() {
+        return RestauranteGateway.create(restauranteDataSource);
     }
 }

@@ -130,7 +130,7 @@ public class JpaUsuarioDataSource implements IUsuarioDataSource {
                 endereco.bairro(), endereco.cidade(), endereco.estado(), endereco.cep()));
     }
 
-    private static DadosUsuario paraDados(UsuarioEntity entidade) {
+    static DadosUsuario paraDados(UsuarioEntity entidade) {
         EnderecoEmbeddable endereco = entidade.getEndereco();
         return new DadosUsuario(entidade.getId(), entidade.getNome(), entidade.getEmail(), entidade.getLogin(),
                 entidade.getSenha(), entidade.getDocumento(), JpaTipoUsuarioDataSource.paraDados(entidade.getTipo()),

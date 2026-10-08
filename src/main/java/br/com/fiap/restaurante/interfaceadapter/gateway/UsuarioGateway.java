@@ -105,21 +105,25 @@ public class UsuarioGateway implements IUsuarioGateway {
         dataSource.anonimizar(id);
     }
 
-    private static DadosUsuario paraDados(Usuario usuario) {
-        Endereco endereco = usuario.getEndereco();
+    static DadosUsuario paraDados(Usuario usuario) {
         return new DadosUsuario(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getLogin(),
                 usuario.getSenha(), usuario.getDocumento().numero(), TipoUsuarioGateway.paraDados(usuario.getTipo()),
-                new DadosEndereco(endereco.rua(), endereco.numero(), endereco.complemento(), endereco.bairro(),
-                        endereco.cidade(), endereco.estado(), endereco.cep()),
-                usuario.getDataCriacao(), usuario.getDataUltimaAlteracao());
+                paraDados(usuario.getEndereco()), usuario.getDataCriacao(), usuario.getDataUltimaAlteracao());
     }
 
-    private static Usuario paraUsuario(DadosUsuario dados) {
-        DadosEndereco endereco = dados.endereco();
+    static Usuario paraUsuario(DadosUsuario dados) {
         return Usuario.create(dados.id(), dados.nome(), dados.email(), dados.login(), dados.senha(),
-                new Endereco(endereco.rua(), endereco.numero(), endereco.complemento(), endereco.bairro(),
-                        endereco.cidade(), endereco.estado(), endereco.cep()),
-                TipoUsuarioGateway.paraTipo(dados.tipo()), Documento.de(dados.documento()),
-                dados.dataCriacao(), dados.dataUltimaAlteracao());
+                paraEndereco(dados.endereco()), TipoUsuarioGateway.paraTipo(dados.tipo()),
+                Documento.de(dados.documento()), dados.dataCriacao(), dados.dataUltimaAlteracao());
+    }
+
+    static DadosEndereco paraDados(Endereco endereco) {
+        return new DadosEndereco(endereco.rua(), endereco.numero(), endereco.complemento(), endereco.bairro(),
+                endereco.cidade(), endereco.estado(), endereco.cep());
+    }
+
+    static Endereco paraEndereco(DadosEndereco dados) {
+        return new Endereco(dados.rua(), dados.numero(), dados.complemento(), dados.bairro(), dados.cidade(),
+                dados.estado(), dados.cep());
     }
 }

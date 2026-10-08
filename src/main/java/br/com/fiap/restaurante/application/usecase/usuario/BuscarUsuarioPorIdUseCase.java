@@ -23,7 +23,7 @@ public class BuscarUsuarioPorIdUseCase {
         return usuarios.buscarPorId(id).orElseThrow(() -> usuarioNaoEncontrado(id));
     }
 
-    static RecursoNaoEncontradoException usuarioNaoEncontrado(Long id) {
+    public static RecursoNaoEncontradoException usuarioNaoEncontrado(Long id) {
         return new RecursoNaoEncontradoException("Usuário " + id + " não encontrado.");
     }
 }
