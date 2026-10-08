@@ -38,6 +38,10 @@
         {
             "name": "Autenticação",
             "description": "Validação de login e senha"
+        },
+        {
+            "name": "Itens do cardápio",
+            "description": "Itens vendidos por um restaurante, nas rotas do próprio restaurante"
         }
     ],
     "paths": {
@@ -606,13 +610,257 @@
                 }
             }
         },
+        "/api/v1/restaurantes/{restauranteId}/itens-cardapio/{itemId}": {
+            "get": {
+                "tags": [
+                    "Itens do cardápio"
+                ],
+                "summary": "Consulta um item do cardápio",
+                "description": "O item precisa ser do restaurante da rota; pela rota de outro restaurante, a resposta é 404.",
+                "operationId": "buscarPorId_2",
+                "parameters": [
+                    {
+                        "name": "restauranteId",
+                        "in": "path",
+                        "description": "Id do restaurante",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 9
+                    },
+                    {
+                        "name": "itemId",
+                        "in": "path",
+                        "description": "Id do item",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 5
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Item encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ItemCardapioResponse"
+                                },
+                                "example": {
+                                    "id": 5,
+                                    "restauranteId": 9,
+                                    "nome": "Feijoada",
+                                    "descricao": "Feijoada completa com farofa, couve e laranja.",
+                                    "preco": 39.9,
+                                    "apenasNoLocal": false,
+                                    "caminhoFoto": "fotos/feijoada.jpg",
+                                    "dataCriacao": "2026-10-08T10:30:00",
+                                    "dataUltimaAlteracao": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Restaurante ou item inexistente, removido, ou item de outro restaurante",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Item 5 não encontrado no restaurante 9.",
+                                    "instance": "/api/v1/restaurantes/9/itens-cardapio/5",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Itens do cardápio"
+                ],
+                "summary": "Atualiza um item do cardápio",
+                "description": "Substitui os dados do item. Manter o próprio nome é aceito; usar o nome de outro item ativo do restaurante, não.",
+                "operationId": "atualizar_1",
+                "parameters": [
+                    {
+                        "name": "restauranteId",
+                        "in": "path",
+                        "description": "Id do restaurante",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 9
+                    },
+                    {
+                        "name": "itemId",
+                        "in": "path",
+                        "description": "Id do item",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 5
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ItemCardapioRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Item atualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ItemCardapioResponse"
+                                },
+                                "example": {
+                                    "id": 5,
+                                    "restauranteId": 9,
+                                    "nome": "Feijoada",
+                                    "descricao": "Feijoada completa com farofa, couve e laranja.",
+                                    "preco": 39.9,
+                                    "apenasNoLocal": false,
+                                    "caminhoFoto": "fotos/feijoada.jpg",
+                                    "dataCriacao": "2026-10-08T10:30:00",
+                                    "dataUltimaAlteracao": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Campo ausente ou inválido",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/dados-invalidos",
+                                    "title": "Dados inválidos",
+                                    "status": 400,
+                                    "detail": "Um ou mais campos da requisição não passaram na validação.",
+                                    "instance": "/api/v1/restaurantes/9/itens-cardapio",
+                                    "momento": "2026-10-08T10:30:00",
+                                    "erros": [
+                                        {
+                                            "campo": "apenasNoLocal",
+                                            "mensagem": "Informe se o item está disponível só para consumo no local."
+                                        },
+                                        {
+                                            "campo": "preco",
+                                            "mensagem": "O preço deve ter no máximo duas casas decimais."
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Restaurante ou item inexistente, removido, ou item de outro restaurante",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Item 5 não encontrado no restaurante 9.",
+                                    "instance": "/api/v1/restaurantes/9/itens-cardapio/5",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Nome de outro item ativo do restaurante",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/conflito-de-dados",
+                                    "title": "Conflito de dados",
+                                    "status": 409,
+                                    "detail": "O restaurante 9 já tem um item ativo chamado Feijoada.",
+                                    "instance": "/api/v1/restaurantes/9/itens-cardapio",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Itens do cardápio"
+                ],
+                "summary": "Exclui um item do cardápio",
+                "description": "A exclusão é lógica: o item some do cardápio e o nome fica livre para outro item do restaurante.",
+                "operationId": "excluir_2",
+                "parameters": [
+                    {
+                        "name": "restauranteId",
+                        "in": "path",
+                        "description": "Id do restaurante",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 9
+                    },
+                    {
+                        "name": "itemId",
+                        "in": "path",
+                        "description": "Id do item",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 5
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Item excluído"
+                    },
+                    "404": {
+                        "description": "Restaurante ou item inexistente, removido, ou item de outro restaurante",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Item 5 não encontrado no restaurante 9.",
+                                    "instance": "/api/v1/restaurantes/9/itens-cardapio/5",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/restaurantes/{id}": {
             "get": {
                 "tags": [
                     "Restaurantes"
                 ],
                 "summary": "Consulta um restaurante pelo id",
-                "operationId": "buscarPorId_2",
+                "operationId": "buscarPorId_3",
                 "parameters": [
                     {
                         "name": "id",
@@ -697,7 +945,7 @@
                 ],
                 "summary": "Atualiza um restaurante",
                 "description": "Substitui os dados e a lista inteira de turnos. Um donoId diferente transfere o restaurante, com as mesmas exigências do cadastro.",
-                "operationId": "atualizar_1",
+                "operationId": "atualizar_2",
                 "parameters": [
                     {
                         "name": "id",
@@ -822,7 +1070,7 @@
                 ],
                 "summary": "Exclui um restaurante",
                 "description": "A exclusão é lógica: o restaurante some das consultas, e a linha fica no banco para o histórico de pedidos e avaliações das próximas fases.",
-                "operationId": "excluir_2",
+                "operationId": "excluir_3",
                 "parameters": [
                     {
                         "name": "id",
@@ -1519,6 +1767,236 @@
                                     "status": 409,
                                     "detail": "O usuário 7 não é Dono de Restaurante. Troque o tipo dele antes de cadastrar o restaurante.",
                                     "instance": "/api/v1/restaurantes",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/restaurantes/{restauranteId}/itens-cardapio": {
+            "get": {
+                "tags": [
+                    "Itens do cardápio"
+                ],
+                "summary": "Lista o cardápio de um restaurante",
+                "description": "Só os itens ativos, paginados: 10 por página por padrão, no máximo 50, em ordem de nome. O filtro apenasNoLocal é opcional. O sort aceita id, nome, preco, dataCriacao e dataUltimaAlteracao.",
+                "operationId": "listar_2",
+                "parameters": [
+                    {
+                        "name": "restauranteId",
+                        "in": "path",
+                        "description": "Id do restaurante",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 9
+                    },
+                    {
+                        "name": "apenasNoLocal",
+                        "in": "query",
+                        "description": "Só os itens disponíveis apenas no local (true) ou os outros (false)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número da página, a partir de 0",
+                        "schema": {
+                            "type": "integer",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "description": "Itens por página, no máximo 50",
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Campo e direção, como preco,desc",
+                        "schema": {
+                            "type": "string",
+                            "default": "nome,asc"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Página de itens",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginaResponse"
+                                },
+                                "example": {
+                                    "conteudo": [
+                                        {
+                                            "id": 5,
+                                            "restauranteId": 9,
+                                            "nome": "Feijoada",
+                                            "descricao": "Feijoada completa com farofa, couve e laranja.",
+                                            "preco": 39.9,
+                                            "apenasNoLocal": false,
+                                            "caminhoFoto": "fotos/feijoada.jpg",
+                                            "dataCriacao": "2026-10-08T10:30:00",
+                                            "dataUltimaAlteracao": "2026-10-08T10:30:00"
+                                        }
+                                    ],
+                                    "pagina": 0,
+                                    "tamanho": 10,
+                                    "totalElementos": 1,
+                                    "totalPaginas": 1,
+                                    "ultima": true
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Ordenação por campo não aceito",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/requisicao-invalida",
+                                    "title": "Requisição inválida",
+                                    "status": 400,
+                                    "detail": "Não é possível ordenar por senha. Campos aceitos: dataCriacao, dataUltimaAlteracao, email, id, login, nome.",
+                                    "instance": "/api/v2/usuarios",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Restaurante inexistente ou removido",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Restaurante 99 não encontrado.",
+                                    "instance": "/api/v1/restaurantes/99",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Itens do cardápio"
+                ],
+                "summary": "Cadastra um item no cardápio",
+                "description": "O nome é único entre os itens ativos do restaurante, sem diferenciar maiúsculas, acentos nem espaço no fim; o mesmo nome em outro restaurante é aceito. O preço precisa ser maior que zero, com no máximo duas casas decimais (mais casas são recusadas, não arredondadas). A foto é só o caminho, terminado em .jpg, .jpeg, .png ou .webp.",
+                "operationId": "cadastrar_3",
+                "parameters": [
+                    {
+                        "name": "restauranteId",
+                        "in": "path",
+                        "description": "Id do restaurante",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "example": 9
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ItemCardapioRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Item cadastrado. O cabeçalho Location aponta para ele.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ItemCardapioResponse"
+                                },
+                                "example": {
+                                    "id": 5,
+                                    "restauranteId": 9,
+                                    "nome": "Feijoada",
+                                    "descricao": "Feijoada completa com farofa, couve e laranja.",
+                                    "preco": 39.9,
+                                    "apenasNoLocal": false,
+                                    "caminhoFoto": "fotos/feijoada.jpg",
+                                    "dataCriacao": "2026-10-08T10:30:00",
+                                    "dataUltimaAlteracao": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Campo ausente ou inválido",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/dados-invalidos",
+                                    "title": "Dados inválidos",
+                                    "status": 400,
+                                    "detail": "Um ou mais campos da requisição não passaram na validação.",
+                                    "instance": "/api/v1/restaurantes/9/itens-cardapio",
+                                    "momento": "2026-10-08T10:30:00",
+                                    "erros": [
+                                        {
+                                            "campo": "apenasNoLocal",
+                                            "mensagem": "Informe se o item está disponível só para consumo no local."
+                                        },
+                                        {
+                                            "campo": "preco",
+                                            "mensagem": "O preço deve ter no máximo duas casas decimais."
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Restaurante inexistente ou removido",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
+                                    "title": "Recurso não encontrado",
+                                    "status": 404,
+                                    "detail": "Restaurante 99 não encontrado.",
+                                    "instance": "/api/v1/restaurantes/99",
+                                    "momento": "2026-10-08T10:30:00"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Nome de outro item ativo do restaurante",
+                        "content": {
+                            "application/problem+json": {
+                                "example": {
+                                    "type": "http://localhost:8080/problemas/conflito-de-dados",
+                                    "title": "Conflito de dados",
+                                    "status": 409,
+                                    "detail": "O restaurante 9 já tem um item ativo chamado Feijoada.",
+                                    "instance": "/api/v1/restaurantes/9/itens-cardapio",
                                     "momento": "2026-10-08T10:30:00"
                                 }
                             }
@@ -2292,6 +2770,87 @@
                     },
                     "sistema": {
                         "type": "boolean"
+                    }
+                }
+            },
+            "ItemCardapioRequest": {
+                "type": "object",
+                "properties": {
+                    "nome": {
+                        "type": "string",
+                        "description": "Espaços sobrando são removidos",
+                        "example": "Feijoada",
+                        "maxLength": 100,
+                        "minLength": 0
+                    },
+                    "descricao": {
+                        "type": "string",
+                        "example": "Feijoada completa com farofa, couve e laranja.",
+                        "maxLength": 500,
+                        "minLength": 0
+                    },
+                    "preco": {
+                        "type": "number",
+                        "description": "Maior que zero, com no máximo duas casas decimais",
+                        "example": 39.9,
+                        "maximum": 99999999.99,
+                        "minimum": 0
+                    },
+                    "apenasNoLocal": {
+                        "type": "boolean",
+                        "description": "Disponível para pedir só no restaurante. Sem valor padrão.",
+                        "example": false
+                    },
+                    "caminhoFoto": {
+                        "type": "string",
+                        "description": "Caminho relativo ou URL de uma imagem",
+                        "example": "fotos/feijoada.jpg",
+                        "maxLength": 255,
+                        "minLength": 0,
+                        "pattern": "(?i).+\\.(jpg|jpeg|png|webp)"
+                    }
+                },
+                "required": [
+                    "apenasNoLocal",
+                    "caminhoFoto",
+                    "descricao",
+                    "nome",
+                    "preco"
+                ]
+            },
+            "ItemCardapioResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "restauranteId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "nome": {
+                        "type": "string"
+                    },
+                    "descricao": {
+                        "type": "string"
+                    },
+                    "preco": {
+                        "type": "number"
+                    },
+                    "apenasNoLocal": {
+                        "type": "boolean"
+                    },
+                    "caminhoFoto": {
+                        "type": "string"
+                    },
+                    "dataCriacao": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "dataUltimaAlteracao": {
+                        "type": "string",
+                        "format": "date-time"
                     }
                 }
             },
