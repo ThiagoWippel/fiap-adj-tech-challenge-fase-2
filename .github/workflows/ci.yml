@@ -12,7 +12,7 @@ on:
 
 jobs:
   testes:
-    name: Testes, arquitetura e cobertura
+    name: Testes, arquitetura e cobertura (INF-07)
     runs-on: ubuntu-latest
 
     steps:
@@ -26,6 +26,7 @@ jobs:
           java-version: '21'
           cache: maven
 
+      # Os dois cortes de cobertura travam o build abaixo de 80% (INF-04)
       - name: Rodar mvn verify
         run: ./mvnw -B verify
 
@@ -40,7 +41,7 @@ jobs:
           if-no-files-found: ignore
 
   aceitacao:
-    name: Aceitação com a collection do Postman
+    name: Aceitação com a collection do Postman (ACE-02)
     runs-on: ubuntu-latest
 
     steps:
@@ -50,7 +51,7 @@ jobs:
       - name: Criar o .env a partir do exemplo
         run: cp .env.example .env
 
-      - name: Subir a aplicação e o banco
+      - name: Subir a aplicação e o banco a partir do .env.example (INF-03)
         run: docker compose up -d --build --wait --wait-timeout 300
 
       - name: Instalar o Node
@@ -60,7 +61,7 @@ jobs:
 
       # Duas vezes seguidas: a segunda só passa se a exclusão liberar e-mail,
       # login e documento para um novo cadastro
-      - name: Rodar a collection com o Newman
+      - name: Rodar a collection com o Newman (ACE-01)
         run: >-
           npx --yes newman@6.2.2 run postman/tech-challenge-fase-2.postman_collection.json
           -e postman/Local.postman_environment.json
