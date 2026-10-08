@@ -25,7 +25,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.net.URI;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 
@@ -42,6 +42,9 @@ import java.util.List;
 public class TratadorDeErros extends ResponseEntityExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TratadorDeErros.class);
+
+    // Com padrão fixo: o toString do LocalDateTime omite os segundos quando são zero.
+    private static final DateTimeFormatter FORMATO_DO_MOMENTO = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     private final ProblemasProperties propriedades;
 
@@ -145,6 +148,10 @@ public class TratadorDeErros extends ResponseEntityExceptionHandler {
             problema.setTitle(tipo.titulo());
         }
         problema.setInstance(URI.create(((ServletWebRequest) requisicao).getRequest().getRequestURI()));
-        problema.setProperty("momento", LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).toString());
+        problema.setProperty("momento", momento(LocalDateTime.now()));
+    }
+
+    static String momento(LocalDateTime agora) {
+        return agora.format(FORMATO_DO_MOMENTO);
     }
 }
