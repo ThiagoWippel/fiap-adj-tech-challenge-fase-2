@@ -3524,7 +3524,7 @@
 		},
 		{
 			"name": "13. Limpeza dos restaurantes",
-			"description": "Sem restaurante ativo, a dona pode ser excluída; o restaurante removido continua apontando para ela.",
+			"description": "Sem restaurante ativo, a dona pode ser excluída; o restaurante removido continua apontando para ela. Depois da\nexclusão, a dona some da consulta, da busca e do login, e o cliente excluído pode se cadastrar de novo com os\nmesmos dados.",
 			"item": [
 				{
 					"name": "Excluir a dona",
@@ -3562,7 +3562,244 @@
 					"response": []
 				},
 				{
+					"name": "Consultar a dona excluída",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 404 Not Found', function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Recurso não encontrado\"', function () {",
+									"    pm.expect(problema.title).to.eql('Recurso não encontrado');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idDonaCantina}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idDonaCantina}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: EXC-03."
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar a dona excluída pelo nome",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('A dona excluída não aparece na busca', function () {",
+									"    const ids = pm.response.json().map(function (usuario) { return usuario.id; });",
+									"    pm.expect(ids).to.not.include(Number(pm.collectionVariables.get('idDonaCantina')));",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios?nome=Carla",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios"
+							],
+							"query": [
+								{
+									"key": "nome",
+									"value": "Carla"
+								}
+							]
+						},
+						"description": "Cenários do catálogo: EXC-03."
+					},
+					"response": []
+				},
+				{
+					"name": "Login da dona excluída",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 401 Unauthorized', function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"const problema = pm.response.json();",
+									"pm.test('Erro no formato ProblemDetail', function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+									"    ['type', 'title', 'status', 'detail', 'instance', 'momento'].forEach(function (campo) {",
+									"        pm.expect(problema).to.have.property(campo);",
+									"    });",
+									"    pm.expect(problema.type).to.include('/problemas/');",
+									"});",
+									"pm.test('Título \"Credenciais inválidas\"', function () {",
+									"    pm.expect(problema.title).to.eql('Credenciais inválidas');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: EXC-03.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"carla.dias\",\n  \"senha\": \"SenhaSegura123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Excluir o cliente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios/{{idClienteCantina}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios",
+								"{{idClienteCantina}}"
+							],
+							"query": []
+						},
+						"description": "Cenários do catálogo: EXC-01."
+					},
+					"response": []
+				},
+				{
+					"name": "Recadastrar o cliente com os mesmos dados",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 201 Created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"const novo = pm.response.json();",
+									"pm.test('O cadastro ganha um id novo', function () {",
+									"    pm.expect(novo.id).to.not.eql(Number(pm.collectionVariables.get('idClienteCantina')));",
+									"});",
+									"pm.collectionVariables.set('idClienteCantina', novo.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"usuarios"
+							],
+							"query": []
+						},
+						"description": "A anonimização deixou livres o e-mail, o login e o CPF do cliente excluído.\n\nCenários do catálogo: EXC-05.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Diego Rocha\",\n  \"email\": \"diego.rocha@exemplo.com\",\n  \"login\": \"diego.rocha\",\n  \"senha\": \"SenhaSegura123\",\n  \"tipo\": \"CLIENTE\",\n  \"cpf\": \"390.533.447-05\",\n  \"endereco\": {\n    \"rua\": \"Rua Hercílio Luz\",\n    \"numero\": \"120\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"Itajaí\",\n    \"estado\": \"SC\",\n    \"cep\": \"88301-000\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir o cliente recadastrado",
 					"event": [
 						{
 							"listen": "test",
