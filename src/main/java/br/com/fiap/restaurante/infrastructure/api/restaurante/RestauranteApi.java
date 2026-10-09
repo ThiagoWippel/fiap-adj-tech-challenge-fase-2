@@ -33,9 +33,9 @@ interface RestauranteApi {
 
     @Operation(summary = "Cadastra um restaurante", description = """
             O dono precisa ser um usuário ativo do tipo Dono de Restaurante. Os horários são turnos por dia da \
-            semana, vários por dia, sem sobreposição; fechamento antes da abertura quer dizer que o turno termina \
-            no dia seguinte (sexta 18:00–02:00 vai até as 2h de sábado). Dia sem turno é dia fechado. Um \
-            restaurante 24 horas cadastra 00:00–23:59.""")
+            semana, vários por dia, sem sobreposição e no máximo 50 no total; fechamento antes da abertura quer \
+            dizer que o turno termina no dia seguinte (sexta 18:00–02:00 vai até as 2h de sábado). Dia sem turno \
+            é dia fechado. Um restaurante 24 horas cadastra 00:00–23:59.""")
     @ApiResponse(responseCode = "201", description = "Restaurante cadastrado. O cabeçalho Location aponta para ele.",
             content = @Content(mediaType = JSON, schema = @Schema(implementation = RestauranteResponse.class),
                     examples = @ExampleObject(ExemplosDeRestaurante.RESTAURANTE)))

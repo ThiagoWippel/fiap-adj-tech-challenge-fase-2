@@ -6,14 +6,15 @@ import jakarta.validation.constraints.NotBlank;
 
 /**
  * Corpo da troca de tipo: o código do novo tipo e o documento que ele exige. Se
- * o documento é CPF ou CNPJ sai do número de dígitos.
+ * o documento é CPF ou CNPJ sai do tamanho, sem a máscara: 11 ou 14 caracteres.
  */
 public record TrocarTipoRequest(
         @Schema(example = "DONO_RESTAURANTE", description = "Código do novo tipo")
         @NotBlank(message = "O tipo é obrigatório.")
         String tipo,
 
-        @Schema(example = "11.222.333/0001-81", description = "CNPJ para DONO_RESTAURANTE, CPF para os demais")
+        @Schema(example = "11.222.333/0001-81",
+                description = "CNPJ para DONO_RESTAURANTE, CPF para os demais. O CNPJ pode ser alfanumérico.")
         @NotBlank(message = "O documento é obrigatório.")
         String documento) {
 

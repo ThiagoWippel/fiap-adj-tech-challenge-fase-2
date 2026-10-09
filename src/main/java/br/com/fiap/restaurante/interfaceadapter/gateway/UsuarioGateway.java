@@ -15,8 +15,8 @@ import java.util.Optional;
 
 /**
  * Gateway de usuários: converte entre a entidade de domínio e os dados da origem
- * de dados. Ao reconstruir o usuário, o tipo do documento sai do número de
- * dígitos: 11 para CPF, 14 para CNPJ.
+ * de dados. Ao reconstruir o usuário, o tipo do documento sai do tamanho: 11
+ * caracteres para CPF, 14 para CNPJ.
  */
 public class UsuarioGateway implements IUsuarioGateway {
 

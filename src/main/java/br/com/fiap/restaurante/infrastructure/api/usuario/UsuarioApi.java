@@ -42,8 +42,8 @@ interface UsuarioApi {
 
     @Operation(summary = "Cadastra um usuário", description = """
             O tipo é o código de um tipo de usuário, como CLIENTE ou DONO_RESTAURANTE. Dono de restaurante \
-            informa CNPJ; os demais tipos informam CPF. Os documentos são aceitos com ou sem pontuação e \
-            gravados só com dígitos. E-mail, login e documento são únicos.""")
+            informa CNPJ, que pode ser alfanumérico; os demais tipos informam CPF. Os documentos são aceitos \
+            com ou sem pontuação e gravados sem ela. E-mail, login e documento são únicos.""")
     @ApiResponse(responseCode = "201", description = "Usuário cadastrado. O cabeçalho Location aponta para ele.",
             content = @Content(mediaType = JSON, schema = @Schema(implementation = UsuarioResponse.class),
                     examples = @ExampleObject(ExemplosDeUsuario.USUARIO)))

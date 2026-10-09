@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 /**
@@ -17,6 +18,8 @@ import java.util.regex.Pattern;
 public class ItemCardapio {
 
     private static final Pattern IMAGEM = Pattern.compile("(?i).+\\.(jpg|jpeg|png|webp)");
+    private static final Pattern ESQUEMA = Pattern.compile("^[A-Za-z][A-Za-z0-9+.-]*:");
+    private static final Pattern URL_WEB = Pattern.compile("(?i)^https?://\\S+");
 
     @EqualsAndHashCode.Include
     private Long id;
@@ -95,7 +98,11 @@ public class ItemCardapio {
         this.apenasNoLocal = apenasNoLocal;
     }
 
-    /** Aceita caminho relativo ou URL, terminado em .jpg, .jpeg, .png ou .webp. */
+    /**
+     * Aceita caminho relativo ou URL http ou https, terminado em .jpg, .jpeg, .png
+     * ou .webp. O caminho não pode subir de pasta: quem for buscar a foto vai
+     * seguir esse caminho.
+     */
     public void setCaminhoFoto(String caminhoFoto) {
         if (caminhoFoto == null || caminhoFoto.isBlank()) {
             throw new ValidacaoDeDominioException("O caminho da foto é obrigatório.");
@@ -106,6 +113,12 @@ public class ItemCardapio {
         }
         if (!IMAGEM.matcher(limpo).matches()) {
             throw new ValidacaoDeDominioException("O caminho da foto deve terminar em .jpg, .jpeg, .png ou .webp.");
+        }
+        if (ESQUEMA.matcher(limpo).find() && !URL_WEB.matcher(limpo).matches()) {
+            throw new ValidacaoDeDominioException("A foto deve ser um caminho relativo ou uma URL http ou https.");
+        }
+        if (Arrays.asList(limpo.split("[/\\\\]")).contains("..")) {
+            throw new ValidacaoDeDominioException("O caminho da foto não pode subir de pasta com \"..\".");
         }
         this.caminhoFoto = limpo;
     }

@@ -69,6 +69,11 @@ public class TipoUsuario {
         if (codigo.isEmpty()) {
             throw new ValidacaoDeDominioException("O nome do tipo deve ter ao menos uma letra ou um número.");
         }
+        // Algumas letras crescem em maiúsculas: "ß" vira "SS"
+        if (codigo.length() > 50) {
+            throw new ValidacaoDeDominioException(
+                    "O nome do tipo gera um código com mais de 50 caracteres. Use um nome mais curto.");
+        }
         return codigo;
     }
 }

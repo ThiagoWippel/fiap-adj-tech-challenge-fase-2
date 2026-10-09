@@ -7,7 +7,6 @@ import br.com.fiap.restaurante.infrastructure.api.comum.EnderecoRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -37,9 +36,10 @@ public record RestauranteRequest(
         @NotNull(message = "O dono do restaurante é obrigatório.")
         Long donoId,
 
-        @NotEmpty(message = "Informe ao menos um turno de funcionamento.")
+        @NotNull(message = "Informe ao menos um turno de funcionamento.")
+        @Size(min = 1, max = 50, message = "Informe de 1 a 50 turnos de funcionamento.")
         @Valid
-        List<TurnoRequest> horarios) {
+        List<@NotNull(message = "O turno não pode ser nulo.") TurnoRequest> horarios) {
 
     public NovoRestauranteDTO paraNovoDTO() {
         return new NovoRestauranteDTO(nome, endereco.paraDTO(), tipoCozinha, turnos(), donoId);

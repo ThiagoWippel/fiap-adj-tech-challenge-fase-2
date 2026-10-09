@@ -47,8 +47,10 @@ public record CriarUsuarioRequest(
         @CPF(message = "O CPF informado não é válido.")
         String cpf,
 
-        @Schema(example = "11.222.333/0001-81", description = "Obrigatório para DONO_RESTAURANTE")
-        @CNPJ(message = "O CNPJ informado não é válido.")
+        @Schema(example = "11.222.333/0001-81",
+                description = "Obrigatório para DONO_RESTAURANTE. Aceita também o formato alfanumérico, "
+                        + "como 12.ABC.345/01DE-35")
+        @CNPJ(format = CNPJ.Format.ALPHANUMERIC, message = "O CNPJ informado não é válido.")
         String cnpj,
 
         @NotNull(message = "O endereço é obrigatório.")
