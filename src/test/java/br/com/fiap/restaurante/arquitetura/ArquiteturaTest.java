@@ -11,8 +11,9 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 
 /**
- * Regras de dependência entre as camadas. {@code allowEmptyShould} deixa a regra
- * passar enquanto uma camada ainda não tem classes.
+ * Regras de dependência entre as camadas. Uma regra cuja camada não tem classes
+ * falha, em vez de passar sem conferir nada: se um pacote for renomeado, o teste
+ * avisa.
  */
 @DisplayName("Arquitetura")
 class ArquiteturaTest {
@@ -37,8 +38,7 @@ class ArquiteturaTest {
         /* arrange */
         ArchRule regra = noClasses()
                 .that().resideInAnyPackage(RAIZ + ".domain..", RAIZ + ".application..")
-                .should().dependOnClassesThat().resideInAnyPackage(PACOTES_DE_FRAMEWORK)
-                .allowEmptyShould(true);
+                .should().dependOnClassesThat().resideInAnyPackage(PACOTES_DE_FRAMEWORK);
 
         /* act + assert */
         regra.check(CLASSES_DE_PRODUCAO);
@@ -51,8 +51,7 @@ class ArquiteturaTest {
         ArchRule regra = noClasses()
                 .that().resideInAnyPackage(
                         RAIZ + ".domain..", RAIZ + ".application..", RAIZ + ".interfaceadapter..")
-                .should().dependOnClassesThat().resideInAPackage(RAIZ + ".infrastructure..")
-                .allowEmptyShould(true);
+                .should().dependOnClassesThat().resideInAPackage(RAIZ + ".infrastructure..");
 
         /* act + assert */
         regra.check(CLASSES_DE_PRODUCAO);
@@ -64,7 +63,6 @@ class ArquiteturaTest {
         /* arrange */
         ArchRule regra = layeredArchitecture()
                 .consideringOnlyDependenciesInLayers()
-                .withOptionalLayers(true)
                 .layer("Domínio").definedBy(RAIZ + ".domain..")
                 .layer("Aplicação").definedBy(RAIZ + ".application..")
                 .layer("Adaptadores").definedBy(RAIZ + ".interfaceadapter..")
@@ -72,8 +70,7 @@ class ArquiteturaTest {
                 .whereLayer("Infraestrutura").mayNotBeAccessedByAnyLayer()
                 .whereLayer("Adaptadores").mayOnlyBeAccessedByLayers("Infraestrutura")
                 .whereLayer("Aplicação").mayOnlyBeAccessedByLayers("Adaptadores", "Infraestrutura")
-                .whereLayer("Domínio").mayOnlyBeAccessedByLayers("Aplicação", "Adaptadores", "Infraestrutura")
-                .allowEmptyShould(true);
+                .whereLayer("Domínio").mayOnlyBeAccessedByLayers("Aplicação", "Adaptadores", "Infraestrutura");
 
         /* act + assert */
         regra.check(CLASSES_DE_PRODUCAO);
@@ -85,8 +82,7 @@ class ArquiteturaTest {
         /* arrange */
         ArchRule regra = noClasses()
                 .that().resideInAPackage(RAIZ + ".interfaceadapter..")
-                .should().dependOnClassesThat().resideInAnyPackage(PACOTES_DE_FRAMEWORK)
-                .allowEmptyShould(true);
+                .should().dependOnClassesThat().resideInAnyPackage(PACOTES_DE_FRAMEWORK);
 
         /* act + assert */
         regra.check(CLASSES_DE_PRODUCAO);
