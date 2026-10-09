@@ -46,7 +46,9 @@ class TipoUsuarioControllerTest {
         mocks = MockitoAnnotations.openMocks(this);
         controller = TipoUsuarioController.create(tipos, usuarios, new TransacaoImediata());
         when(tipos.buscarPorId(3L)).thenReturn(Optional.of(ENTREGADOR));
+        when(tipos.buscarPorIdParaAlterar(3L)).thenReturn(Optional.of(ENTREGADOR));
         when(tipos.buscarPorId(1L)).thenReturn(Optional.of(DadosDeExemplo.CLIENTE));
+        when(tipos.buscarPorIdParaAlterar(1L)).thenReturn(Optional.of(DadosDeExemplo.CLIENTE));
     }
 
     @AfterEach

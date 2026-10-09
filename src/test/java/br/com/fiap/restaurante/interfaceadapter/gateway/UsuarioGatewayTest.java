@@ -143,4 +143,15 @@ class UsuarioGatewayTest {
         assertThat(gateway.contarAtivosPorTipo(1L)).isEqualTo(5L);
         assertThat(gateway.existeDocumentoEmOutroUsuario(CPF, 8L)).isTrue();
     }
+
+    @Test
+    @DisplayName("CON-03 · a busca para alterar devolve o usuário convertido, ou vazio")
+    void deveBuscarParaAlterar() {
+        /* arrange */
+        when(dataSource.buscarPorIdParaAlterar(7L)).thenReturn(Optional.of(DADOS_MARIA));
+
+        /* act + assert */
+        assertThat(gateway.buscarPorIdParaAlterar(7L)).get().usingRecursiveComparison().isEqualTo(maria());
+        assertThat(gateway.buscarPorIdParaAlterar(8L)).isEmpty();
+    }
 }

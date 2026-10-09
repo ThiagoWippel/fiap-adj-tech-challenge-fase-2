@@ -82,4 +82,15 @@ class ItemCardapioGatewayTest {
         assertThat(gateway.existeNomeAtivoEmOutroItem(9L, "Feijoada", 6L)).isTrue();
         verify(dataSource).remover(5L);
     }
+
+    @Test
+    @DisplayName("CON-03 · a busca para alterar devolve o item convertido, ou vazio")
+    void deveBuscarParaAlterar() {
+        /* arrange */
+        when(dataSource.buscarPorIdParaAlterar(5L)).thenReturn(Optional.of(DadosDeExemplo.feijoada()));
+
+        /* act + assert */
+        assertThat(gateway.buscarPorIdParaAlterar(5L)).get().extracting(ItemCardapio::getNome).isEqualTo("Feijoada");
+        assertThat(gateway.buscarPorIdParaAlterar(99L)).isEmpty();
+    }
 }

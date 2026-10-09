@@ -95,4 +95,18 @@ class TipoUsuarioGatewayTest {
         assertThat(gateway.existeNomeEmOutroTipo("Entregador", 4L)).isTrue();
         verify(dataSource).excluir(3L);
     }
+
+    @Test
+    @DisplayName("CON-03 · a busca para alterar devolve o tipo convertido, ou vazio")
+    void deveBuscarParaAlterar() {
+        /* arrange */
+        when(dataSource.buscarPorIdParaAlterar(3L))
+                .thenReturn(Optional.of(new DadosTipoUsuario(3L, "Entregador", "ENTREGADOR")));
+        TipoUsuarioGateway gateway = TipoUsuarioGateway.create(dataSource);
+
+        /* act + assert */
+        assertThat(gateway.buscarPorIdParaAlterar(3L)).get().extracting(TipoUsuario::getCodigo)
+                .isEqualTo("ENTREGADOR");
+        assertThat(gateway.buscarPorIdParaAlterar(99L)).isEmpty();
+    }
 }

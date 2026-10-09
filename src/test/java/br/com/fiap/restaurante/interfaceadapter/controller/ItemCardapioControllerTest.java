@@ -44,6 +44,7 @@ class ItemCardapioControllerTest {
         controller = ItemCardapioController.create(itens, restaurantes, new TransacaoImediata());
         when(restaurantes.existeAtivo(9L)).thenReturn(true);
         when(itens.buscarPorId(5L)).thenReturn(Optional.of(DadosDeExemplo.feijoada()));
+        when(itens.buscarPorIdParaAlterar(5L)).thenReturn(Optional.of(DadosDeExemplo.feijoada()));
     }
 
     @AfterEach

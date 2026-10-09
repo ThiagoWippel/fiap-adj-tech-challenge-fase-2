@@ -53,9 +53,9 @@ class AtualizarRestauranteUseCaseTest {
         mocks = MockitoAnnotations.openMocks(this);
         transacao = new TransacaoImediata();
         useCase = AtualizarRestauranteUseCase.create(restaurantes, usuarios, transacao);
-        when(restaurantes.buscarPorId(9L)).thenReturn(Optional.of(cantina()));
-        when(usuarios.buscarPorId(7L)).thenReturn(Optional.of(maria()));
-        when(usuarios.buscarPorId(10L)).thenReturn(Optional.of(joao()));
+        when(restaurantes.buscarPorIdParaAlterar(9L)).thenReturn(Optional.of(cantina()));
+        when(usuarios.buscarPorIdParaAlterar(7L)).thenReturn(Optional.of(maria()));
+        when(usuarios.buscarPorIdParaAlterar(10L)).thenReturn(Optional.of(joao()));
         when(restaurantes.atualizar(any())).thenAnswer(chamada -> chamada.getArgument(0));
     }
 
@@ -65,7 +65,7 @@ class AtualizarRestauranteUseCaseTest {
     }
 
     @Test
-    @DisplayName("RES-08 · a atualização altera os dados e substitui todos os turnos, mantendo o dono")
+    @DisplayName("RES-08 · CON-03 · a atualização altera os dados e substitui todos os turnos, mantendo o dono")
     void deveAtualizarESubstituirOsTurnos() {
         /* act */
         Restaurante atualizado = useCase.run(atualizacao(8L));
@@ -75,7 +75,7 @@ class AtualizarRestauranteUseCaseTest {
         assertThat(atualizado.getTipoCozinha()).isEqualTo(TipoCozinha.PIZZARIA);
         assertThat(atualizado.getHorarios().turnos()).extracting(Turno::toString).containsExactly("TERCA 18:00–23:00");
         assertThat(atualizado.getDono().getId()).isEqualTo(8L);
-        verify(usuarios, never()).buscarPorId(anyLong());
+        verify(usuarios, never()).buscarPorIdParaAlterar(anyLong());
         assertThat(transacao.execucoes()).isEqualTo(1);
     }
 

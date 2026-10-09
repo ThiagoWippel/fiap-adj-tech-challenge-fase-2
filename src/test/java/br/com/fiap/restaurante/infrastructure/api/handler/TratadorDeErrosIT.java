@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -93,6 +94,20 @@ class TratadorDeErrosIT {
         /* assert */
         assertThat(resultado).hasStatus(HttpStatus.CONFLICT);
         assertThat(resultado).bodyText().doesNotContain("Duplicate entry").doesNotContain("uk_usuario_email");
+    }
+
+    @Test
+    @DisplayName("CON-04 · bloqueio esgotado ou impasse no banco devolve 409 e pede para tentar de novo")
+    void deveDevolver409_QuandoHouverFalhaDeConcorrencia() {
+        /* act */
+        MvcTestResult resultado = mvc.get().uri("/teste-de-erros/concorrencia").exchange();
+
+        /* assert */
+        assertThat(resultado).hasStatus(HttpStatus.CONFLICT);
+        assertThat(resultado).bodyJson().extractingPath("$.type").isEqualTo(BASE_DOS_TIPOS + "conflito-de-dados");
+        assertThat(resultado).bodyJson().extractingPath("$.detail")
+                .isEqualTo("Outra operação estava alterando o mesmo registro. Tente de novo.");
+        assertThat(resultado).bodyText().doesNotContain("Lock wait timeout");
     }
 
     @Test
@@ -288,6 +303,11 @@ class TratadorDeErrosIT {
         @GetMapping("/integridade")
         void integridade() {
             throw new DataIntegrityViolationException("Duplicate entry 'maria@exemplo.com' for key 'uk_usuario_email'");
+        }
+
+        @GetMapping("/concorrencia")
+        void concorrencia() {
+            throw new CannotAcquireLockException("Lock wait timeout exceeded; try restarting transaction");
         }
 
         @GetMapping("/bug")

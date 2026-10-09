@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -34,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -59,8 +61,8 @@ class TrocarTipoDoUsuarioUseCaseTest {
         mocks = MockitoAnnotations.openMocks(this);
         transacao = new TransacaoImediata();
         useCase = TrocarTipoDoUsuarioUseCase.create(usuarios, tipos, restaurantes, transacao);
-        when(usuarios.buscarPorId(7L)).thenReturn(Optional.of(maria()));
-        when(usuarios.buscarPorId(8L)).thenReturn(Optional.of(ana()));
+        when(usuarios.buscarPorIdParaAlterar(7L)).thenReturn(Optional.of(maria()));
+        when(usuarios.buscarPorIdParaAlterar(8L)).thenReturn(Optional.of(ana()));
         when(tipos.buscarPorCodigo(TipoUsuario.CODIGO_CLIENTE)).thenReturn(Optional.of(cliente()));
         when(tipos.buscarPorCodigo(TipoUsuario.CODIGO_DONO_RESTAURANTE)).thenReturn(Optional.of(donoDeRestaurante()));
         when(usuarios.atualizar(any())).thenAnswer(chamada -> chamada.getArgument(0));
@@ -100,6 +102,23 @@ class TrocarTipoDoUsuarioUseCaseTest {
         assertThat(trocado.getTipo().getCodigo()).isEqualTo("CLIENTE");
         assertThat(trocado.getDocumento().numero()).isEqualTo("52998224725");
         verify(restaurantes).contarAtivosPorDono(8L);
+    }
+
+    @Test
+    @DisplayName("CON-02 · o usuário é reservado antes da contagem de restaurantes e só depois gravado")
+    void deveReservarOUsuarioAntesDeConferir() {
+        /* arrange */
+        when(restaurantes.contarAtivosPorDono(8L)).thenReturn(0L);
+
+        /* act */
+        useCase.run(new TrocaDeTipoDTO(8L, "CLIENTE", "52998224725"));
+
+        /* assert */
+        InOrder ordem = inOrder(usuarios, restaurantes);
+        ordem.verify(usuarios).buscarPorIdParaAlterar(8L);
+        ordem.verify(restaurantes).contarAtivosPorDono(8L);
+        ordem.verify(usuarios).atualizar(any());
+        verify(usuarios, never()).buscarPorId(anyLong());
     }
 
     @ParameterizedTest(name = "TRO-10 · dono com {0} restaurante(s) ativo(s) não vira Cliente")

@@ -44,7 +44,7 @@ class AtualizarUsuarioUseCaseTest {
         mocks = MockitoAnnotations.openMocks(this);
         transacao = new TransacaoImediata();
         useCase = AtualizarUsuarioUseCase.create(usuarios, transacao);
-        when(usuarios.buscarPorId(7L)).thenReturn(Optional.of(maria()));
+        when(usuarios.buscarPorIdParaAlterar(7L)).thenReturn(Optional.of(maria()));
         when(usuarios.atualizar(any())).thenAnswer(chamada -> chamada.getArgument(0));
     }
 
@@ -54,7 +54,7 @@ class AtualizarUsuarioUseCaseTest {
     }
 
     @Test
-    @DisplayName("USU-11 · altera nome, e-mail, login e endereço sem tocar na senha nem no tipo")
+    @DisplayName("USU-11 · CON-03 · altera nome, e-mail, login e endereço sem tocar na senha nem no tipo")
     void deveAtualizarOsDados() {
         /* arrange */
         AtualizacaoDeUsuarioDTO dados = new AtualizacaoDeUsuarioDTO(7L, "Maria Silva Souza",

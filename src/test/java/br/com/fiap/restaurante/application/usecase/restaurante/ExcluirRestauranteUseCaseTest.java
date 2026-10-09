@@ -35,7 +35,7 @@ class ExcluirRestauranteUseCaseTest {
         mocks = MockitoAnnotations.openMocks(this);
         transacao = new TransacaoImediata();
         useCase = ExcluirRestauranteUseCase.create(restaurantes, transacao);
-        when(restaurantes.buscarPorId(9L)).thenReturn(Optional.of(cantina()));
+        when(restaurantes.buscarPorIdParaAlterar(9L)).thenReturn(Optional.of(cantina()));
     }
 
     @AfterEach
@@ -44,7 +44,7 @@ class ExcluirRestauranteUseCaseTest {
     }
 
     @Test
-    @DisplayName("RES-11 · excluir marca o restaurante como removido, dentro de uma transação")
+    @DisplayName("RES-11 · CON-03 · excluir marca o restaurante como removido, dentro de uma transação")
     void deveRemoverLogicamente() {
         /* act */
         useCase.run(9L);

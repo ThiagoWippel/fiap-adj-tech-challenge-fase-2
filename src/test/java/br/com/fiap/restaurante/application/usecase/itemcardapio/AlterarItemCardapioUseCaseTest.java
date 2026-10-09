@@ -44,7 +44,7 @@ class AlterarItemCardapioUseCaseTest {
         transacao = new TransacaoImediata();
         when(restaurantes.existeAtivo(9L)).thenReturn(true);
         when(restaurantes.existeAtivo(10L)).thenReturn(true);
-        when(itens.buscarPorId(5L)).thenReturn(Optional.of(feijoada()));
+        when(itens.buscarPorIdParaAlterar(5L)).thenReturn(Optional.of(feijoada()));
         when(itens.atualizar(any())).thenAnswer(chamada -> chamada.getArgument(0));
     }
 
@@ -54,7 +54,7 @@ class AlterarItemCardapioUseCaseTest {
     }
 
     @Test
-    @DisplayName("ITE-15 · atualizar sem mudar o nome é aceito: a verificação ignora o próprio item")
+    @DisplayName("ITE-15 · CON-03 · atualizar sem mudar o nome é aceito: a verificação ignora o próprio item")
     void deveAtualizarMantendoONome() {
         /* act */
         ItemCardapio atualizado = AtualizarItemCardapioUseCase.create(itens, restaurantes, transacao)
@@ -94,7 +94,7 @@ class AlterarItemCardapioUseCaseTest {
     }
 
     @Test
-    @DisplayName("ITE-18 · excluir marca o item como removido, dentro de uma transação")
+    @DisplayName("ITE-18 · CON-03 · excluir marca o item como removido, dentro de uma transação")
     void deveExcluirLogicamente() {
         /* act */
         ExcluirItemCardapioUseCase.create(itens, restaurantes, transacao).run(9L, 5L);

@@ -50,7 +50,7 @@ class TrocarSenhaUseCaseTest {
         mocks = MockitoAnnotations.openMocks(this);
         transacao = new TransacaoImediata();
         useCase = TrocarSenhaUseCase.create(usuarios, senhas, transacao);
-        when(usuarios.buscarPorId(7L)).thenReturn(Optional.of(maria()));
+        when(usuarios.buscarPorIdParaAlterar(7L)).thenReturn(Optional.of(maria()));
         when(senhas.confere(SENHA, SENHA_CODIFICADA)).thenReturn(true);
         when(senhas.codificar(NOVA_SENHA)).thenReturn(NOVA_SENHA_CODIFICADA);
     }
@@ -61,7 +61,7 @@ class TrocarSenhaUseCaseTest {
     }
 
     @Test
-    @DisplayName("USU-15 · com a senha atual correta, grava a nova senha codificada")
+    @DisplayName("USU-15 · CON-03 · com a senha atual correta, grava a nova senha codificada")
     void deveGravarANovaSenhaCodificada() {
         /* act */
         useCase.run(new TrocaDeSenhaDTO(7L, SENHA, NOVA_SENHA));

@@ -47,7 +47,9 @@ class RestauranteControllerTest {
         mocks = MockitoAnnotations.openMocks(this);
         controller = RestauranteController.create(restaurantes, usuarios, new TransacaoImediata());
         when(usuarios.buscarPorId(8L)).thenReturn(Optional.of(DadosDeExemplo.ana()));
+        when(usuarios.buscarPorIdParaAlterar(8L)).thenReturn(Optional.of(DadosDeExemplo.ana()));
         when(restaurantes.buscarPorId(9L)).thenReturn(Optional.of(DadosDeExemplo.cantina()));
+        when(restaurantes.buscarPorIdParaAlterar(9L)).thenReturn(Optional.of(DadosDeExemplo.cantina()));
     }
 
     @AfterEach

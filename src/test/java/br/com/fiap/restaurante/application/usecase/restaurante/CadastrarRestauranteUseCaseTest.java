@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -30,6 +31,8 @@ import static br.com.fiap.restaurante.suporte.Exemplos.turnosDTO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,8 +55,8 @@ class CadastrarRestauranteUseCaseTest {
         mocks = MockitoAnnotations.openMocks(this);
         transacao = new TransacaoImediata();
         useCase = CadastrarRestauranteUseCase.create(restaurantes, usuarios, transacao);
-        when(usuarios.buscarPorId(8L)).thenReturn(Optional.of(ana()));
-        when(usuarios.buscarPorId(7L)).thenReturn(Optional.of(maria()));
+        when(usuarios.buscarPorIdParaAlterar(8L)).thenReturn(Optional.of(ana()));
+        when(usuarios.buscarPorIdParaAlterar(7L)).thenReturn(Optional.of(maria()));
         when(restaurantes.incluir(any())).thenAnswer(chamada -> chamada.getArgument(0));
     }
 
@@ -77,6 +80,19 @@ class CadastrarRestauranteUseCaseTest {
                 .containsExactly("SEGUNDA 11:00–15:00", "SEXTA 18:00–02:00");
         assertThat(cadastrado.getEndereco().cep()).isEqualTo("88301000");
         assertThat(transacao.execucoes()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("CON-01 · CON-02 · o dono é reservado antes de o restaurante ser gravado")
+    void deveReservarODonoAntesDeGravar() {
+        /* act */
+        useCase.run(novo("ITALIANA", turnosDTO(), 8L));
+
+        /* assert */
+        InOrder ordem = inOrder(usuarios, restaurantes);
+        ordem.verify(usuarios).buscarPorIdParaAlterar(8L);
+        ordem.verify(restaurantes).incluir(any());
+        verify(usuarios, never()).buscarPorId(anyLong());
     }
 
     @Test

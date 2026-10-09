@@ -60,6 +60,7 @@ class UsuarioControllerTest {
         mocks = MockitoAnnotations.openMocks(this);
         controller = UsuarioController.create(usuarios, tipos, restaurantes, senhas, new TransacaoImediata());
         when(usuarios.buscarPorId(7L)).thenReturn(Optional.of(DadosDeExemplo.maria()));
+        when(usuarios.buscarPorIdParaAlterar(7L)).thenReturn(Optional.of(DadosDeExemplo.maria()));
     }
 
     @AfterEach

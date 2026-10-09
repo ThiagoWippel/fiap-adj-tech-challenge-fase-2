@@ -45,9 +45,9 @@ class ExcluirTipoUsuarioUseCaseTest {
         mocks = MockitoAnnotations.openMocks(this);
         transacao = new TransacaoImediata();
         useCase = ExcluirTipoUsuarioUseCase.create(tipos, usuarios, transacao);
-        when(tipos.buscarPorId(1L)).thenReturn(Optional.of(cliente()));
-        when(tipos.buscarPorId(2L)).thenReturn(Optional.of(donoDeRestaurante()));
-        when(tipos.buscarPorId(3L)).thenReturn(Optional.of(entregador()));
+        when(tipos.buscarPorIdParaAlterar(1L)).thenReturn(Optional.of(cliente()));
+        when(tipos.buscarPorIdParaAlterar(2L)).thenReturn(Optional.of(donoDeRestaurante()));
+        when(tipos.buscarPorIdParaAlterar(3L)).thenReturn(Optional.of(entregador()));
     }
 
     @AfterEach
@@ -56,7 +56,7 @@ class ExcluirTipoUsuarioUseCaseTest {
     }
 
     @Test
-    @DisplayName("TIP-10 · tipo sem usuários ativos é excluído")
+    @DisplayName("TIP-10 · CON-03 · tipo sem usuários ativos é excluído")
     void deveExcluirTipoSemUsuarios() {
         /* act */
         useCase.run(3L);
@@ -87,7 +87,7 @@ class ExcluirTipoUsuarioUseCaseTest {
     void deveRecusarTipoDeSistema() {
         /* arrange */
         TipoUsuario renomeado = TipoUsuario.create(1L, "Cliente Final", TipoUsuario.CODIGO_CLIENTE);
-        when(tipos.buscarPorId(1L)).thenReturn(Optional.of(renomeado));
+        when(tipos.buscarPorIdParaAlterar(1L)).thenReturn(Optional.of(renomeado));
 
         /* act + assert */
         assertThatThrownBy(() -> useCase.run(1L))

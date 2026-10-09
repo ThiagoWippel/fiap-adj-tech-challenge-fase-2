@@ -113,4 +113,16 @@ class RestauranteGatewayTest {
         assertThat(gateway.existeAtivo(99L)).isFalse();
         verify(dataSource).remover(9L);
     }
+
+    @Test
+    @DisplayName("CON-03 · a busca para alterar devolve o restaurante convertido, ou vazio")
+    void deveBuscarParaAlterar() {
+        /* arrange */
+        when(dataSource.buscarPorIdParaAlterar(9L)).thenReturn(Optional.of(DadosDeExemplo.cantina()));
+
+        /* act + assert */
+        assertThat(gateway.buscarPorIdParaAlterar(9L)).get().extracting(Restaurante::getNome)
+                .isEqualTo("Cantina da Nona");
+        assertThat(gateway.buscarPorIdParaAlterar(99L)).isEmpty();
+    }
 }

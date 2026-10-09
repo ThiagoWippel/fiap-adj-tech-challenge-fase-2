@@ -39,8 +39,8 @@ class RenomearTipoUsuarioUseCaseTest {
         mocks = MockitoAnnotations.openMocks(this);
         transacao = new TransacaoImediata();
         useCase = RenomearTipoUsuarioUseCase.create(tipos, transacao);
-        when(tipos.buscarPorId(1L)).thenReturn(Optional.of(cliente()));
-        when(tipos.buscarPorId(3L)).thenReturn(Optional.of(entregador()));
+        when(tipos.buscarPorIdParaAlterar(1L)).thenReturn(Optional.of(cliente()));
+        when(tipos.buscarPorIdParaAlterar(3L)).thenReturn(Optional.of(entregador()));
         when(tipos.atualizar(any())).thenAnswer(chamada -> chamada.getArgument(0));
     }
 
@@ -50,7 +50,7 @@ class RenomearTipoUsuarioUseCaseTest {
     }
 
     @Test
-    @DisplayName("TIP-04 · renomear grava o novo nome e mantém o código")
+    @DisplayName("TIP-04 · CON-03 · renomear grava o novo nome e mantém o código")
     void deveRenomearMantendoOCodigo() {
         /* act */
         TipoUsuario renomeado = useCase.run(new RenomeacaoDeTipoUsuarioDTO(3L, "Entregador Parceiro"));
