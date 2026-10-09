@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -18,10 +19,18 @@ final class Paginas {
     private Paginas() {
     }
 
+    /**
+     * O id entra no fim como desempate. Sem ele, registros com o mesmo valor no
+     * campo de ordenação saem em ordem qualquer, e um deles pode aparecer em duas
+     * páginas e sumir de outra.
+     */
     static PageRequest paraPageRequest(PedidoDePagina pedido) {
-        List<Sort.Order> ordens = pedido.ordenacao().stream()
+        List<Sort.Order> ordens = new ArrayList<>(pedido.ordenacao().stream()
                 .map(ordem -> ordem.crescente() ? Sort.Order.asc(ordem.campo()) : Sort.Order.desc(ordem.campo()))
-                .toList();
+                .toList());
+        if (ordens.stream().noneMatch(ordem -> ordem.getProperty().equals("id"))) {
+            ordens.add(Sort.Order.asc("id"));
+        }
         return PageRequest.of(pedido.numero(), pedido.tamanho(), Sort.by(ordens));
     }
 

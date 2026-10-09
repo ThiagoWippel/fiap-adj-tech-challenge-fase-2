@@ -24,10 +24,22 @@ public final class Paginacao {
      * erro 500, e daria para ordenar por colunas que a API não mostra, como a senha.
      */
     public static PedidoDePagina pedido(Pageable paginacao, Set<String> camposOrdenaveis) {
+        garantirQueOBancoAlcanca(paginacao);
         List<PedidoDePagina.Ordem> ordenacao = paginacao.getSort().stream()
                 .map(ordem -> ordem(ordem, camposOrdenaveis))
                 .toList();
         return new PedidoDePagina(paginacao.getPageNumber(), paginacao.getPageSize(), ordenacao);
+    }
+
+    // O banco pula no máximo Integer.MAX_VALUE registros; acima disso a consulta
+    // falharia como erro 500.
+    private static void garantirQueOBancoAlcanca(Pageable paginacao) {
+        long deslocamento = (long) paginacao.getPageNumber() * paginacao.getPageSize();
+        if (deslocamento > Integer.MAX_VALUE) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A página " + paginacao.getPageNumber()
+                    + " passa do limite: com " + paginacao.getPageSize() + " itens por página, a última página "
+                    + "possível é " + Integer.MAX_VALUE / paginacao.getPageSize() + ".");
+        }
     }
 
     private static PedidoDePagina.Ordem ordem(Sort.Order ordem, Set<String> camposOrdenaveis) {
