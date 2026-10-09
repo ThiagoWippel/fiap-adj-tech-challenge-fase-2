@@ -28,7 +28,7 @@ Com a aplicação no ar, o Swagger fica em http://localhost:8080/swagger-ui.html
 | 1 · Funcionalidade | [Endpoints](#endpoints): 26 rotas, as 8 da Fase 1 e 18 novas · testes em `src/test/.../infrastructure/api` |
 | 2 · Qualidade do código | [Arquitetura](#arquitetura), Javadoc em todas as classes públicas, [decisões](#decisões-principais) |
 | 3 · Documentação | Este README · Swagger com exemplos de sucesso e de erro em cada rota · [`docs/openapi.json`](docs/openapi.json) |
-| 4 · Collections | [`postman/`](postman/): 83 requisições com verificações, rodadas pelo CI a cada push |
+| 4 · Collections | [`postman/`](postman/): 88 requisições com verificações, rodadas pelo CI a cada push |
 | 5 · Docker Compose | [`docker-compose.yml`](docker-compose.yml): aplicação e MySQL, os dois com healthcheck |
 | 6 · Repositório | Este repositório, público, com o histórico da Fase 1 |
 | 7 · Clean Architecture | Pacotes `domain`, `application`, `interfaceadapter` e `infrastructure`, com as regras de dependência testadas pelo ArchUnit |
@@ -61,17 +61,19 @@ o comprova: está tudo na [matriz requisito → evidência](docs/matriz-de-evide
   `AJUDANTE_DE_COZINHA`) e nunca muda. Cliente e Dono de Restaurante são tipos de sistema: podem ser
   renomeados, não excluídos. Um usuário troca de tipo na mesma conta, informando o documento do novo tipo.
 - **Restaurantes**: nome, endereço, tipo de cozinha (lista fechada), horários e dono. O dono precisa ser do
-  tipo Dono de Restaurante. Os horários são turnos por dia da semana; um turno pode passar da meia-noite
+  tipo Dono de Restaurante. Os horários são de 1 a 50 turnos por semana; um turno pode passar da meia-noite
   (sexta 18:00–02:00) e os turnos não podem se sobrepor.
 - **Itens do cardápio**: nas rotas do restaurante. Nome único entre os itens ativos do restaurante, preço com
-  no máximo duas casas, disponibilidade só no local e o caminho da foto.
+  no máximo duas casas, disponibilidade só no local e o caminho da foto (relativo ou URL http/https, sem `..`).
 
 Regras que cruzam os cadastros:
 
-- Dono de Restaurante usa CNPJ; os demais tipos usam CPF, com os dígitos verificadores conferidos.
+- Dono de Restaurante usa CNPJ, inclusive no formato alfanumérico que a Receita emite desde julho de 2026; os
+  demais tipos usam CPF. Os dígitos verificadores são conferidos nos dois.
 - Quem tem restaurante ativo não pode ser excluído nem deixar de ser Dono de Restaurante.
 - A exclusão depende da natureza do dado: o usuário é anonimizado, restaurante e item têm exclusão lógica, e
   o tipo de usuário é excluído de verdade, se nenhum usuário ativo o usar.
+- A senha tem de 8 a 72 caracteres e no máximo 72 bytes, o limite do BCrypt: letra acentuada conta como dois.
 
 ## Como executar
 
@@ -267,7 +269,7 @@ de validação de campo trazem também `erros`, com o campo e a mensagem de cada
 | Credenciais inválidas | 401 | Login ou senha incorretos, senha atual incorreta |
 | Recurso não encontrado | 404 | Id inexistente ou registro removido |
 | Método não permitido | 405 | Verbo que a rota não aceita |
-| Conflito de dados | 409 | Unicidade, tipo em uso, dono que não é Dono de Restaurante, restaurante ativo |
+| Conflito de dados | 409 | Unicidade, tipo em uso, dono que não é Dono de Restaurante, restaurante ativo, ou outra operação alterando o mesmo registro ao mesmo tempo |
 | Mídia não suportada | 415 | Corpo que não é JSON |
 | Erro interno | 500 | Falha inesperada; o detalhe fica só no log |
 
@@ -444,6 +446,12 @@ só confere o mapeamento.
   própria collection.
 - **Desempenho.** Associações LAZY, sem sessão aberta durante a serialização, e a listagem de restaurantes com
   um número fixo de consultas, qualquer que seja o tamanho da página (há um teste que conta).
+- **Operações simultâneas.** As operações que alteram um registro o reservam no banco (`SELECT ... FOR UPDATE`)
+  até o fim da transação. Sem isso, excluir um usuário e cadastrar um restaurante para ele ao mesmo tempo
+  passavam as duas, e um PUT simultâneo trazia de volta um registro recém-excluído. Há um teste que dispara os
+  pares juntos.
+- **Listagens estáveis.** Toda ordenação termina pelo id. Sem esse desempate, registros com o mesmo nome podiam
+  aparecer em duas páginas e sumir de outra.
 
 ## Testes
 
@@ -460,9 +468,10 @@ só confere o mapeamento.
 
 - **Cobertura:** dois cortes travam o build, cada um com 80% de linhas e de ramos: o dos testes unitários sobre
   o núcleo (`domain`, `application` e `interfaceadapter`) e o total. Hoje o núcleo está em 100% e o total acima
-  de 99%.
-- **Catálogo de cenários:** os 175 cenários de [`docs/catalogo-de-cenarios.md`](docs/catalogo-de-cenarios.md)
-  foram escritos antes do código. O ID de cada um aparece no nome do teste que o comprova, na descrição da
+  de 99%, com 355 testes unitários e 182 de integração.
+- **Catálogo de cenários:** os 187 cenários de [`docs/catalogo-de-cenarios.md`](docs/catalogo-de-cenarios.md)
+  foram escritos antes do código, menos os 12 da auditoria final, que travam falhas encontradas com a aplicação
+  no ar. O ID de cada um aparece no nome do teste que o comprova, na descrição da
   requisição da collection e na [matriz](docs/matriz-de-evidencias.md).
 - **TDD:** no histórico do git, o commit dos testes de cada parte vem antes do commit da implementação.
 - **CI:** a cada push, o GitHub Actions roda dois jobs. Um executa o `mvn verify`; o outro sobe o docker compose

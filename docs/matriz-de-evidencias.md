@@ -8,7 +8,7 @@ cenário leva ao teste que roda.
 Níveis: **U** domínio · **C** caso de uso · **I** integração com MySQL · **P** collection (Newman no CI) ·
 **A** regra de arquitetura · **CI** pipeline.
 
-**175 de 175 cenários com evidência.**
+**187 de 187 cenários com evidência.**
 
 ## Requisito → cenários
 
@@ -17,7 +17,7 @@ Níveis: **U** domínio · **C** caso de uso · **I** integração com MySQL · 
 | EN-OBJ | Enunciado, seção "Objetivo" ("expande o sistema", "código limpo", "execução integrada") | INF-03, ACE-01 |
 | EN-TU | Enunciado, seção "Tipo de usuário" | TIP-01, TIP-03, TIP-05, TIP-06, TIP-08, TIP-10, TIP-11, TIP-12, TIP-14, TIP-15, TIP-16, TIP-17, TIP-18, TRO-01, TRO-05, TRO-08, TRO-09 |
 | EN-RE | Enunciado, seção "Cadastro de restaurante" | RES-01, RES-02, RES-03, RES-05, RES-06, RES-08, RES-10, RES-12, RES-13, RES-14, RES-15, RES-16, RES-17, HOR-01, HOR-10, COZ-01, COZ-02, COZ-03 |
-| EN-IT | Enunciado, seção "Cadastro dos itens do cardápio" | ITE-01, ITE-02, ITE-04, ITE-08, ITE-09, ITE-10, ITE-11, ITE-21 |
+| EN-IT | Enunciado, seção "Cadastro dos itens do cardápio" | ITE-01, ITE-02, ITE-04, ITE-08, ITE-09, ITE-10, ITE-11, ITE-21, ITE-23 |
 | EN-1 | Critério 1 · Funcionalidade: os três cadastros e os endpoints funcionando | TIP-16, TRO-08, RES-12, ITE-21 |
 | EN-2 | Critério 2 · Qualidade do código: práticas do Spring Boot, código organizado e documentado | Javadoc nas classes públicas, Swagger (INF-05) e o README; ver o relatório |
 | EN-3 | Critério 3 · Documentação: arquitetura, endpoints, configuração e execução | INF-05 |
@@ -31,7 +31,7 @@ Níveis: **U** domínio · **C** caso de uso · **I** integração com MySQL · 
 | FB-2 | Feedback da Fase 1: busca por nome na collection | USU-27, USU-28 |
 | FB-3 | Feedback da Fase 1: respostas de erro em ProblemDetail | ERR-01, ERR-02, ERR-10 |
 | F1-01 | Cadastro, atualização e exclusão de usuários | USU-06, USU-08, USU-14, USU-18, USU-24, USU-29, EXC-01, EXC-02 |
-| F1-02 | Troca de senha em endpoint separado | USU-15, USU-16, USU-26, LOG-05 |
+| F1-02 | Troca de senha em endpoint separado | USU-15, USU-16, USU-26, USU-31, LOG-05 |
 | F1-03 | Atualização dos demais dados em endpoint distinto do de senha | USU-11, USU-25 |
 | F1-04 | Registro da data da última alteração | USU-25, USU-30 |
 | F1-05 | Busca de usuários pelo nome | USU-17, USU-27, USU-28 |
@@ -40,7 +40,7 @@ Níveis: **U** domínio · **C** caso de uso · **I** integração com MySQL · 
 | F1-08 | Os dois tipos de usuário obrigatórios | USU-19 |
 | F1-09 | Campos obrigatórios: nome, e-mail, login, senha, data da última alteração e endereço | END-01, END-02, END-03, END-04, END-05, USU-01, USU-02, USU-03, USU-04, USU-22 |
 | F1-10 | Estratégia de versionamento de API | USU-27, USU-28 |
-| F1-11 | Respostas de erro no padrão ProblemDetail | ERR-01, ERR-03, ERR-04, ERR-05, ERR-06, ERR-07 |
+| F1-11 | Respostas de erro no padrão ProblemDetail | ERR-01, ERR-03, ERR-04, ERR-05, ERR-06, ERR-07, CON-04 |
 | F1-12 | Swagger com exemplos de sucesso e de erro | INF-05 |
 
 ## Fatia 0 · Fundação
@@ -76,6 +76,8 @@ Níveis: **U** domínio · **C** caso de uso · **I** integração com MySQL · 
 | PAG-04 | Dada uma página além da última, então a resposta é 200 com conteúdo vazio. | I | `PaginacaoDasListagensIT.deveDevolverPaginaVazia`<br>`UsuarioV2ApiIT.deveDevolverPaginaVaziaAlemDaUltima` | — |
 | PAG-05 | Registros removidos nunca aparecem em nenhuma listagem. | I | `UsuarioV2ApiIT.deveIgnorarUsuariosRemovidos` | — |
 | PAG-06 | A contagem de elementos nos metadados considera só registros ativos. | I | `UsuarioV2ApiIT.deveIgnorarUsuariosRemovidos` | — |
+| PAG-07 | Dada uma página tão alta que o banco não consegue pular os registros anteriores, então a resposta é 400 com a última página possível, e não 500. | I | `PaginacaoDasListagensIT.deveRecusarPaginaForaDoAlcance`<br>`PaginacaoTest.deveRecusarPaginaForaDoAlcance` | — |
+| PAG-08 | Registros com o mesmo valor no campo de ordenação aparecem uma única vez ao percorrer as páginas: o id desempata. | I | `OrdenacaoComEmpateIT.deveListarCadaRegistroUmaVez`<br>`PaginasTest.deveDesempatarPeloId`<br>`PaginasTest.naoDeveRepetirOId` | — |
 
 ## Fatia 1 · Usuário
 
@@ -92,6 +94,7 @@ Níveis: **U** domínio · **C** caso de uso · **I** integração com MySQL · 
 | DOC-04 | CNPJ com dígitos verificadores inválidos, ou com todos os dígitos iguais, é recusado. | U | `DocumentoTest.deveRecusarCnpjInvalido` | — |
 | DOC-05 | Usuário do tipo Dono de Restaurante exige CNPJ; com CPF, é recusado. | U | `CadastrarUsuarioUseCaseTest.deveUsarOCnpjParaDonoDeRestaurante`<br>`CadastrarUsuarioUseCaseTest.deveRecusarDonoSemCnpj`<br>`UsuarioTest.donoDeRestauranteDeveExigirCnpj` | — |
 | DOC-06 | Usuário de qualquer outro tipo exige CPF; com CNPJ, é recusado. | U | `UsuarioTest.demaisTiposDevemExigirCpf` | Postman: 2. CPF ausente para tipo CLIENTE<br>Postman: 9. Cadastrar usuário do tipo novo |
+| DOC-07 | CNPJ alfanumérico, emitido pela Receita desde julho de 2026, é aceito com ou sem máscara e guardado sem ela; com dígito verificador errado ou letra minúscula, é recusado. O CPF continua só com dígitos. | U · I | `DocumentoTest.deveAceitarCnpjAlfanumerico`<br>`DocumentoTest.deveRecusarCnpjAlfanumericoInvalido`<br>`DocumentoTest.deveRecusarLetraNoCpf`<br>`UsuarioApiIT.deveCadastrarDonoComCnpjAlfanumerico` | — |
 | USU-01 | Usuário válido é criado com nome, e-mail, login, senha já codificada, endereço, tipo e documento. | U | `UsuarioTest.deveCriarUsuarioValido`<br>`UsuarioTest.deveReconstituirUsuarioComIdEDatas`<br>`UsuarioTest.deveExigirSenhaEEndereco`<br>`UsuarioTest.deveCompararUsuariosPeloId` | — |
 | USU-02 | Nome vazio ou fora de 3 a 120 caracteres é recusado. | U | `UsuarioTest.deveRecusarNomeInvalido`<br>`UsuarioTest.deveRecusarNomeLongoDemais` | — |
 | USU-03 | E-mail em formato inválido é recusado. | U | `UsuarioTest.deveRecusarEmailInvalido`<br>`UsuarioTest.deveRecusarEmailLongoDemais` | — |
@@ -122,6 +125,7 @@ Níveis: **U** domínio · **C** caso de uso · **I** integração com MySQL · 
 | USU-28 | GET `/api/v2/usuarios?nome=` devolve página com `conteudo` e metadados. | I · P | `BuscarUsuariosPorNomeUseCaseTest.deveBuscarPaginado`<br>`BuscarUsuariosPorNomeUseCaseTest.deveBuscarTodosPaginado_QuandoNaoHouverTermo`<br>`UsuarioV2ApiIT.deveDevolverAPaginaFiltradaPeloNome` | Postman: 5. Busca paginada (v2) |
 | USU-29 | Nenhuma resposta da API contém o campo senha. | I · P | `SenhaEmTextoTest.naoDeveExporASenhaNoToString`<br>`UsuarioApiIT.naoDeveExporASenha` | Postman: 1. Cadastrar cliente (CPF)<br>Postman: 4. Atualizacao com sucesso<br>Postman: 6. Credenciais validas |
 | USU-30 | Persistir, atualizar e reler um usuário mantém `dataCriacao` e avança `dataUltimaAlteracao` (a armadilha do update). | I | `JpaUsuarioDataSourceIT.deveManterADataDeCriacaoNaAtualizacao` | — |
+| USU-31 | Senha com até 72 caracteres, mas acima de 72 bytes (letra acentuada conta como dois), é recusada com 400 no cadastro e na troca, sem chegar ao BCrypt. | U · I | `SenhaEmTextoTest.deveRecusarSenhaAcimaDe72Bytes`<br>`SenhaEmTextoTest.deveAceitarSenhaAcentuadaNoLimite`<br>`UsuarioApiIT.deveRecusarSenhaAcimaDe72Bytes` | — |
 | LOG-01 | Login com credenciais válidas devolve id, nome, tipo, token e validade do token. | C · I · P | `AutenticarUsuarioUseCaseTest.deveAutenticarEDevolverOToken`<br>`AutenticacaoApiIT.deveAutenticar`<br>`AutenticacaoControllerTest.deveAutenticar`<br>`AutenticacaoPresenterTest.deveMontarARespostaDoLogin` | Postman: 6. Credenciais validas |
 | LOG-02 | Login inexistente devolve 401 com a mesma mensagem da senha incorreta, sem revelar que o login não existe. | C · I · P | `AutenticarUsuarioUseCaseTest.deveRecusarLoginInexistente`<br>`AutenticacaoApiIT.deveResponderIgualParaLoginInexistenteESenhaErrada` | Postman: 6. Login inexistente |
 | LOG-03 | Login inexistente ainda executa uma comparação de hash, para levar o mesmo tempo que uma senha errada. | C | `AutenticarUsuarioUseCaseTest.deveConferirASenhaMesmoComLoginInexistente`<br>`CodificadorDeSenhaBCryptTest.deveRecusarQuandoNaoHouverHash` | — |
@@ -132,11 +136,11 @@ Níveis: **U** domínio · **C** caso de uso · **I** integração com MySQL · 
 | TOK-01 | O token emitido é um JWT assinado, com `sub` igual ao id do usuário, o código do tipo e a expiração definida na configuração. | U · I | `AutenticacaoApiIT.deveDevolverTokenAssinado`<br>`GeradorDeTokenJwtTest.deveGerarTokenAssinadoComOsDadosDoUsuario` | — |
 | TOK-02 | Um token adulterado não passa na verificação da assinatura. | U | `GeradorDeTokenJwtTest.deveRecusarTokenAdulterado`<br>`GeradorDeTokenJwtTest.deveRecusarTokenDeOutraChave` | — |
 | TOK-03 | Nenhum endpoint exige token nesta fase: requisição sem `Authorization` é atendida normalmente. | I | `UsuarioApiIT.naoDeveExigirToken` | — |
-| EXC-01 | Excluir usuário sem restaurante ativo anonimiza o registro. | C | `ExcluirUsuarioUseCaseTest.deveAnonimizarOUsuario`<br>`UsuarioControllerTest.deveExcluir` | Postman: 8. Excluir o dono de restaurante<br>Postman: 8. Excluir o cliente<br>Postman: 11. Excluir o usuário<br>Postman: 13. Excluir o cliente |
+| EXC-01 | Excluir usuário sem restaurante ativo anonimiza o registro. | C | `ExcluirUsuarioUseCaseTest.deveAnonimizarOUsuario`<br>`UsuarioControllerTest.deveExcluir` | Postman: 8. Excluir o dono de restaurante<br>Postman: 8. Excluir o cliente<br>Postman: 11. Excluir o usuário<br>Postman: 13. Excluir o cliente<br>Postman: 13. Excluir o cliente recadastrado |
 | EXC-02 | Excluir usuário inexistente ou já removido devolve 404. | C · I · P | `ExcluirUsuarioUseCaseTest.deveRecusarUsuarioInexistente`<br>`UsuarioApiIT.deveExcluirUmaVezSo` | Postman: 8. Excluir novamente (deve falhar) |
-| EXC-03 | Depois da exclusão, o GET devolve 404, a busca por nome não traz o usuário e o login falha. | I · P | `UsuarioApiIT.deveSumirDepoisDeExcluido` | — |
+| EXC-03 | Depois da exclusão, o GET devolve 404, a busca por nome não traz o usuário e o login falha. | I · P | `UsuarioApiIT.deveSumirDepoisDeExcluido` | Postman: 13. Consultar a dona excluída<br>Postman: 13. Buscar a dona excluída pelo nome<br>Postman: 13. Login da dona excluída |
 | EXC-04 | Depois da exclusão, a linha continua com id e datas; o nome vira "Usuário removido"; e-mail, login, senha, documento, endereço e tipo ficam nulos; `removido_em` é preenchido. | I | `JpaUsuarioDataSourceIT.deveAnonimizarOUsuario` | — |
-| EXC-05 | Depois da exclusão, um novo cadastro com o mesmo e-mail, login e documento é aceito, com id novo. | I · P | `UsuarioApiIT.devePermitirRecadastroDepoisDaExclusao` | — |
+| EXC-05 | Depois da exclusão, um novo cadastro com o mesmo e-mail, login e documento é aceito, com id novo. | I · P | `UsuarioApiIT.devePermitirRecadastroDepoisDaExclusao` | Postman: 13. Recadastrar o cliente com os mesmos dados |
 | EXC-06 | O banco recusa um usuário ativo (sem `removido_em`) com e-mail, login, senha, documento, endereço ou tipo nulo. | I | `JpaUsuarioDataSourceIT.deveRecusarUsuarioAtivoIncompleto` | — |
 | ACE-01 | A collection da Fase 1 roda contra a Fase 2 e passa inteira, com três ajustes deliberados e documentados: o `type` dos erros, os títulos com acento e a verificação de mensagem do login atualizada para as palavras acentuadas. | P · CI | — | CI: Rodar a collection com o Newman (ACE-01) |
 | ACE-02 | A cada push, o GitHub Actions sobe o docker-compose e roda a collection completa com o Newman, e termina verde. | CI | — | CI: Aceitação com a collection do Postman (ACE-02) |
@@ -163,6 +167,7 @@ Níveis: **U** domínio · **C** caso de uso · **I** integração com MySQL · 
 | TIP-16 | CRUD HTTP: POST devolve 201 com o código e `Location`; GET lista paginada; GET por id 200 e 404; PUT 200, 404 e 409; DELETE 204, 404 e 409. | I · P | `BuscarTipoUsuarioUseCaseTest.deveBuscarPorId`<br>`BuscarTipoUsuarioUseCaseTest.deveListar`<br>`TipoUsuarioApiIT.deveCadastrarTipo`<br>`TipoUsuarioApiIT.deveRecusarNomeInvalido`<br>`TipoUsuarioApiIT.deveListarPaginado`<br>`TipoUsuarioApiIT.deveBuscarPorId`<br>`TipoUsuarioApiIT.deveRenomear`<br>`TipoUsuarioApiIT.deveExcluir`<br>`JpaTipoUsuarioDataSourceIT.deveListarEExcluir`<br>`TipoUsuarioControllerTest.deveCadastrar`<br>`TipoUsuarioControllerTest.deveConsultarERenomear`<br>`TipoUsuarioGatewayTest.deveConverterNasDemaisOperacoes`<br>`TipoUsuarioPresenterTest.deveMontarAResposta`<br>`TipoUsuarioPresenterTest.deveConverterAPagina` | Postman: 9. Cadastrar tipo<br>Postman: 9. Cadastrar tipo com nome curto<br>Postman: 9. Listar tipos<br>Postman: 9. Consultar tipo<br>Postman: 9. Consultar tipo inexistente<br>Postman: 9. Renomear tipo<br>Postman: 11. Excluir o tipo<br>Postman: 11. Consultar o tipo excluído |
 | TIP-17 | GET `/api/v1/tipos-usuario/{id}/usuarios` lista, paginados, só os usuários ativos do tipo; tipo inexistente devolve 404. | I · P | `BuscarTipoUsuarioUseCaseTest.deveListarOsUsuariosDoTipo`<br>`TipoUsuarioApiIT.deveListarUsuariosDoTipo`<br>`JpaUsuarioDataSourceIT.deveContarEBuscarSoUsuariosAtivosDoTipo`<br>`TipoUsuarioControllerTest.deveListarUsuariosDoTipo`<br>`UsuarioGatewayTest.deveBuscarPorTipoEContar` | Postman: 9. Listar usuários do tipo |
 | TIP-18 | A chave estrangeira do banco recusa a exclusão de um tipo referenciado, mesmo se a verificação do caso de uso for contornada. | I | `JpaTipoUsuarioDataSourceIT.deveBarrarExclusaoDeTipoEmUsoNoBanco` | — |
+| TIP-19 | Nome cujo código gerado passa de 50 caracteres ("ß" vira "SS") é recusado com 400, e não com 409. | U · I | `TipoUsuarioTest.deveRecusarNomeQueGeraCodigoLongoDemais`<br>`TipoUsuarioApiIT.deveRecusarNomeQueGeraCodigoLongoDemais` | — |
 | TRO-01 | Trocar o tipo para Dono de Restaurante com CNPJ válido troca o tipo e o documento. | U · C | `TrocarTipoDoUsuarioUseCaseTest.deveTrocarClienteParaDono`<br>`UsuarioTest.deveTrocarParaDonoComCnpj`<br>`UsuarioControllerTest.deveTrocarOTipo` | Postman: 10. Trocar para Dono de Restaurante |
 | TRO-02 | Trocar para Dono de Restaurante informando CPF é recusado. | U | `TrocarTipoDoUsuarioUseCaseTest.deveRecusarCpfParaDono`<br>`UsuarioTest.deveRecusarTrocaParaDonoComCpf` | Postman: 10. Trocar para Dono informando CPF |
 | TRO-03 | Trocar para Cliente, ou para um tipo criado pelo CRUD, informando CNPJ é recusado. | U | `UsuarioTest.deveRecusarTrocaParaOutrosTiposComCnpj`<br>`UsuarioTest.deveTrocarParaTipoCriadoPeloCrud` | — |
@@ -208,6 +213,8 @@ Níveis: **U** domínio · **C** caso de uso · **I** integração com MySQL · 
 | HOR-11 | A resposta traz os turnos ordenados por dia e por horário de abertura. | U · I | `QuadroDeHorariosTest.deveAceitarEOrdenarTurnos`<br>`TurnoTest.deveOrdenarPorDiaEAbertura`<br>`RestauranteApiIT.deveCadastrar` | Postman: 12. Cadastrar restaurante |
 | HOR-12 | O PUT do restaurante substitui todos os turnos: os antigos deixam de existir no banco. | I | `RestauranteApiIT.deveAtualizar`<br>`RestauranteApiIT.deveRegistrarAlteracaoSoDosTurnos` | Postman: 12. Atualizar restaurante |
 | HOR-13 | Horário em formato inválido ("25:00", "11h") ou dia inexistente devolve 400. | I | `CadastrarRestauranteUseCaseTest.deveRecusarHorarioInvalido`<br>`DiaSemanaTest.deveRecusarDiaInexistente`<br>`RestauranteApiIT.deveRecusarHorarioOuDiaInvalido` | — |
+| HOR-14 | Lista de turnos com um elemento nulo devolve 400 apontando o turno, e não 500. | I | `RestauranteApiIT.deveRecusarTurnoNulo` | — |
+| HOR-15 | Mais de 50 turnos é recusado; até 50, aceito. | U · I | `QuadroDeHorariosTest.deveLimitarAQuantidadeDeTurnos`<br>`RestauranteApiIT.deveRecusarMaisDe50Turnos` | — |
 | COZ-01 | Tipo de cozinha fora da lista devolve 400, com os valores aceitos na mensagem. | U · I | `CadastrarRestauranteUseCaseTest.deveRecusarTipoDeCozinhaInvalido`<br>`TipoCozinhaTest.deveAceitarValoresDaLista`<br>`TipoCozinhaTest.deveRecusarValorForaDaLista`<br>`RestauranteApiIT.deveRecusarTipoDeCozinhaInvalido` | Postman: 12. Cadastrar com tipo de cozinha inválido |
 | COZ-02 | Tipo de cozinha ausente devolve 400. | I | `TipoCozinhaTest.deveRecusarValorAusente`<br>`RestauranteApiIT.deveExigirTurnosETipoDeCozinha` | — |
 | COZ-03 | O filtro por tipo de cozinha devolve só os restaurantes daquele tipo; valor inválido no filtro devolve 400. | I · P | `BuscarRestaurantesUseCaseTest.deveRecusarFiltroDeCozinhaInvalido`<br>`RestauranteApiIT.deveListarComFiltros` | Postman: 12. Listar com filtro de tipo de cozinha<br>Postman: 12. Listar com tipo de cozinha inválido |
@@ -242,8 +249,13 @@ Níveis: **U** domínio · **C** caso de uso · **I** integração com MySQL · 
 | ITE-20 | O banco recusa dois itens ativos com o mesmo nome no mesmo restaurante, mesmo se a verificação do caso de uso for contornada. | I | `JpaItemCardapioDataSourceIT.deveBarrarNomeRepetidoNoBanco`<br>`JpaItemCardapioDataSourceIT.deveLiberarONomeDoItemRemovido` | — |
 | ITE-21 | CRUD HTTP aninhado: POST devolve 201 com `Location`; GET lista paginada com filtro `apenasNoLocal`; GET por id; PUT; DELETE devolve 204 e, depois dele, 404. | I · P | `ConsultarItensCardapioUseCaseTest.deveBuscarPorId`<br>`ConsultarItensCardapioUseCaseTest.deveListar`<br>`ItemCardapioApiIT.deveCadastrar`<br>`ItemCardapioApiIT.deveListar`<br>`ItemCardapioApiIT.deveConsultarEAtualizar`<br>`ItemCardapioControllerTest.deveCadastrarEConsultar`<br>`ItemCardapioControllerTest.deveAtualizarEExcluir`<br>`ItemCardapioGatewayTest.deveConsultarERepassar`<br>`ItemCardapioPresenterTest.deveConverterAPagina` | Postman: 14. Cadastrar item<br>Postman: 14. Listar o cardápio<br>Postman: 14. Consultar item<br>Postman: 14. Atualizar item mantendo o nome<br>Postman: 14. Excluir item<br>Postman: 14. Consultar item excluído |
 | ITE-22 | Todas as rotas de item de um restaurante removido devolvem 404. | I | `ConsultarItensCardapioUseCaseTest.deveRecusarRestauranteRemovido`<br>`ItemCardapioApiIT.deveEsconderItensDeRestauranteRemovido`<br>`RestauranteGatewayTest.deveRepassarContagemERemocao` | Postman: 15. Cardápio de restaurante excluído |
+| ITE-23 | Caminho da foto que sobe de pasta (`..`) ou usa esquema que não é http nem https (`javascript:`, `file:`) é recusado. | U · I | `ItemCardapioTest.deveRecusarFotoQueSobeDePasta`<br>`ItemCardapioTest.deveRecusarFotoComEsquemaEstranho`<br>`ItemCardapioTest.deveAceitarUrlHttpENomeComPontos`<br>`ItemCardapioApiIT.deveRecusarCaminhoDeFotoForaDoPadrao` | — |
 
 ## Fatia 5 · Fechamento
 
 | ID | Cenário | Nível | Testes | Collection e CI |
 |---|---|---|---|---|
+| CON-01 | Excluir um usuário e cadastrar um restaurante para ele ao mesmo tempo: só uma das duas operações dá certo, e a listagem de restaurantes continua respondendo. | C · I | `CadastrarRestauranteUseCaseTest.deveReservarODonoAntesDeGravar`<br>`ExcluirUsuarioUseCaseTest.deveReservarOUsuarioAntesDeConferir`<br>`OperacoesSimultaneasIT.deveImpedirRestauranteDeDonoExcluido` | — |
+| CON-02 | Trocar o dono para Cliente e cadastrar um restaurante para ele ao mesmo tempo: só uma das duas dá certo. | C · I | `CadastrarRestauranteUseCaseTest.deveReservarODonoAntesDeGravar`<br>`TrocarTipoDoUsuarioUseCaseTest.deveReservarOUsuarioAntesDeConferir`<br>`OperacoesSimultaneasIT.deveImpedirRestauranteDeDonoQueVirouCliente` | — |
+| CON-03 | Excluir e atualizar ao mesmo tempo o mesmo usuário, restaurante, item ou tipo: o registro excluído não volta, e nenhuma resposta é 500. | C · I | `AlterarItemCardapioUseCaseTest.deveAtualizarMantendoONome`<br>`AlterarItemCardapioUseCaseTest.deveExcluirLogicamente`<br>`AtualizarRestauranteUseCaseTest.deveAtualizarESubstituirOsTurnos`<br>`ExcluirRestauranteUseCaseTest.deveRemoverLogicamente`<br>`ExcluirTipoUsuarioUseCaseTest.deveExcluirTipoSemUsuarios`<br>`RenomearTipoUsuarioUseCaseTest.deveRenomearMantendoOCodigo`<br>`AtualizarUsuarioUseCaseTest.deveAtualizarOsDados`<br>`TrocarSenhaUseCaseTest.deveGravarANovaSenhaCodificada`<br>`OperacoesSimultaneasIT.deveManterAExclusao`<br>`ItemCardapioGatewayTest.deveBuscarParaAlterar`<br>`RestauranteGatewayTest.deveBuscarParaAlterar`<br>`TipoUsuarioGatewayTest.deveBuscarParaAlterar`<br>`UsuarioGatewayTest.deveBuscarParaAlterar` | — |
+| CON-04 | Falha de concorrência no banco (espera pela reserva esgotada, impasse) devolve 409 em ProblemDetail, pedindo para tentar de novo. | I | `TratadorDeErrosIT.deveDevolver409_QuandoHouverFalhaDeConcorrencia` | — |

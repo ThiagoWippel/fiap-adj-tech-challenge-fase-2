@@ -1193,7 +1193,7 @@
                     "Usuários"
                 ],
                 "summary": "Cadastra um usuário",
-                "description": "O tipo é o código de um tipo de usuário, como CLIENTE ou DONO_RESTAURANTE. Dono de restaurante informa CNPJ; os demais tipos informam CPF. Os documentos são aceitos com ou sem pontuação e gravados só com dígitos. E-mail, login e documento são únicos.",
+                "description": "O tipo é o código de um tipo de usuário, como CLIENTE ou DONO_RESTAURANTE. Dono de restaurante informa CNPJ, que pode ser alfanumérico; os demais tipos informam CPF. Os documentos são aceitos com ou sem pontuação e gravados sem ela. E-mail, login e documento são únicos.",
                 "operationId": "cadastrar",
                 "requestBody": {
                     "content": {
@@ -1630,7 +1630,7 @@
                     "Restaurantes"
                 ],
                 "summary": "Cadastra um restaurante",
-                "description": "O dono precisa ser um usuário ativo do tipo Dono de Restaurante. Os horários são turnos por dia da semana, vários por dia, sem sobreposição; fechamento antes da abertura quer dizer que o turno termina no dia seguinte (sexta 18:00–02:00 vai até as 2h de sábado). Dia sem turno é dia fechado. Um restaurante 24 horas cadastra 00:00–23:59.",
+                "description": "O dono precisa ser um usuário ativo do tipo Dono de Restaurante. Os horários são turnos por dia da semana, vários por dia, sem sobreposição e no máximo 50 no total; fechamento antes da abertura quer dizer que o turno termina no dia seguinte (sexta 18:00–02:00 vai até as 2h de sábado). Dia sem turno é dia fechado. Um restaurante 24 horas cadastra 00:00–23:59.",
                 "operationId": "cadastrar_2",
                 "requestBody": {
                     "content": {
@@ -2883,6 +2883,7 @@
                         "items": {
                             "$ref": "#/components/schemas/TurnoRequest"
                         },
+                        "maxItems": 50,
                         "minItems": 1
                     }
                 },
@@ -3024,7 +3025,7 @@
                     },
                     "cnpj": {
                         "type": "string",
-                        "description": "Obrigatório para DONO_RESTAURANTE",
+                        "description": "Obrigatório para DONO_RESTAURANTE. Aceita também o formato alfanumérico, como 12.ABC.345/01DE-35",
                         "example": "11.222.333/0001-81"
                     },
                     "endereco": {
@@ -3092,7 +3093,7 @@
                     },
                     "documento": {
                         "type": "string",
-                        "description": "CNPJ para DONO_RESTAURANTE, CPF para os demais",
+                        "description": "CNPJ para DONO_RESTAURANTE, CPF para os demais. O CNPJ pode ser alfanumérico.",
                         "example": "11.222.333/0001-81",
                         "minLength": 1
                     }

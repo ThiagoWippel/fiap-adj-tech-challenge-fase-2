@@ -36,6 +36,7 @@ Assim qualquer frase do enunciado leva a um cenário, e cada cenário leva a um 
 | F1-01 a F1-13 | Requisitos herdados da Fase 1 (lista abaixo) |
 | FB-1 a FB-3 | Feedback da Fase 1: login sem testes e geração de tokens; busca por nome na collection; ProblemDetail |
 | Dec. A a X | Decisão do dossiê com a letra correspondente |
+| AUD | Auditoria do código pronto: falha encontrada com a aplicação no ar e travada por um cenário novo |
 
 Requisitos herdados da Fase 1:
 
@@ -61,14 +62,20 @@ Decisões do dossiê: A repositório · B token · C horário · D tipo do dono 
 
 | Fatia | Tema | Cenários |
 |---|---|---|
-| 0 | Fundação: arquitetura, infraestrutura, erros, paginação | 29 |
-| 1 | Usuário: herança da Fase 1, login, token, exclusão | 59 |
-| 2 | Tipo de usuário e troca de tipo | 27 |
-| 3 | Restaurante, horários e tipo de cozinha | 38 |
-| 4 | Item do cardápio | 22 |
-| | **Total** | **175** |
+| 0 | Fundação: arquitetura, infraestrutura, erros, paginação | 31 |
+| 1 | Usuário: herança da Fase 1, login, token, exclusão | 61 |
+| 2 | Tipo de usuário e troca de tipo | 28 |
+| 3 | Restaurante, horários e tipo de cozinha | 40 |
+| 4 | Item do cardápio | 23 |
+| 5 | Fechamento: operações simultâneas | 4 |
+| | **Total** | **187** |
 
 Os cenários de paginação (PAG) valem para todas as listagens e são repetidos no teste de integração de cada uma.
+
+Doze cenários, com origem AUD, entraram depois das fatias, na auditoria do código pronto. Cada um trava uma falha
+encontrada com a aplicação no ar: respostas 500 para senha acentuada, turno nulo e página alta demais; um 409 no
+lugar de 400; a paginação que repetia registros; entradas sem limite; o CNPJ alfanumérico recusado; e operações
+simultâneas que passavam juntas pelas verificações.
 
 ---
 
@@ -122,6 +129,8 @@ Os cenários de paginação (PAG) valem para todas as listagens e são repetidos
 | PAG-04 | Dada uma página além da última, então a resposta é 200 com conteúdo vazio. | I | Dec. W |
 | PAG-05 | Registros removidos nunca aparecem em nenhuma listagem. | I | Dec. E |
 | PAG-06 | A contagem de elementos nos metadados considera só registros ativos. | I | Dec. E |
+| PAG-07 | Dada uma página tão alta que o banco não consegue pular os registros anteriores, então a resposta é 400 com a última página possível, e não 500. | I | AUD, Dec. W |
+| PAG-08 | Registros com o mesmo valor no campo de ordenação aparecem uma única vez ao percorrer as páginas: o id desempata. | I | AUD, Dec. W |
 
 ---
 
@@ -147,6 +156,7 @@ Os cenários de paginação (PAG) valem para todas as listagens e são repetidos
 | DOC-04 | CNPJ com dígitos verificadores inválidos, ou com todos os dígitos iguais, é recusado. | U | Dec. J |
 | DOC-05 | Usuário do tipo Dono de Restaurante exige CNPJ; com CPF, é recusado. | U | Dec. D, J |
 | DOC-06 | Usuário de qualquer outro tipo exige CPF; com CNPJ, é recusado. | U | Dec. D, J |
+| DOC-07 | CNPJ alfanumérico, emitido pela Receita desde julho de 2026, é aceito com ou sem máscara e guardado sem ela; com dígito verificador errado ou letra minúscula, é recusado. O CPF continua só com dígitos. | U · I | AUD, Dec. J |
 
 ### Usuário (USU)
 
@@ -182,6 +192,7 @@ Os cenários de paginação (PAG) valem para todas as listagens e são repetidos
 | USU-28 | GET `/api/v2/usuarios?nome=` devolve página com `conteudo` e metadados. | I · P | F1-05, F1-10, FB-2 |
 | USU-29 | Nenhuma resposta da API contém o campo senha. | I · P | F1-01 |
 | USU-30 | Persistir, atualizar e reler um usuário mantém `dataCriacao` e avança `dataUltimaAlteracao` (a armadilha do update). | I | F1-04, Dec. H |
+| USU-31 | Senha com até 72 caracteres, mas acima de 72 bytes (letra acentuada conta como dois), é recusada com 400 no cadastro e na troca, sem chegar ao BCrypt. | U · I | AUD, F1-02 |
 
 ### Login e token (LOG, TOK)
 
@@ -242,6 +253,7 @@ Os cenários de paginação (PAG) valem para todas as listagens e são repetidos
 | TIP-16 | CRUD HTTP: POST devolve 201 com o código e `Location`; GET lista paginada; GET por id 200 e 404; PUT 200, 404 e 409; DELETE 204, 404 e 409. | I · P | EN-TU, EN-1 |
 | TIP-17 | GET `/api/v1/tipos-usuario/{id}/usuarios` lista, paginados, só os usuários ativos do tipo; tipo inexistente devolve 404. | I · P | EN-TU |
 | TIP-18 | A chave estrangeira do banco recusa a exclusão de um tipo referenciado, mesmo se a verificação do caso de uso for contornada. | I | EN-TU, Dec. E |
+| TIP-19 | Nome cujo código gerado passa de 50 caracteres ("ß" vira "SS") é recusado com 400, e não com 409. | U · I | AUD, Dec. D |
 
 ### Troca de tipo (TRO)
 
@@ -301,6 +313,8 @@ Os cenários de paginação (PAG) valem para todas as listagens e são repetidos
 | HOR-11 | A resposta traz os turnos ordenados por dia e por horário de abertura. | U · I | Dec. C |
 | HOR-12 | O PUT do restaurante substitui todos os turnos: os antigos deixam de existir no banco. | I | Dec. C |
 | HOR-13 | Horário em formato inválido ("25:00", "11h") ou dia inexistente devolve 400. | I | Dec. C |
+| HOR-14 | Lista de turnos com um elemento nulo devolve 400 apontando o turno, e não 500. | I | AUD, Dec. C |
+| HOR-15 | Mais de 50 turnos é recusado; até 50, aceito. | U · I | AUD, Dec. C |
 
 ### Tipo de cozinha (COZ)
 
@@ -349,9 +363,21 @@ Os cenários de paginação (PAG) valem para todas as listagens e são repetidos
 | ITE-20 | O banco recusa dois itens ativos com o mesmo nome no mesmo restaurante, mesmo se a verificação do caso de uso for contornada. | I | Dec. S |
 | ITE-21 | CRUD HTTP aninhado: POST devolve 201 com `Location`; GET lista paginada com filtro `apenasNoLocal`; GET por id; PUT; DELETE devolve 204 e, depois dele, 404. | I · P | EN-IT, EN-1, Dec. M |
 | ITE-22 | Todas as rotas de item de um restaurante removido devolvem 404. | I | Dec. E, M |
+| ITE-23 | Caminho da foto que sobe de pasta (`..`) ou usa esquema que não é http nem https (`javascript:`, `file:`) é recusado. | U · I | AUD, EN-IT, Dec. W |
 
 ---
 
 ## Fatia 5 · Fechamento
 
-A fatia 5 não acrescenta cenários. Ela confirma que todos os anteriores estão verdes no CI e percorre o checklist de entrega do briefing: README com guia de avaliação rápida, relatório em PDF organizado pelos nove critérios, matriz requisito → evidência gerada a partir deste catálogo, diagramas, EXPLAIN dos índices e o vídeo.
+A fatia 5 confirma que todos os cenários anteriores estão verdes no CI e percorre o checklist de entrega do briefing: README com guia de avaliação rápida, relatório em PDF organizado pelos nove critérios, matriz requisito → evidência gerada a partir deste catálogo, diagramas, EXPLAIN dos índices e o vídeo.
+
+### Operações simultâneas (CON)
+
+Encontrados na auditoria: duas requisições ao mesmo tempo sobre o mesmo registro passavam juntas pelas verificações dos casos de uso. As operações de alteração passaram a reservar o registro no banco até o fim da transação (`SELECT ... FOR UPDATE`).
+
+| ID | Cenário | Nível | Origem |
+|---|---|---|---|
+| CON-01 | Excluir um usuário e cadastrar um restaurante para ele ao mesmo tempo: só uma das duas operações dá certo, e a listagem de restaurantes continua respondendo. | C · I | AUD, Dec. E |
+| CON-02 | Trocar o dono para Cliente e cadastrar um restaurante para ele ao mesmo tempo: só uma das duas dá certo. | C · I | AUD, Dec. D |
+| CON-03 | Excluir e atualizar ao mesmo tempo o mesmo usuário, restaurante, item ou tipo: o registro excluído não volta, e nenhuma resposta é 500. | C · I | AUD, Dec. E |
+| CON-04 | Falha de concorrência no banco (espera pela reserva esgotada, impasse) devolve 409 em ProblemDetail, pedindo para tentar de novo. | I | AUD, F1-11 |
