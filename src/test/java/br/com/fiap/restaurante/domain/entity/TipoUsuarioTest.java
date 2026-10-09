@@ -62,6 +62,18 @@ class TipoUsuarioTest {
     }
 
     @Test
+    @DisplayName("TIP-19 · nome que gera código com mais de 50 caracteres é recusado")
+    void deveRecusarNomeQueGeraCodigoLongoDemais() {
+        /* arrange */
+        String nome = "ß".repeat(30); // em maiúsculas, cada ß vira SS
+
+        /* act + assert */
+        assertThatThrownBy(() -> TipoUsuario.create(nome))
+                .isInstanceOf(ValidacaoDeDominioException.class)
+                .hasMessage("O nome do tipo gera um código com mais de 50 caracteres. Use um nome mais curto.");
+    }
+
+    @Test
     @DisplayName("TIP-04 · renomear um tipo mantém o código")
     void deveManterOCodigoAoRenomear() {
         /* arrange */

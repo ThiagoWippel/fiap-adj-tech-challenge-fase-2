@@ -40,6 +40,25 @@ class SenhaEmTextoTest {
     }
 
     @Test
+    @DisplayName("USU-31 · senha com até 72 caracteres, mas acima de 72 bytes, é recusada")
+    void deveRecusarSenhaAcimaDe72Bytes() {
+        /* arrange */
+        String acentuada = "é".repeat(37); // 37 caracteres, 74 bytes
+
+        /* act + assert */
+        assertThatThrownBy(() -> new SenhaEmTexto(acentuada))
+                .isInstanceOf(ValidacaoDeDominioException.class)
+                .hasMessage("A senha deve ter no máximo 72 bytes. Letras acentuadas contam como dois.");
+    }
+
+    @Test
+    @DisplayName("USU-31 · senha acentuada com exatamente 72 bytes é aceita")
+    void deveAceitarSenhaAcentuadaNoLimite() {
+        /* act + assert */
+        assertThat(new SenhaEmTexto("é".repeat(36)).valor()).hasSize(36);
+    }
+
+    @Test
     @DisplayName("USU-29 · a senha não aparece no toString")
     void naoDeveExporASenhaNoToString() {
         /* act + assert */

@@ -94,6 +94,25 @@ class QuadroDeHorariosTest {
     }
 
     @Test
+    @DisplayName("HOR-15 · até 50 turnos são aceitos; o 51º é recusado")
+    void deveLimitarAQuantidadeDeTurnos() {
+        /* arrange */
+        List<Turno> cinquenta = new ArrayList<>();
+        for (int i = 0; i < 50; i++) {
+            // Turnos de uma hora espalhados pela semana, sem sobreposição
+            cinquenta.add(turno(DiaSemana.values()[i % 7], i / 7, i / 7 + 1));
+        }
+        List<Turno> cinquentaEUm = new ArrayList<>(cinquenta);
+        cinquentaEUm.add(turno(DOMINGO, 20, 21));
+
+        /* act + assert */
+        assertThat(new QuadroDeHorarios(cinquenta).turnos()).hasSize(50);
+        assertThatThrownBy(() -> new QuadroDeHorarios(cinquentaEUm))
+                .isInstanceOf(ValidacaoDeDominioException.class)
+                .hasMessage("Informe no máximo 50 turnos de funcionamento.");
+    }
+
+    @Test
     @DisplayName("HOR-10 · a lista guardada não pode ser alterada por fora")
     void deveGuardarUmaCopiaImutavel() {
         /* arrange */

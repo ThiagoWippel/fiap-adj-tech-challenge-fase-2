@@ -131,6 +131,38 @@ class ItemCardapioTest {
                 .hasMessage("O caminho da foto deve terminar em .jpg, .jpeg, .png ou .webp.");
     }
 
+    @ParameterizedTest(name = "ITE-23 · caminho de foto \"{0}\", que sobe de pasta, é recusado")
+    @ValueSource(strings = {"../fotos/feijoada.jpg", "fotos/../../etc/feijoada.png", "fotos\\..\\feijoada.webp"})
+    void deveRecusarFotoQueSobeDePasta(String caminho) {
+        /* act + assert */
+        assertThatThrownBy(() -> ItemCardapio.create(9L, "Feijoada", "Feijoada.", PRECO, true, caminho))
+                .isInstanceOf(ValidacaoDeDominioException.class)
+                .hasMessage("O caminho da foto não pode subir de pasta com \"..\".");
+    }
+
+    @ParameterizedTest(name = "ITE-23 · caminho de foto \"{0}\", com esquema que não é http nem https, é recusado")
+    @ValueSource(strings = {"javascript:alert(1).png", "file:///etc/feijoada.jpg", "ftp://servidor/feijoada.png",
+            "C:\\fotos\\feijoada.jpg"})
+    void deveRecusarFotoComEsquemaEstranho(String caminho) {
+        /* act + assert */
+        assertThatThrownBy(() -> ItemCardapio.create(9L, "Feijoada", "Feijoada.", PRECO, true, caminho))
+                .isInstanceOf(ValidacaoDeDominioException.class)
+                .hasMessage("A foto deve ser um caminho relativo ou uma URL http ou https.");
+    }
+
+    @Test
+    @DisplayName("ITE-23 · URL http e nome com dois pontos seguidos continuam aceitos")
+    void deveAceitarUrlHttpENomeComPontos() {
+        /* arrange */
+        String url = "http://cdn.exemplo.com/feijoada.jpg";
+        String comPontos = "fotos/feijoada..grande.png";
+
+        /* act + assert */
+        assertThat(ItemCardapio.create(9L, "Feijoada", "Feijoada.", PRECO, true, url).getCaminhoFoto()).isEqualTo(url);
+        assertThat(ItemCardapio.create(9L, "Feijoada", "Feijoada.", PRECO, true, comPontos).getCaminhoFoto())
+                .isEqualTo(comPontos);
+    }
+
     @Test
     @DisplayName("ITE-08 · caminho de foto ausente ou acima de 255 caracteres é recusado")
     void deveRecusarFotoAusenteOuLongaDemais() {

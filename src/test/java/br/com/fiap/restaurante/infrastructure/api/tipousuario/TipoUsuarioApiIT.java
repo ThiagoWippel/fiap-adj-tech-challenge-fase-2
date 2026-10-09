@@ -71,6 +71,16 @@ class TipoUsuarioApiIT {
     }
 
     @Test
+    @DisplayName("TIP-19 · nome que gera código com mais de 50 caracteres devolve 400, e não 409")
+    void deveRecusarNomeQueGeraCodigoLongoDemais() {
+        api.requisicao().body(tipo("ß".repeat(30))).post(TIPOS)
+                .then()
+                .statusCode(400)
+                .body("detail", equalTo(
+                        "O nome do tipo gera um código com mais de 50 caracteres. Use um nome mais curto."));
+    }
+
+    @Test
     @DisplayName("TIP-06 · POST com nome que só muda nas maiúsculas ou nos acentos devolve 409")
     void deveRecusarNomeRepetido() {
         /* arrange */

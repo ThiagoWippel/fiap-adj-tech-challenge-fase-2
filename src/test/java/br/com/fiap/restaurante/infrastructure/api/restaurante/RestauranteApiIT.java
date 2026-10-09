@@ -118,6 +118,36 @@ class RestauranteApiIT {
     }
 
     @Test
+    @DisplayName("HOR-14 · lista de turnos com um elemento nulo devolve 400 apontando o turno, e não 500")
+    void deveRecusarTurnoNulo() {
+        /* arrange */
+        String corpo = restaurante("Cantina", "ITALIANA", ana).replace("\"horarios\": []", "\"horarios\": [null]");
+
+        /* act + assert */
+        api.requisicao().body(corpo).post(RESTAURANTES)
+                .then()
+                .statusCode(400)
+                .body("erros.campo", hasItems("horarios[0]"));
+    }
+
+    @Test
+    @DisplayName("HOR-15 · mais de 50 turnos devolve 400 apontando o campo")
+    void deveRecusarMaisDe50Turnos() {
+        /* arrange */
+        String[] dias = {"SEGUNDA", "TERCA", "QUARTA", "QUINTA", "SEXTA", "SABADO", "DOMINGO"};
+        String[] turnos = new String[51];
+        for (int i = 0; i < turnos.length; i++) {
+            turnos[i] = "%s %02d:00 %02d:00".formatted(dias[i % 7], i / 7, i / 7 + 1);
+        }
+
+        /* act + assert */
+        api.requisicao().body(restaurante("Cantina", "ITALIANA", ana, turnos)).post(RESTAURANTES)
+                .then()
+                .statusCode(400)
+                .body("erros.campo", hasItems("horarios"));
+    }
+
+    @Test
     @DisplayName("HOR-10 · COZ-02 · sem turnos ou sem tipo de cozinha devolve 400 apontando o campo")
     void deveExigirTurnosETipoDeCozinha() {
         api.requisicao().body(restaurante("Cantina", "", ana)).post(RESTAURANTES)

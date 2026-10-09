@@ -247,6 +247,40 @@ class UsuarioApiIT {
     }
 
     @Test
+    @DisplayName("USU-31 · senha acentuada acima de 72 bytes devolve 400 no cadastro e na troca, e não 500")
+    void deveRecusarSenhaAcimaDe72Bytes() {
+        /* arrange */
+        String acentuada = "é".repeat(37);
+        String mensagem = "A senha deve ter no máximo 72 bytes. Letras acentuadas contam como dois.";
+        long id = api.cadastrar(cliente("Maria Silva", "maria@exemplo.com", "maria.silva", "12345678909"));
+
+        /* act + assert */
+        api.requisicao()
+                .body(cliente("João Silva", "joao@exemplo.com", "joao.silva", "52998224725").replace(SENHA, acentuada))
+                .post(USUARIOS)
+                .then().statusCode(400).body("detail", equalTo(mensagem));
+        api.requisicao().body(trocaDeSenha(SENHA, acentuada))
+                .put(USUARIOS + "/{id}/senha", id)
+                .then().statusCode(400).body("detail", equalTo(mensagem));
+    }
+
+    @Test
+    @DisplayName("DOC-07 · POST de dono com CNPJ alfanumérico devolve 201; com dígito errado, 400 apontando o campo")
+    void deveCadastrarDonoComCnpjAlfanumerico() {
+        api.requisicao().body(dono("Ana Costa", "ana@exemplo.com", "ana.costa", "12.ABC.345/01DE-35"))
+                .post(USUARIOS)
+                .then()
+                .statusCode(201)
+                .body("tipo", equalTo("DONO_RESTAURANTE"))
+                .body("documento", equalTo("12ABC34501DE35"));
+        api.requisicao().body(dono("Rui Costa", "rui@exemplo.com", "rui.costa", "12.ABC.345/01DE-36"))
+                .post(USUARIOS)
+                .then()
+                .statusCode(400)
+                .body("erros.campo", hasItem("cnpj"));
+    }
+
+    @Test
     @DisplayName("USU-27 · GET ?nome= devolve lista simples com resultados, sem resultados e sem filtro")
     void deveBuscarPorNomeEmLista() {
         /* arrange */

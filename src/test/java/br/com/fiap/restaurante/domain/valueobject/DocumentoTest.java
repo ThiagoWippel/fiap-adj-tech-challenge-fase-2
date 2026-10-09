@@ -60,6 +60,38 @@ class DocumentoTest {
                 .hasMessage("O CNPJ informado não é válido.");
     }
 
+    @Test
+    @DisplayName("DOC-07 · CNPJ alfanumérico válido é aceito, com ou sem máscara, e guardado sem a máscara")
+    void deveAceitarCnpjAlfanumerico() {
+        /* act */
+        Documento comMascara = Documento.cnpj("12.ABC.345/01DE-35");
+
+        /* assert */
+        assertThat(comMascara.numero()).isEqualTo("12ABC34501DE35");
+        assertThat(comMascara.ehCnpj()).isTrue();
+        assertThat(Documento.cnpj("12ABC34501DE35")).isEqualTo(comMascara);
+        assertThat(Documento.de("12ABC34501DE35").ehCnpj()).isTrue();
+    }
+
+    @ParameterizedTest(name = "DOC-07 · CNPJ alfanumérico \"{0}\" é recusado")
+    @ValueSource(strings = {"12.ABC.345/01DE-36", "12.abc.345/01de-35", "12.ABC.345/01DE-3X", "12.ABC.345/01D?-35"})
+    void deveRecusarCnpjAlfanumericoInvalido(String cnpj) {
+        /* act + assert */
+        assertThatThrownBy(() -> Documento.cnpj(cnpj))
+                .isInstanceOf(ValidacaoDeDominioException.class)
+                .hasMessage("O CNPJ informado não é válido.");
+    }
+
+    @Test
+    @DisplayName("DOC-07 · CPF continua só com dígitos: com letra, é recusado mesmo com 11 caracteres")
+    void deveRecusarLetraNoCpf() {
+        /* act + assert */
+        assertThatThrownBy(() -> Documento.cpf("1234567890A"))
+                .hasMessage("O CPF informado não é válido.");
+        assertThatThrownBy(() -> Documento.de("1234567890A"))
+                .hasMessage("O CPF informado não é válido.");
+    }
+
     @ParameterizedTest(name = "DOC-02 · documento \"{0}\" ausente é recusado")
     @NullAndEmptySource
     @ValueSource(strings = {"   "})

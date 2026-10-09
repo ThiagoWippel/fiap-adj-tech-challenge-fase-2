@@ -98,6 +98,19 @@ class ItemCardapioApiIT {
     }
 
     @Test
+    @DisplayName("ITE-23 · caminho de foto que sobe de pasta ou usa esquema que não é http devolve 400")
+    void deveRecusarCaminhoDeFotoForaDoPadrao() {
+        api.requisicao().body(item("Feijoada", "39.90", true, "../../etc/feijoada.png")).post(ITENS, cantina)
+                .then()
+                .statusCode(400)
+                .body("detail", equalTo("O caminho da foto não pode subir de pasta com \"..\"."));
+        api.requisicao().body(item("Feijoada", "39.90", true, "javascript:alert(1).png")).post(ITENS, cantina)
+                .then()
+                .statusCode(400)
+                .body("detail", equalTo("A foto deve ser um caminho relativo ou uma URL http ou https."));
+    }
+
+    @Test
     @DisplayName("ITE-12 · ITE-13 · nome de outro item ativo, mesmo com maiúsculas, acentos ou espaço no fim diferentes, devolve 409")
     void deveRecusarNomeRepetido() {
         /* arrange */
