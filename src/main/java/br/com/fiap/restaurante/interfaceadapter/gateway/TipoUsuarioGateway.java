@@ -46,6 +46,11 @@ public class TipoUsuarioGateway implements ITipoUsuarioGateway {
     }
 
     @Override
+    public Optional<TipoUsuario> buscarPorIdParaAlterar(Long id) {
+        return dataSource.buscarPorIdParaAlterar(id).map(TipoUsuarioGateway::paraTipo);
+    }
+
+    @Override
     public Optional<TipoUsuario> buscarPorCodigo(String codigo) {
         return dataSource.buscarPorCodigo(codigo).map(TipoUsuarioGateway::paraTipo);
     }

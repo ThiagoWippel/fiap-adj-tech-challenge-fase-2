@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -88,6 +89,17 @@ public class TratadorDeErros extends ResponseEntityExceptionHandler {
         LOGGER.warn("Violação de integridade no banco: {}", excecao.getMostSpecificCause().getMessage());
         return responder(TipoDeProblema.CONFLITO_DE_DADOS,
                 "Os dados informados conflitam com um registro existente.", excecao, requisicao);
+    }
+
+    // As operações de alteração reservam o registro; se a espera pela reserva se
+    // esgota, ou o banco desfaz uma das transações para sair de um impasse, quem
+    // chamou pode simplesmente tentar de novo.
+    @ExceptionHandler(ConcurrencyFailureException.class)
+    public ResponseEntity<Object> tratarFalhaDeConcorrencia(ConcurrencyFailureException excecao,
+                                                            WebRequest requisicao) {
+        LOGGER.warn("Falha de concorrência no banco: {}", excecao.getMostSpecificCause().getMessage());
+        return responder(TipoDeProblema.CONFLITO_DE_DADOS,
+                "Outra operação estava alterando o mesmo registro. Tente de novo.", excecao, requisicao);
     }
 
     // Qualquer outra falha, inclusive IllegalArgumentException fora do domínio, é

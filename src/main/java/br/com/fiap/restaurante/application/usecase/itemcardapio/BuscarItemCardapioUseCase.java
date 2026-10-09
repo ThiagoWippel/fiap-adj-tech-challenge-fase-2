@@ -7,6 +7,8 @@ import br.com.fiap.restaurante.application.gateway.IRestauranteGateway;
 import br.com.fiap.restaurante.application.usecase.restaurante.BuscarRestaurantePorIdUseCase;
 import br.com.fiap.restaurante.domain.entity.ItemCardapio;
 
+import java.util.Optional;
+
 /**
  * Consulta um item pela rota do restaurante. O restaurante precisa estar ativo e
  * ser o dono do item; pela rota de outro restaurante, o item não existe.
@@ -32,8 +34,18 @@ public class BuscarItemCardapioUseCase {
     static ItemCardapio itemDoRestaurante(IItemCardapioGateway itens, IRestauranteGateway restaurantes,
                                           Long restauranteId, Long itemId) {
         garantirRestauranteAtivo(restaurantes, restauranteId);
-        return itens.buscarPorId(itemId)
-                .filter(item -> item.pertenceA(restauranteId))
+        return doRestaurante(itens.buscarPorId(itemId), restauranteId, itemId);
+    }
+
+    /** Como {@link #itemDoRestaurante}, mas reserva o item até o fim da transação. */
+    static ItemCardapio itemDoRestauranteParaAlterar(IItemCardapioGateway itens, IRestauranteGateway restaurantes,
+                                                     Long restauranteId, Long itemId) {
+        garantirRestauranteAtivo(restaurantes, restauranteId);
+        return doRestaurante(itens.buscarPorIdParaAlterar(itemId), restauranteId, itemId);
+    }
+
+    private static ItemCardapio doRestaurante(Optional<ItemCardapio> item, Long restauranteId, Long itemId) {
+        return item.filter(encontrado -> encontrado.pertenceA(restauranteId))
                 .orElseThrow(() -> new RecursoNaoEncontradoException(
                         "Item " + itemId + " não encontrado no restaurante " + restauranteId + "."));
     }

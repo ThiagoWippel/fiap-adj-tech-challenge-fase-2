@@ -23,7 +23,7 @@ public class ExcluirRestauranteUseCase {
 
     public void run(Long id) {
         transacao.executar(() -> {
-            restaurantes.buscarPorId(id).orElseThrow(() -> BuscarRestaurantePorIdUseCase.restauranteNaoEncontrado(id));
+            restaurantes.buscarPorIdParaAlterar(id).orElseThrow(() -> BuscarRestaurantePorIdUseCase.restauranteNaoEncontrado(id));
             restaurantes.remover(id);
         });
     }

@@ -1,9 +1,11 @@
 package br.com.fiap.restaurante.infrastructure.persistence.repository;
 
 import br.com.fiap.restaurante.infrastructure.persistence.entity.ItemCardapioEntity;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 
 import java.util.Optional;
 
@@ -25,4 +27,8 @@ public interface ItemCardapioRepository extends JpaRepository<ItemCardapioEntity
     boolean existsByRestauranteIdAndNomeAndRemovidoEmIsNull(Long restauranteId, String nome);
 
     boolean existsByRestauranteIdAndNomeAndRemovidoEmIsNullAndIdNot(Long restauranteId, String nome, Long id);
+
+    // SELECT ... FOR UPDATE só na linha do próprio registro, sem as associações
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<ItemCardapioEntity> findParaAlterarByIdAndRemovidoEmIsNull(Long id);
 }

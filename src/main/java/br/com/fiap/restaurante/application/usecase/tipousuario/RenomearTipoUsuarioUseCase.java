@@ -26,7 +26,7 @@ public class RenomearTipoUsuarioUseCase {
 
     public TipoUsuario run(RenomeacaoDeTipoUsuarioDTO dados) {
         return transacao.executar(() -> {
-            TipoUsuario tipo = tipos.buscarPorId(dados.id())
+            TipoUsuario tipo = tipos.buscarPorIdParaAlterar(dados.id())
                     .orElseThrow(() -> BuscarTipoUsuarioPorIdUseCase.tipoNaoEncontrado(dados.id()));
             tipo.setNome(dados.nome());
             if (tipos.existeNomeEmOutroTipo(tipo.getNome(), tipo.getId())) {

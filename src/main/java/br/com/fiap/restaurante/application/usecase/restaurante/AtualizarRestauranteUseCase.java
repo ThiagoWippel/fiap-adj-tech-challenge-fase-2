@@ -31,7 +31,7 @@ public class AtualizarRestauranteUseCase {
 
     public Restaurante run(AtualizacaoDeRestauranteDTO dados) {
         return transacao.executar(() -> {
-            Restaurante restaurante = restaurantes.buscarPorId(dados.id())
+            Restaurante restaurante = restaurantes.buscarPorIdParaAlterar(dados.id())
                     .orElseThrow(() -> BuscarRestaurantePorIdUseCase.restauranteNaoEncontrado(dados.id()));
 
             if (!restaurante.getDono().getId().equals(dados.donoId())) {

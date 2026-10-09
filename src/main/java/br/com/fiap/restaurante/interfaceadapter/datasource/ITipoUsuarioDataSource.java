@@ -19,6 +19,12 @@ public interface ITipoUsuarioDataSource {
 
     Optional<DadosTipoUsuario> buscarPorId(Long id);
 
+    /**
+     * Como {@link #buscarPorId}, mas reserva o registro até o fim da transação:
+     * outra operação que queira alterá-lo espera esta terminar.
+     */
+    Optional<DadosTipoUsuario> buscarPorIdParaAlterar(Long id);
+
     Optional<DadosTipoUsuario> buscarPorCodigo(String codigo);
 
     Pagina<DadosTipoUsuario> listar(PedidoDePagina pedido);

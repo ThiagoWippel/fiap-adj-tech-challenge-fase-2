@@ -48,10 +48,12 @@ public class CadastrarRestauranteUseCase {
 
     /**
      * Busca o dono e confere o tipo antes de criar o restaurante, para devolver 404
-     * ou 409 com uma orientação, em vez do erro genérico da entidade.
+     * ou 409 com uma orientação, em vez do erro genérico da entidade. O dono fica
+     * reservado até o fim da transação: ninguém o exclui nem troca o tipo dele
+     * enquanto o restaurante é gravado.
      */
     static Usuario donoValido(IUsuarioGateway usuarios, Long donoId, String acao) {
-        Usuario dono = usuarios.buscarPorId(donoId)
+        Usuario dono = usuarios.buscarPorIdParaAlterar(donoId)
                 .orElseThrow(() -> BuscarUsuarioPorIdUseCase.usuarioNaoEncontrado(donoId));
         if (!dono.ehDonoDeRestaurante()) {
             throw new ConflitoDeDadosException("O usuário " + donoId + " não é Dono de Restaurante. "

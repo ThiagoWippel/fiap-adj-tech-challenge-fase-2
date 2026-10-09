@@ -46,6 +46,11 @@ public class UsuarioGateway implements IUsuarioGateway {
     }
 
     @Override
+    public Optional<Usuario> buscarPorIdParaAlterar(Long id) {
+        return dataSource.buscarPorIdParaAlterar(id).map(UsuarioGateway::paraUsuario);
+    }
+
+    @Override
     public Optional<Usuario> buscarPorLogin(String login) {
         return dataSource.buscarPorLogin(login).map(UsuarioGateway::paraUsuario);
     }

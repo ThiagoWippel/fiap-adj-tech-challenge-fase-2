@@ -19,6 +19,12 @@ public interface IUsuarioGateway {
 
     Optional<Usuario> buscarPorId(Long id);
 
+    /**
+     * Como {@link #buscarPorId}, mas reserva o registro até o fim da transação:
+     * outra operação que queira alterá-lo espera esta terminar.
+     */
+    Optional<Usuario> buscarPorIdParaAlterar(Long id);
+
     Optional<Usuario> buscarPorLogin(String login);
 
     List<Usuario> buscarPorNome(String nome);

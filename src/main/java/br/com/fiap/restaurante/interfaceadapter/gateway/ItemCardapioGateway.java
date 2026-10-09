@@ -42,6 +42,11 @@ public class ItemCardapioGateway implements IItemCardapioGateway {
     }
 
     @Override
+    public Optional<ItemCardapio> buscarPorIdParaAlterar(Long id) {
+        return dataSource.buscarPorIdParaAlterar(id).map(ItemCardapioGateway::paraItem);
+    }
+
+    @Override
     public Pagina<ItemCardapio> listar(Long restauranteId, Boolean apenasNoLocal, PedidoDePagina pedido) {
         return dataSource.listar(restauranteId, apenasNoLocal, pedido).map(ItemCardapioGateway::paraItem);
     }

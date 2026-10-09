@@ -46,6 +46,11 @@ public class RestauranteGateway implements IRestauranteGateway {
     }
 
     @Override
+    public Optional<Restaurante> buscarPorIdParaAlterar(Long id) {
+        return dataSource.buscarPorIdParaAlterar(id).map(RestauranteGateway::paraRestaurante);
+    }
+
+    @Override
     public Pagina<Restaurante> listar(String nome, TipoCozinha tipoCozinha, PedidoDePagina pedido) {
         return dataSource.listar(nome, tipoCozinha == null ? null : tipoCozinha.name(), pedido)
                 .map(RestauranteGateway::paraRestaurante);

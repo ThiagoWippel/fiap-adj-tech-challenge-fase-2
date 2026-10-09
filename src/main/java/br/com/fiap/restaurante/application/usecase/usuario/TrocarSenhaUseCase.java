@@ -30,7 +30,7 @@ public class TrocarSenhaUseCase {
 
     public void run(TrocaDeSenhaDTO dados) {
         transacao.executar(() -> {
-            Usuario usuario = usuarios.buscarPorId(dados.id())
+            Usuario usuario = usuarios.buscarPorIdParaAlterar(dados.id())
                     .orElseThrow(() -> BuscarUsuarioPorIdUseCase.usuarioNaoEncontrado(dados.id()));
 
             if (!senhas.confere(dados.senhaAtual(), usuario.getSenha())) {

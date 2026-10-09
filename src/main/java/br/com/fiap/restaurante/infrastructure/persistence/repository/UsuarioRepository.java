@@ -1,10 +1,12 @@
 package br.com.fiap.restaurante.infrastructure.persistence.repository;
 
 import br.com.fiap.restaurante.infrastructure.persistence.entity.UsuarioEntity;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,4 +46,8 @@ public interface UsuarioRepository extends JpaRepository<UsuarioEntity, Long> {
 
     @EntityGraph(attributePaths = "tipo")
     Page<UsuarioEntity> findByTipoIdAndRemovidoEmIsNull(Long tipoId, Pageable paginacao);
+
+    // SELECT ... FOR UPDATE só na linha do próprio registro, sem as associações
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<UsuarioEntity> findParaAlterarByIdAndRemovidoEmIsNull(Long id);
 }

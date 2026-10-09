@@ -31,7 +31,7 @@ public class AtualizarItemCardapioUseCase {
 
     public ItemCardapio run(AtualizacaoDeItemCardapioDTO dados) {
         return transacao.executar(() -> {
-            ItemCardapio item = BuscarItemCardapioUseCase.itemDoRestaurante(itens, restaurantes,
+            ItemCardapio item = BuscarItemCardapioUseCase.itemDoRestauranteParaAlterar(itens, restaurantes,
                     dados.restauranteId(), dados.itemId());
             item.setNome(dados.nome());
             item.setDescricao(dados.descricao());

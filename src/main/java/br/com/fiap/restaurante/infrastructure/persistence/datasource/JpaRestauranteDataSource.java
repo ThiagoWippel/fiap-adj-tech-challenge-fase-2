@@ -60,6 +60,13 @@ public class JpaRestauranteDataSource implements IRestauranteDataSource {
         return restaurantes.findByIdAndRemovidoEmIsNull(id).map(JpaRestauranteDataSource::paraDados);
     }
 
+    // Roda na transação do caso de uso, e a reserva vale até ela terminar
+    @Override
+    @Transactional
+    public Optional<DadosRestaurante> buscarPorIdParaAlterar(Long id) {
+        return restaurantes.findParaAlterarByIdAndRemovidoEmIsNull(id).map(JpaRestauranteDataSource::paraDados);
+    }
+
     @Override
     @Transactional(readOnly = true)
     public Pagina<DadosRestaurante> listar(String nome, String tipoCozinha, PedidoDePagina pedido) {

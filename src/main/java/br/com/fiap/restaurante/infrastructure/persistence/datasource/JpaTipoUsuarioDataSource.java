@@ -7,6 +7,7 @@ import br.com.fiap.restaurante.infrastructure.persistence.repository.TipoUsuario
 import br.com.fiap.restaurante.interfaceadapter.datasource.DadosTipoUsuario;
 import br.com.fiap.restaurante.interfaceadapter.datasource.ITipoUsuarioDataSource;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -48,6 +49,13 @@ public class JpaTipoUsuarioDataSource implements ITipoUsuarioDataSource {
     @Override
     public Optional<DadosTipoUsuario> buscarPorId(Long id) {
         return repository.findById(id).map(JpaTipoUsuarioDataSource::paraDados);
+    }
+
+    // Roda na transação do caso de uso, e a reserva vale até ela terminar
+    @Override
+    @Transactional
+    public Optional<DadosTipoUsuario> buscarPorIdParaAlterar(Long id) {
+        return repository.findParaAlterarById(id).map(JpaTipoUsuarioDataSource::paraDados);
     }
 
     @Override

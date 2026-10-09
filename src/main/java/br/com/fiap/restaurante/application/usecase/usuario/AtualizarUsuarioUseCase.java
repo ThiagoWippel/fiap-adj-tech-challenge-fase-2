@@ -25,7 +25,7 @@ public class AtualizarUsuarioUseCase {
 
     public Usuario run(AtualizacaoDeUsuarioDTO dados) {
         return transacao.executar(() -> {
-            Usuario usuario = usuarios.buscarPorId(dados.id())
+            Usuario usuario = usuarios.buscarPorIdParaAlterar(dados.id())
                     .orElseThrow(() -> BuscarUsuarioPorIdUseCase.usuarioNaoEncontrado(dados.id()));
 
             if (usuarios.existeEmailEmOutroUsuario(dados.email(), dados.id())) {

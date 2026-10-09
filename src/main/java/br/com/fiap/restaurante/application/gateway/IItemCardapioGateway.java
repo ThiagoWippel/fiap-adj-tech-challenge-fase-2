@@ -19,6 +19,12 @@ public interface IItemCardapioGateway {
 
     Optional<ItemCardapio> buscarPorId(Long id);
 
+    /**
+     * Como {@link #buscarPorId}, mas reserva o registro até o fim da transação:
+     * outra operação que queira alterá-lo espera esta terminar.
+     */
+    Optional<ItemCardapio> buscarPorIdParaAlterar(Long id);
+
     /** {@code apenasNoLocal} nulo não filtra. */
     Pagina<ItemCardapio> listar(Long restauranteId, Boolean apenasNoLocal, PedidoDePagina pedido);
 

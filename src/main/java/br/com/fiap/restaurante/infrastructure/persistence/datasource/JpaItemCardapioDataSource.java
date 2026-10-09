@@ -7,6 +7,7 @@ import br.com.fiap.restaurante.infrastructure.persistence.repository.ItemCardapi
 import br.com.fiap.restaurante.interfaceadapter.datasource.DadosItemCardapio;
 import br.com.fiap.restaurante.interfaceadapter.datasource.IItemCardapioDataSource;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -42,6 +43,13 @@ public class JpaItemCardapioDataSource implements IItemCardapioDataSource {
     @Override
     public Optional<DadosItemCardapio> buscarPorId(Long id) {
         return itens.findByIdAndRemovidoEmIsNull(id).map(JpaItemCardapioDataSource::paraDados);
+    }
+
+    // Roda na transação do caso de uso, e a reserva vale até ela terminar
+    @Override
+    @Transactional
+    public Optional<DadosItemCardapio> buscarPorIdParaAlterar(Long id) {
+        return itens.findParaAlterarByIdAndRemovidoEmIsNull(id).map(JpaItemCardapioDataSource::paraDados);
     }
 
     @Override

@@ -15,7 +15,8 @@ import br.com.fiap.restaurante.domain.valueobject.Documento;
  * Troca o tipo do usuário na mesma conta: id, login, senha e histórico ficam;
  * mudam o tipo e o documento. Pedir o tipo e o documento que o usuário já tem é
  * aceito, sem gravar nada. Quem tem restaurante ativo continua Dono de
- * Restaurante até transferir ou excluir o restaurante.
+ * Restaurante até transferir ou excluir o restaurante. O usuário fica reservado
+ * durante a troca, pelo mesmo motivo da exclusão.
  */
 public class TrocarTipoDoUsuarioUseCase {
 
@@ -39,7 +40,7 @@ public class TrocarTipoDoUsuarioUseCase {
 
     public Usuario run(TrocaDeTipoDTO dados) {
         return transacao.executar(() -> {
-            Usuario usuario = usuarios.buscarPorId(dados.id())
+            Usuario usuario = usuarios.buscarPorIdParaAlterar(dados.id())
                     .orElseThrow(() -> BuscarUsuarioPorIdUseCase.usuarioNaoEncontrado(dados.id()));
             TipoUsuario novoTipo = tipos.buscarPorCodigo(dados.tipo())
                     .orElseThrow(() -> BuscarTipoUsuarioPorIdUseCase.tipoNaoEncontrado(dados.tipo()));

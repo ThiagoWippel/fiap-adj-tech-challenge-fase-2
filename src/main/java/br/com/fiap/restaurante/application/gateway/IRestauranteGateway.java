@@ -19,6 +19,12 @@ public interface IRestauranteGateway {
 
     Optional<Restaurante> buscarPorId(Long id);
 
+    /**
+     * Como {@link #buscarPorId}, mas reserva o registro até o fim da transação:
+     * outra operação que queira alterá-lo espera esta terminar.
+     */
+    Optional<Restaurante> buscarPorIdParaAlterar(Long id);
+
     /** {@code tipoCozinha} nulo não filtra; nome vazio também não. */
     Pagina<Restaurante> listar(String nome, TipoCozinha tipoCozinha, PedidoDePagina pedido);
 

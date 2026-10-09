@@ -31,7 +31,7 @@ public class ExcluirTipoUsuarioUseCase {
 
     public void run(Long id) {
         transacao.executar(() -> {
-            TipoUsuario tipo = tipos.buscarPorId(id)
+            TipoUsuario tipo = tipos.buscarPorIdParaAlterar(id)
                     .orElseThrow(() -> BuscarTipoUsuarioPorIdUseCase.tipoNaoEncontrado(id));
             if (tipo.ehDeSistema()) {
                 throw new ConflitoDeDadosException(

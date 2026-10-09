@@ -9,7 +9,8 @@ import br.com.fiap.restaurante.application.port.ITransactionManager;
  * Exclui o usuário anonimizando o registro: os dados pessoais são apagados e a
  * linha fica, para não quebrar o histórico que aponta para ela. Quem é
  * responsável por restaurante ativo precisa transferir ou excluir o restaurante
- * antes.
+ * antes. O usuário fica reservado durante a exclusão, para que nenhum restaurante
+ * seja cadastrado para ele entre a contagem e a anonimização.
  */
 public class ExcluirUsuarioUseCase {
 
@@ -31,7 +32,7 @@ public class ExcluirUsuarioUseCase {
 
     public void run(Long id) {
         transacao.executar(() -> {
-            usuarios.buscarPorId(id).orElseThrow(() -> BuscarUsuarioPorIdUseCase.usuarioNaoEncontrado(id));
+            usuarios.buscarPorIdParaAlterar(id).orElseThrow(() -> BuscarUsuarioPorIdUseCase.usuarioNaoEncontrado(id));
             long ativos = restaurantes.contarAtivosPorDono(id);
             if (ativos > 0) {
                 throw new ConflitoDeDadosException("O usuário " + id + " é responsável por "

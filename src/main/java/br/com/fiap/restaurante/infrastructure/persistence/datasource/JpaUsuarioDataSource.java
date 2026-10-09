@@ -10,6 +10,7 @@ import br.com.fiap.restaurante.interfaceadapter.datasource.DadosEndereco;
 import br.com.fiap.restaurante.interfaceadapter.datasource.DadosUsuario;
 import br.com.fiap.restaurante.interfaceadapter.datasource.IUsuarioDataSource;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,6 +51,13 @@ public class JpaUsuarioDataSource implements IUsuarioDataSource {
     @Override
     public Optional<DadosUsuario> buscarPorId(Long id) {
         return usuarios.findByIdAndRemovidoEmIsNull(id).map(JpaUsuarioDataSource::paraDados);
+    }
+
+    // Roda na transação do caso de uso, e a reserva vale até ela terminar
+    @Override
+    @Transactional
+    public Optional<DadosUsuario> buscarPorIdParaAlterar(Long id) {
+        return usuarios.findParaAlterarByIdAndRemovidoEmIsNull(id).map(JpaUsuarioDataSource::paraDados);
     }
 
     @Override

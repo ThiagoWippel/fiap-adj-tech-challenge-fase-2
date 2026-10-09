@@ -20,6 +20,12 @@ public interface ITipoUsuarioGateway {
 
     Optional<TipoUsuario> buscarPorId(Long id);
 
+    /**
+     * Como {@link #buscarPorId}, mas reserva o registro até o fim da transação:
+     * outra operação que queira alterá-lo espera esta terminar.
+     */
+    Optional<TipoUsuario> buscarPorIdParaAlterar(Long id);
+
     Optional<TipoUsuario> buscarPorCodigo(String codigo);
 
     Pagina<TipoUsuario> listar(PedidoDePagina pedido);

@@ -28,7 +28,7 @@ public class ExcluirItemCardapioUseCase {
 
     public void run(Long restauranteId, Long itemId) {
         transacao.executar(() -> {
-            BuscarItemCardapioUseCase.itemDoRestaurante(itens, restaurantes, restauranteId, itemId);
+            BuscarItemCardapioUseCase.itemDoRestauranteParaAlterar(itens, restaurantes, restauranteId, itemId);
             itens.remover(itemId);
         });
     }
