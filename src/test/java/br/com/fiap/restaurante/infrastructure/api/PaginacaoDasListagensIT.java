@@ -110,4 +110,15 @@ class PaginacaoDasListagensIT {
         api.requisicao().queryParam("page", 9).get(rotas.get(listagem))
                 .then().statusCode(200).body("conteudo", empty()).body("ultima", equalTo(true));
     }
+
+    @ParameterizedTest(name = "PAG-07 · {0}: página alta demais para o banco devolve 400, e não 500")
+    @ValueSource(strings = {"usuarios v2", "tipos de usuário", "usuários do tipo", "restaurantes",
+            "restaurantes do usuário", "itens do cardápio"})
+    void deveRecusarPaginaForaDoAlcance(String listagem) {
+        api.requisicao().queryParam("page", 999_999_999).get(rotas.get(listagem))
+                .then().statusCode(400)
+                .body("title", equalTo("Requisição inválida"))
+                .body("detail", equalTo("A página 999999999 passa do limite: com 10 itens por página, "
+                        + "a última página possível é 214748364."));
+    }
 }

@@ -41,4 +41,17 @@ class PaginacaoTest {
                     assertThat(erro.getReason()).isEqualTo("Não é possível ordenar por senha. Campos aceitos: email, nome.");
                 });
     }
+
+    @Test
+    @DisplayName("PAG-07 · página cujo deslocamento passa do limite do banco devolve 400; a última possível passa")
+    void deveRecusarPaginaForaDoAlcance() {
+        /* act + assert */
+        assertThat(Paginacao.pedido(PageRequest.of(42_949_672, 50), CAMPOS).numero()).isEqualTo(42_949_672);
+        assertThatThrownBy(() -> Paginacao.pedido(PageRequest.of(42_949_673, 50), CAMPOS))
+                .isInstanceOfSatisfying(ResponseStatusException.class, erro -> {
+                    assertThat(erro.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+                    assertThat(erro.getReason()).isEqualTo("A página 42949673 passa do limite: com 50 itens por "
+                            + "página, a última página possível é 42949672.");
+                });
+    }
 }
