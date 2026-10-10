@@ -51,8 +51,9 @@ public class ErroDoServidorController implements ErrorController {
     }
 
     // Na reentrada pelo /error o Tomcat troca o método para GET; o 405 não pode citá-lo
-    private static String detalhe(int status, String caminho) {
+    static String detalhe(int status, String caminho) {
         return switch (status) {
+            case 400 -> "A requisição está malformada e não pôde ser interpretada.";
             case 404 -> "Não existe recurso no caminho " + caminho + ".";
             case 405 -> "O método da requisição não é suportado nesta rota.";
             case 413 -> "O corpo da requisição passa do limite de 1 MB.";
