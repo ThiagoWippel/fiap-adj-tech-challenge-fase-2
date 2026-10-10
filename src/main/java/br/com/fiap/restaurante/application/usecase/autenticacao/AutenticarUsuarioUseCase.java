@@ -42,7 +42,8 @@ public class AutenticarUsuarioUseCase {
             throw new ValidacaoDeDominioException("Login e senha são obrigatórios.");
         }
 
-        Optional<Usuario> usuario = usuarios.buscarPorLogin(credenciais.login());
+        // O login é gravado sem os espaços das pontas, e o banco considera o espaço no fim
+        Optional<Usuario> usuario = usuarios.buscarPorLogin(credenciais.login().trim());
         boolean senhaConfere = senhas.confere(credenciais.senha(), usuario.map(Usuario::getSenha).orElse(null));
         if (usuario.isEmpty() || !senhaConfere) {
             throw new CredenciaisInvalidasException(CREDENCIAIS_INVALIDAS);

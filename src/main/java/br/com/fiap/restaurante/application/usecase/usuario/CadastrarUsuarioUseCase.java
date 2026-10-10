@@ -39,7 +39,7 @@ public class CadastrarUsuarioUseCase {
 
     public Usuario run(NovoUsuarioDTO dados) {
         return transacao.executar(() -> {
-            TipoUsuario tipo = tipos.buscarPorCodigo(dados.tipo())
+            TipoUsuario tipo = tipos.buscarPorCodigo(semEspacosNasPontas(dados.tipo()))
                     .orElseThrow(() -> BuscarTipoUsuarioPorIdUseCase.tipoNaoEncontrado(dados.tipo()));
             Documento documento = documentoExigidoPelo(tipo, dados);
             Endereco endereco = dados.endereco() == null ? null : dados.endereco().paraEndereco();
@@ -51,6 +51,11 @@ public class CadastrarUsuarioUseCase {
                     senhas.codificar(senha.valor()), endereco, tipo, documento);
             return usuarios.incluir(usuario);
         });
+    }
+
+    // O banco considera o espaço no fim: "CLIENTE " não acharia o tipo CLIENTE
+    static String semEspacosNasPontas(String valor) {
+        return valor == null ? null : valor.trim();
     }
 
     // Só o documento do tipo é considerado; a ausência dele é tratada pela entidade.

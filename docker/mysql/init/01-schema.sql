@@ -4,8 +4,12 @@
 -- volume vazio. Os testes de integração usam o mesmo script. O Hibernate não
 -- cria tabelas, só confere o mapeamento.
 --
--- A colação utf8mb4_unicode_ci não diferencia maiúsculas, acentos nem espaço no
--- fim. As restrições únicas e as buscas por nome seguem essa regra.
+-- A colação utf8mb4_0900_ai_ci não diferencia maiúsculas nem acentos, e as
+-- restrições únicas e as buscas por nome seguem essa regra. Diferente da
+-- utf8mb4_unicode_ci, ela distingue um emoji de outro ("Pizza 🍕" e "Pizza 🍔") e
+-- considera o espaço no fim. A aplicação tira os espaços das pontas antes de gravar
+-- e de buscar, e as colunas únicas de texto têm um CHECK que exige o valor aparado:
+-- sem ele, "Lasanha " escaparia da restrição única de "Lasanha".
 
 CREATE TABLE tipo_usuario (
     id      BIGINT      NOT NULL AUTO_INCREMENT,
@@ -15,10 +19,12 @@ CREATE TABLE tipo_usuario (
 
     CONSTRAINT pk_tipo_usuario        PRIMARY KEY (id),
     CONSTRAINT uk_tipo_usuario_nome   UNIQUE (nome),
-    CONSTRAINT uk_tipo_usuario_codigo UNIQUE (codigo)
+    CONSTRAINT uk_tipo_usuario_codigo UNIQUE (codigo),
+    CONSTRAINT ck_tipo_usuario_nome_aparado CHECK (nome = TRIM(nome)),
+    CONSTRAINT ck_tipo_usuario_codigo_aparado CHECK (codigo = TRIM(codigo))
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci;
+  COLLATE = utf8mb4_0900_ai_ci;
 
 -- Tipos de sistema: podem ser renomeados, não excluídos
 INSERT INTO tipo_usuario (nome, codigo) VALUES
@@ -55,6 +61,8 @@ CREATE TABLE usuario (
     CONSTRAINT uk_usuario_email     UNIQUE (email),
     CONSTRAINT uk_usuario_login     UNIQUE (login),
     CONSTRAINT uk_usuario_documento UNIQUE (documento),
+    CONSTRAINT ck_usuario_email_aparado CHECK (email = TRIM(email)),
+    CONSTRAINT ck_usuario_login_aparado CHECK (login = TRIM(login)),
     -- Sem ON DELETE: o MySQL não aceita ação referencial em coluna usada num CHECK.
     -- O padrão do InnoDB já impede excluir um tipo em uso.
     CONSTRAINT fk_usuario_tipo_usuario FOREIGN KEY (tipo_usuario_id) REFERENCES tipo_usuario (id),
@@ -73,7 +81,7 @@ CREATE TABLE usuario (
     INDEX idx_usuario_tipo (tipo_usuario_id)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci;
+  COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE restaurante (
     id                     BIGINT       NOT NULL AUTO_INCREMENT,
@@ -105,7 +113,7 @@ CREATE TABLE restaurante (
     INDEX idx_restaurante_cozinha (tipo_cozinha)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci;
+  COLLATE = utf8mb4_0900_ai_ci;
 
 -- Turnos de funcionamento. Vários por dia; a sobreposição é verificada no domínio.
 -- Um turno com fechamento antes da abertura termina no dia seguinte.
@@ -120,11 +128,15 @@ CREATE TABLE horario_funcionamento (
     CONSTRAINT pk_horario_funcionamento PRIMARY KEY (id),
     -- O turno faz parte do restaurante; no dia a dia, os turnos saem pelo PUT, removidos pelo JPA
     CONSTRAINT fk_horario_restaurante FOREIGN KEY (restaurante_id) REFERENCES restaurante (id) ON DELETE CASCADE,
+    -- O domínio já confere; o banco recusa o turno impossível mesmo vindo de fora da aplicação
+    CONSTRAINT ck_horario_dia_semana CHECK (dia_semana IN ('SEGUNDA', 'TERCA', 'QUARTA', 'QUINTA', 'SEXTA',
+                                                           'SABADO', 'DOMINGO')),
+    CONSTRAINT ck_horario_abertura_fechamento CHECK (abertura <> fechamento),
 
     INDEX idx_horario_restaurante (restaurante_id)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci;
+  COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE item_cardapio (
     id                     BIGINT        NOT NULL AUTO_INCREMENT,
@@ -148,7 +160,8 @@ CREATE TABLE item_cardapio (
     CONSTRAINT fk_item_restaurante     FOREIGN KEY (restaurante_id) REFERENCES restaurante (id),
     -- Começa por restaurante_id, então também atende a listagem do cardápio
     CONSTRAINT uk_item_nome_ativo      UNIQUE (restaurante_id, nome, ativo_marcador),
+    CONSTRAINT ck_item_nome_aparado    CHECK (nome = TRIM(nome)),
     CONSTRAINT ck_item_preco_positivo  CHECK (preco > 0)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci;
+  COLLATE = utf8mb4_0900_ai_ci;

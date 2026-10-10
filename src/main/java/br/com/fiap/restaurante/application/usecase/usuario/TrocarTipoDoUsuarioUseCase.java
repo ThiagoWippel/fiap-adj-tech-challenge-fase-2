@@ -42,7 +42,7 @@ public class TrocarTipoDoUsuarioUseCase {
         return transacao.executar(() -> {
             Usuario usuario = usuarios.buscarPorIdParaAlterar(dados.id())
                     .orElseThrow(() -> BuscarUsuarioPorIdUseCase.usuarioNaoEncontrado(dados.id()));
-            TipoUsuario novoTipo = tipos.buscarPorCodigo(dados.tipo())
+            TipoUsuario novoTipo = tipos.buscarPorCodigo(CadastrarUsuarioUseCase.semEspacosNasPontas(dados.tipo()))
                     .orElseThrow(() -> BuscarTipoUsuarioPorIdUseCase.tipoNaoEncontrado(dados.tipo()));
             Documento documento = dados.documento() == null ? null : Documento.de(dados.documento());
 
