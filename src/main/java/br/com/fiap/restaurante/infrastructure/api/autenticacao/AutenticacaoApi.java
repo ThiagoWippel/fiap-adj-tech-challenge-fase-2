@@ -27,7 +27,7 @@ interface AutenticacaoApi {
                     examples = @ExampleObject("""
                     {
                       "id": 1,
-                      "nome": "Maria Silva",
+                      "nome": "Laura Mendes",
                       "tipo": "CLIENTE",
                       "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidGlwbyI6IkNMSUVOVEUifQ.assinatura",
                       "expiraEm": "2026-10-08T11:30:00"

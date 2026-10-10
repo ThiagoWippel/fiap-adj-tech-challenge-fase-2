@@ -14,18 +14,18 @@ import jakarta.validation.constraints.Size;
  * Atualização de dados. Senha e tipo têm endpoints próprios.
  */
 public record AtualizarUsuarioRequest(
-        @Schema(example = "Maria Silva Souza")
+        @Schema(example = "Laura Mendes Costa")
         @NotBlank(message = "O nome é obrigatório.")
         @Size(min = 3, max = 120, message = "O nome deve ter entre 3 e 120 caracteres.")
         String nome,
 
-        @Schema(example = "maria.souza@exemplo.com")
+        @Schema(example = "laura.costa@exemplo.com")
         @NotBlank(message = "O e-mail é obrigatório.")
         @Email(message = "O e-mail informado não é válido.")
         @Size(max = 255, message = "O e-mail deve ter no máximo 255 caracteres.")
         String email,
 
-        @Schema(example = "maria.souza")
+        @Schema(example = "laura.costa")
         @NotBlank(message = "O login é obrigatório.")
         @Pattern(regexp = "[A-Za-z0-9._-]{4,50}",
                 message = "O login deve ter de 4 a 50 caracteres: letras, números, ponto, hífen ou sublinhado.")

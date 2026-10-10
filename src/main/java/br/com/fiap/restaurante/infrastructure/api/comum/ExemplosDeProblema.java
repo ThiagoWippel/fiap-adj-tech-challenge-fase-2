@@ -74,7 +74,7 @@ public final class ExemplosDeProblema {
               "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
               "title": "Recurso não encontrado",
               "status": 404,
-              "detail": "Tipo de usuário ENTREGADOR não encontrado.",
+              "detail": "Tipo de usuário GARCOM não encontrado.",
               "instance": "/api/v1/usuarios",
               "momento": "2026-10-08T10:30:00"
             }""";
@@ -104,7 +104,7 @@ public final class ExemplosDeProblema {
               "type": "http://localhost:8080/problemas/conflito-de-dados",
               "title": "Conflito de dados",
               "status": 409,
-              "detail": "Já existe um tipo de usuário com o nome Entregador.",
+              "detail": "Já existe um tipo de usuário com o nome Garçom.",
               "instance": "/api/v1/tipos-usuario",
               "momento": "2026-10-08T10:30:00"
             }""";
@@ -114,7 +114,7 @@ public final class ExemplosDeProblema {
               "type": "http://localhost:8080/problemas/conflito-de-dados",
               "title": "Conflito de dados",
               "status": 409,
-              "detail": "O tipo Entregador não pode ser excluído: 2 usuários ativos o usam.",
+              "detail": "O tipo Garçom não pode ser excluído: 2 usuários ativos o usam.",
               "instance": "/api/v1/tipos-usuario/3",
               "momento": "2026-10-08T10:30:00"
             }""";

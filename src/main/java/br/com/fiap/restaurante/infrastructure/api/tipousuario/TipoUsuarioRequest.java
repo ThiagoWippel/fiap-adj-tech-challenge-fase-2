@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
  * gerado no cadastro e não muda depois.
  */
 public record TipoUsuarioRequest(
-        @Schema(example = "Entregador")
+        @Schema(example = "Garçom")
         @NotBlank(message = "O nome do tipo é obrigatório.")
         @Size(min = 3, max = 50, message = "O nome do tipo deve ter entre 3 e 50 caracteres.")
         String nome) {

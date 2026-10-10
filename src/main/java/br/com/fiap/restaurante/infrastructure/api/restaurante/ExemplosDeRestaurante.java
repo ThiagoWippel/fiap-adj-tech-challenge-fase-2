@@ -24,7 +24,7 @@ public final class ExemplosDeRestaurante {
                 { "diaSemana": "SEGUNDA", "abertura": "18:00", "fechamento": "23:00" },
                 { "diaSemana": "SEXTA", "abertura": "18:00", "fechamento": "02:00" }
               ],
-              "dono": { "id": 7, "nome": "Maria Silva" },
+              "dono": { "id": 7, "nome": "Laura Mendes" },
               "dataCriacao": "2026-10-08T10:30:00",
               "dataUltimaAlteracao": "2026-10-08T10:30:00"
             }""";

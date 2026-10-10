@@ -17,18 +17,18 @@ import org.hibernate.validator.constraints.br.CPF;
  * documento é exigido: CNPJ para DONO_RESTAURANTE, CPF para os demais.
  */
 public record CriarUsuarioRequest(
-        @Schema(example = "Maria Silva")
+        @Schema(example = "Laura Mendes")
         @NotBlank(message = "O nome é obrigatório.")
         @Size(min = 3, max = 120, message = "O nome deve ter entre 3 e 120 caracteres.")
         String nome,
 
-        @Schema(example = "maria.silva@exemplo.com")
+        @Schema(example = "laura.mendes@exemplo.com")
         @NotBlank(message = "O e-mail é obrigatório.")
         @Email(message = "O e-mail informado não é válido.")
         @Size(max = 255, message = "O e-mail deve ter no máximo 255 caracteres.")
         String email,
 
-        @Schema(example = "maria.silva")
+        @Schema(example = "laura.mendes")
         @NotBlank(message = "O login é obrigatório.")
         @Pattern(regexp = "[A-Za-z0-9._-]{4,50}",
                 message = "O login deve ter de 4 a 50 caracteres: letras, números, ponto, hífen ou sublinhado.")
@@ -44,13 +44,13 @@ public record CriarUsuarioRequest(
         @Size(max = 50, message = "O tipo do usuário deve ter no máximo 50 caracteres.")
         String tipo,
 
-        @Schema(example = "123.456.789-09", description = "Obrigatório para todos os tipos, menos DONO_RESTAURANTE")
+        @Schema(example = "246.813.579-28", description = "Obrigatório para todos os tipos, menos DONO_RESTAURANTE")
         @CPF(message = "O CPF informado não é válido.")
         String cpf,
 
-        @Schema(example = "11.222.333/0001-81",
-                description = "Obrigatório para DONO_RESTAURANTE. Aceita também o formato alfanumérico, "
-                        + "como 12.ABC.345/01DE-35")
+        @Schema(example = "12.ABC.345/01DE-35",
+                description = "Obrigatório para DONO_RESTAURANTE. Aceita o formato só com números e o "
+                        + "alfanumérico")
         @CNPJ(format = CNPJ.Format.ALPHANUMERIC, message = "O CNPJ informado não é válido.")
         String cnpj,
 

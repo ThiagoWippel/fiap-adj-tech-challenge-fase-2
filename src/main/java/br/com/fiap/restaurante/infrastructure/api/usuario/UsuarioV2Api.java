@@ -39,6 +39,6 @@ interface UsuarioV2Api {
     @Parameter(name = "sort", in = ParameterIn.QUERY, description = "Campo e direção, como nome,desc",
             schema = @Schema(type = "string", defaultValue = "nome,asc"))
     ResponseEntity<PaginaResponse<UsuarioResponse>> buscarPorNome(
-            @Parameter(description = "Trecho do nome", example = "maria") String nome,
+            @Parameter(description = "Trecho do nome", example = "laura") String nome,
             @Parameter(hidden = true) Pageable paginacao);
 }

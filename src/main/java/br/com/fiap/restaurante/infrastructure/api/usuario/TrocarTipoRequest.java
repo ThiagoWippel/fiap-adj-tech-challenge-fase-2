@@ -15,7 +15,7 @@ public record TrocarTipoRequest(
         @Size(max = 50, message = "O tipo deve ter no máximo 50 caracteres.")
         String tipo,
 
-        @Schema(example = "11.222.333/0001-81",
+        @Schema(example = "12.ABC.345/01DE-35",
                 description = "CNPJ para DONO_RESTAURANTE, CPF para os demais. O CNPJ pode ser alfanumérico.")
         @NotBlank(message = "O documento é obrigatório.")
         @Size(max = 18, message = "O documento deve ter no máximo 18 caracteres, contando a máscara.")

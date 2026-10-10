@@ -76,7 +76,7 @@ interface UsuarioApi {
     @ApiResponse(responseCode = "400", description = "Parâmetro em formato inválido",
             content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(DADOS_INVALIDOS)))
     ResponseEntity<List<UsuarioResponse>> buscarPorNome(
-            @Parameter(description = "Trecho do nome", example = "maria") String nome);
+            @Parameter(description = "Trecho do nome", example = "laura") String nome);
 
     @Operation(summary = "Atualiza os dados de um usuário", description = """
             Altera nome, e-mail, login e endereço. A senha e o tipo têm endpoints próprios.""")

@@ -8,11 +8,11 @@ final class ExemplosDeUsuario {
     static final String USUARIO = """
             {
               "id": 1,
-              "nome": "Maria Silva",
-              "email": "maria.silva@exemplo.com",
-              "login": "maria.silva",
+              "nome": "Laura Mendes",
+              "email": "laura.mendes@exemplo.com",
+              "login": "laura.mendes",
               "tipo": "CLIENTE",
-              "documento": "12345678909",
+              "documento": "24681357928",
               "endereco": {
                 "rua": "Rua das Flores",
                 "numero": "123",
@@ -29,11 +29,11 @@ final class ExemplosDeUsuario {
     static final String USUARIO_DONO = """
             {
               "id": 1,
-              "nome": "Maria Silva",
-              "email": "maria.silva@exemplo.com",
-              "login": "maria.silva",
+              "nome": "Laura Mendes",
+              "email": "laura.mendes@exemplo.com",
+              "login": "laura.mendes",
               "tipo": "DONO_RESTAURANTE",
-              "documento": "11222333000181",
+              "documento": "12ABC34501DE35",
               "endereco": {
                 "rua": "Rua das Flores",
                 "numero": "123",

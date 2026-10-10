@@ -8,8 +8,8 @@ final class ExemplosDeTipoUsuario {
     static final String TIPO = """
             {
               "id": 3,
-              "nome": "Entregador",
-              "codigo": "ENTREGADOR",
+              "nome": "Garçom",
+              "codigo": "GARCOM",
               "sistema": false
             }""";
 
@@ -18,7 +18,7 @@ final class ExemplosDeTipoUsuario {
               "conteudo": [
                 { "id": 1, "nome": "Cliente", "codigo": "CLIENTE", "sistema": true },
                 { "id": 2, "nome": "Dono de Restaurante", "codigo": "DONO_RESTAURANTE", "sistema": true },
-                { "id": 3, "nome": "Entregador", "codigo": "ENTREGADOR", "sistema": false }
+                { "id": 3, "nome": "Garçom", "codigo": "GARCOM", "sistema": false }
               ],
               "pagina": 0,
               "tamanho": 10,
@@ -35,7 +35,7 @@ final class ExemplosDeTipoUsuario {
                   "nome": "Bruno Lima",
                   "email": "bruno@exemplo.com",
                   "login": "bruno.lima",
-                  "tipo": "ENTREGADOR",
+                  "tipo": "GARCOM",
                   "documento": "52998224725",
                   "endereco": {
                     "rua": "Rua das Flores",

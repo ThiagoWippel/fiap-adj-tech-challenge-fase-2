@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
  * Corpo da requisição de login.
  */
 public record LoginRequest(
-        @Schema(example = "maria.silva")
+        @Schema(example = "laura.mendes")
         @NotBlank(message = "O login é obrigatório.")
         @Size(max = 50, message = "O login deve ter no máximo 50 caracteres.")
         String login,
