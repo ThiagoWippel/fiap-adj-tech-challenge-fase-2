@@ -281,6 +281,16 @@ class UsuarioApiIT {
     }
 
     @Test
+    @DisplayName("USU-32 · código do tipo com espaços nas pontas é aceito no cadastro")
+    void deveAceitarTipoComEspacosNasPontas() {
+        api.requisicao()
+                .body(cliente("Maria Silva", "maria@exemplo.com", "maria.silva", "12345678909")
+                        .replace("\"CLIENTE\"", "\" CLIENTE \""))
+                .post(USUARIOS)
+                .then().statusCode(201).body("tipo", equalTo("CLIENTE"));
+    }
+
+    @Test
     @DisplayName("USU-27 · GET ?nome= devolve lista simples com resultados, sem resultados e sem filtro")
     void deveBuscarPorNomeEmLista() {
         /* arrange */

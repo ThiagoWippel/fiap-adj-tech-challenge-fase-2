@@ -74,6 +74,16 @@ class TrocarTipoDoUsuarioUseCaseTest {
     }
 
     @Test
+    @DisplayName("USU-32 · na troca, o código do tipo é procurado sem os espaços das pontas")
+    void deveProcurarOTipoSemEspacos() {
+        /* act */
+        Usuario trocado = useCase.run(new TrocaDeTipoDTO(7L, " DONO_RESTAURANTE ", "11.222.333/0001-81"));
+
+        /* assert */
+        assertThat(trocado.ehDonoDeRestaurante()).isTrue();
+    }
+
+    @Test
     @DisplayName("TRO-01 · cliente vira Dono de Restaurante com CNPJ, na mesma conta e numa transação")
     void deveTrocarClienteParaDono() {
         /* act */

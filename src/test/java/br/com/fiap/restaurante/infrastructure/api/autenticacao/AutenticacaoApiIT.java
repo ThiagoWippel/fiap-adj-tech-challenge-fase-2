@@ -54,6 +54,13 @@ class AutenticacaoApiIT {
     }
 
     @Test
+    @DisplayName("LOG-08 · login com espaços nas pontas autentica, como o cadastro, que guarda o login sem eles")
+    void deveAutenticarComEspacosNasPontas() {
+        api.requisicao().body(credenciais(" maria.silva ", SENHA)).post(LOGIN)
+                .then().statusCode(200).body("id", equalTo((int) idMaria));
+    }
+
+    @Test
     @DisplayName("LOG-01 · credenciais válidas devolvem id, nome, tipo, token e validade, sem dados de perfil")
     void deveAutenticar() {
         api.requisicao()

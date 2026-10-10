@@ -126,6 +126,19 @@ class ItemCardapioApiIT {
     }
 
     @Test
+    @DisplayName("ITE-24 · nomes que só diferem no emoji são itens diferentes; maiúscula ainda não diferencia")
+    void deveDistinguirNomesQueSoDiferemNoEmoji() {
+        /* arrange */
+        api.cadastrarItem(cantina, item("Pizza 🍕", "45.00", false, "fotos/pizza.jpg"));
+
+        /* act + assert */
+        api.requisicao().body(item("Pizza 🍔", "45.00", false, "fotos/pizza.jpg")).post(ITENS, cantina)
+                .then().statusCode(201);
+        api.requisicao().body(item("PIZZA 🍕", "45.00", false, "fotos/pizza.jpg")).post(ITENS, cantina)
+                .then().statusCode(409);
+    }
+
+    @Test
     @DisplayName("ITE-14 · o mesmo nome em outro restaurante é aceito")
     void deveAceitarMesmoNomeEmOutroRestaurante() {
         /* arrange */

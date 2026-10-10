@@ -65,6 +65,16 @@ class AutenticarUsuarioUseCaseTest {
     }
 
     @Test
+    @DisplayName("LOG-08 · o login é procurado sem os espaços das pontas")
+    void deveProcurarOLoginSemEspacos() {
+        /* act */
+        Autenticacao autenticacao = useCase.run(new CredenciaisDTO(" maria.silva ", SENHA));
+
+        /* assert */
+        assertThat(autenticacao.usuario().getId()).isEqualTo(7L);
+    }
+
+    @Test
     @DisplayName("LOG-01 · credenciais válidas devolvem o usuário e o token")
     void deveAutenticarEDevolverOToken() {
         /* act */

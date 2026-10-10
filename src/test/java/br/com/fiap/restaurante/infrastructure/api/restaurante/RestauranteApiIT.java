@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ import static br.com.fiap.restaurante.suporte.ApiDeTeste.cliente;
 import static br.com.fiap.restaurante.suporte.ApiDeTeste.dono;
 import static br.com.fiap.restaurante.suporte.ApiDeTeste.restaurante;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
@@ -115,6 +117,23 @@ class RestauranteApiIT {
                 .then()
                 .statusCode(400)
                 .body("detail", containsString("O dia FERIADO não existe."));
+    }
+
+    @Test
+    @DisplayName("HOR-16 · o banco recusa turno com dia inexistente ou com abertura igual ao fechamento")
+    void deveBarrarTurnoInvalidoNoBanco() {
+        /* arrange */
+        long id = api.cadastrarRestaurante(restaurante("Cantina", "ITALIANA", ana, "SEGUNDA 11:00 15:00"));
+        String sql = "INSERT INTO horario_funcionamento (restaurante_id, dia_semana, abertura, fechamento) "
+                + "VALUES (?, ?, ?, ?)";
+
+        /* act + assert */
+        assertThatThrownBy(() -> jdbc.update(sql, id, "FERIADO", "10:00", "11:00"))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("ck_horario_dia_semana");
+        assertThatThrownBy(() -> jdbc.update(sql, id, "SEGUNDA", "10:00", "10:00"))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("ck_horario_abertura_fechamento");
     }
 
     @Test

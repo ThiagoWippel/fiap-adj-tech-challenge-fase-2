@@ -113,6 +113,21 @@ class CadastrarUsuarioUseCaseTest {
     }
 
     @Test
+    @DisplayName("USU-32 · o código do tipo é procurado sem os espaços das pontas")
+    void deveProcurarOTipoSemEspacos() {
+        /* arrange */
+        NovoUsuarioDTO dados = new NovoUsuarioDTO("Maria Silva", "maria@exemplo.com", "maria.silva", SENHA,
+                " CLIENTE ", CPF, null, enderecoDTO());
+
+        /* act */
+        Usuario cadastrado = useCase.run(dados);
+
+        /* assert */
+        assertThat(cadastrado.getTipo().getCodigo()).isEqualTo(TipoUsuario.CODIGO_CLIENTE);
+        assertThat(CadastrarUsuarioUseCase.semEspacosNasPontas(null)).isNull();
+    }
+
+    @Test
     @DisplayName("USU-07 · e-mail já cadastrado devolve conflito e nada é gravado")
     void deveRecusarEmailJaCadastrado() {
         /* arrange */

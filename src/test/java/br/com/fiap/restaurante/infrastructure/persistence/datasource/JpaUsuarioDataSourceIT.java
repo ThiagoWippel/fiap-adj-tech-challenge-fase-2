@@ -115,6 +115,25 @@ class JpaUsuarioDataSourceIT {
                 .hasMessageContaining("ck_usuario_ativo_completo");
     }
 
+    @ParameterizedTest(name = "USU-33 · o banco recusa {0} com espaço nas pontas, que escaparia da restrição única")
+    @ValueSource(strings = {"email", "login"})
+    void deveRecusarValorUnicoComEspacoNasPontas(String coluna) {
+        /* arrange */
+        List<Object> valores = new ArrayList<>(Arrays.asList("Maria Silva", "maria@exemplo.com", "maria.silva",
+                HASH, "12345678909", 1L, "Rua das Flores", "123", "Centro", "Itajaí", "SC", "88301000"));
+        valores.set(COLUNAS.indexOf(coluna), valores.get(COLUNAS.indexOf(coluna)) + " ");
+        String sql = "INSERT INTO usuario (" + String.join(", ", COLUNAS)
+                + ", data_criacao, data_ultima_alteracao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(6), NOW(6))";
+
+        /* act + assert */
+        assertThatThrownBy(() -> jdbc.update(sql, valores.toArray()))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("ck_usuario_" + coluna + "_aparado");
+        assertThatThrownBy(() -> jdbc.update("INSERT INTO tipo_usuario (nome, codigo) VALUES ('Garçom ', 'GARCOM')"))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("ck_tipo_usuario_nome_aparado");
+    }
+
     @Test
     @DisplayName("USU-21 · a restrição única do banco não diferencia maiúsculas e barra o e-mail repetido mesmo sem o caso de uso")
     void deveBarrarEmailRepetidoNoBanco() {
