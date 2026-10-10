@@ -20,7 +20,8 @@ class ErroDoServidorControllerTest {
     @CsvSource(delimiter = '|', value = {
             "405 | Método não permitido | O método da requisição não é suportado nesta rota.",
             "500 | Erro interno | Ocorreu uma falha inesperada ao processar a requisição.",
-            "400 | Requisição inválida | A requisição não pôde ser atendida."
+            "400 | Requisição inválida | A requisição está malformada e não pôde ser interpretada.",
+            "403 | Requisição inválida | A requisição não pôde ser atendida."
     })
     void deveResponderOErroEncaminhado(int status, String titulo, String detalhe) {
         /* arrange */

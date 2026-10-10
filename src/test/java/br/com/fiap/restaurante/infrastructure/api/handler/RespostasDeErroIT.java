@@ -11,6 +11,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,10 +98,33 @@ class RespostasDeErroIT {
                 .contains("Um parâmetro da URL tem codificação inválida. Confira os caracteres com %.");
     }
 
-    // Os clientes HTTP recusam montar uma URL com %zz; um socket manda a linha como está
+    @Test
+    @DisplayName("ERR-17 · requisição malformada, barrada pelo Tomcat antes do Spring, também sai em ProblemDetail")
+    void deveResponderEmProblemDetail_QuandoOTomcatRecusarARequisicao() throws IOException {
+        /* act */
+        String caminhoMalCodificado = requisicaoCrua("GET /api/v1/usuarios/%zz HTTP/1.1");
+        String cabecalhoGrande = requisicaoCrua("GET /api/v1/tipos-usuario HTTP/1.1",
+                "X-Grande: " + "a".repeat(20_000));
+
+        /* assert */
+        for (String resposta : List.of(caminhoMalCodificado, cabecalhoGrande)) {
+            assertThat(resposta).startsWith("HTTP/1.1 400")
+                    .contains("Content-Type: " + PROBLEMA)
+                    .contains("\"title\":\"Requisição inválida\"")
+                    .contains("\"detail\":\"A requisição está malformada e não pôde ser interpretada.\"")
+                    .doesNotContain("<html");
+        }
+    }
+
     private String requisicaoCrua(String linha) throws IOException {
+        return requisicaoCrua(linha, null);
+    }
+
+    // Os clientes HTTP recusam montar uma URL com %zz; um socket manda a linha como está
+    private String requisicaoCrua(String linha, String cabecalhoExtra) throws IOException {
         try (Socket socket = new Socket("localhost", porta)) {
-            socket.getOutputStream().write((linha + "\r\nHost: localhost\r\nConnection: close\r\n\r\n")
+            String extra = cabecalhoExtra == null ? "" : cabecalhoExtra + "\r\n";
+            socket.getOutputStream().write((linha + "\r\nHost: localhost\r\n" + extra + "Connection: close\r\n\r\n")
                     .getBytes(StandardCharsets.US_ASCII));
             return new String(socket.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
         }
