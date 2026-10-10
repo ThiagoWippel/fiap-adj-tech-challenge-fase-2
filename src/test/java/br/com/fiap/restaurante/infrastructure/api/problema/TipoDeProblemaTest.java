@@ -33,6 +33,14 @@ class TipoDeProblemaTest {
         assertThat(TipoDeProblema.porIdentificador("inexistente")).isEmpty();
     }
 
+    @Test
+    @DisplayName("ERR-12 · o 406 tem tipo próprio, e a descrição dele diz 406")
+    void deveTerTipoProprioParaO406() {
+        /* act + assert */
+        assertThat(TipoDeProblema.paraErroDoFramework(406)).isEqualTo(TipoDeProblema.FORMATO_NAO_DISPONIVEL);
+        assertThat(TipoDeProblema.FORMATO_NAO_DISPONIVEL.status()).isEqualTo(406);
+    }
+
     @ParameterizedTest(name = "ERR-09 · erro do framework com status {0} vira o tipo {1}")
     @CsvSource({
             "400, REQUISICAO_INVALIDA",

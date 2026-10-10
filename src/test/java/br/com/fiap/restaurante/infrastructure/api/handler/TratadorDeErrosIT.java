@@ -11,12 +11,17 @@ import br.com.fiap.restaurante.infrastructure.config.ProblemasProperties;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import org.apache.tomcat.util.http.InvalidParameterException;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.CannotAcquireLockException;
@@ -31,6 +36,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.List;
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -42,6 +51,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import(TratadorDeErrosIT.ControllerDeErros.class)
 @EnableConfigurationProperties(ProblemasProperties.class)
 @DisplayName("Tratamento de erros")
+@ExtendWith(OutputCaptureExtension.class)
 class TratadorDeErrosIT {
 
     private static final String BASE_DOS_TIPOS = "http://localhost:8080/problemas/";
@@ -111,6 +121,85 @@ class TratadorDeErrosIT {
     }
 
     @Test
+    @DisplayName("ERR-11 · o 404 cita o caminho pedido, inclusive com a barra do fim")
+    void deveCitarOCaminhoPedido_QuandoARotaTerminarComBarra() {
+        /* act */
+        MvcTestResult resultado = mvc.get().uri("/rota-que-nao-existe/").exchange();
+
+        /* assert */
+        assertThat(resultado).hasStatus(HttpStatus.NOT_FOUND);
+        assertThat(resultado).bodyJson().extractingPath("$.detail")
+                .isEqualTo("Não existe recurso no caminho /rota-que-nao-existe/.");
+    }
+
+    @Test
+    @DisplayName("ERR-12 · pedir um formato que a API não produz devolve 406 com tipo próprio")
+    void deveDevolver406ComTipoProprio_QuandoOFormatoPedidoNaoExistir() {
+        /* act */
+        MvcTestResult resultado = mvc.get().uri("/teste-de-erros/objeto").accept(MediaType.APPLICATION_XML).exchange();
+
+        /* assert */
+        assertThat(resultado).hasStatus(HttpStatus.NOT_ACCEPTABLE).hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
+        assertThat(resultado).bodyJson().extractingPath("$.type").isEqualTo(BASE_DOS_TIPOS + "formato-nao-disponivel");
+        assertThat(resultado).bodyJson().extractingPath("$.title").isEqualTo("Formato de resposta não disponível");
+    }
+
+    @Test
+    @DisplayName("ERR-14 · valor com tipo errado no JSON aponta o campo, inclusive dentro de objetos e listas")
+    void deveApontarOCampo_QuandoUmValorTiverOTipoErrado() {
+        /* act */
+        MvcTestResult textoComObjeto = mvc.post().uri("/teste-de-erros/corpo").contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"nome": {"a": 1}, "email": "maria@exemplo.com"}""").exchange();
+        MvcTestResult numeroComTexto = mvc.post().uri("/teste-de-erros/corpo").contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"nome": "Maria", "email": "maria@exemplo.com", "idade": "dez"}""").exchange();
+        MvcTestResult dentroDaLista = mvc.post().uri("/teste-de-erros/corpo").contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"nome": "Maria", "email": "maria@exemplo.com", "turnos": [{"abertura": [1]}]}""").exchange();
+
+        /* assert */
+        assertThat(textoComObjeto).hasStatus(HttpStatus.BAD_REQUEST);
+        assertThat(textoComObjeto).bodyJson().extractingPath("$.title").isEqualTo("Requisição inválida");
+        assertThat(textoComObjeto).bodyJson().extractingPath("$.detail")
+                .isEqualTo("O campo nome tem um valor do tipo errado.");
+        assertThat(textoComObjeto).bodyJson().extractingPath("$.erros[0].campo").isEqualTo("nome");
+        assertThat(textoComObjeto).bodyJson().extractingPath("$.erros[0].mensagem").isEqualTo("Informe um texto.");
+        assertThat(numeroComTexto).bodyJson().extractingPath("$.erros[0].campo").isEqualTo("idade");
+        assertThat(numeroComTexto).bodyJson().extractingPath("$.erros[0].mensagem")
+                .isEqualTo("Informe um número inteiro.");
+        assertThat(dentroDaLista).bodyJson().extractingPath("$.erros[0].campo").isEqualTo("turnos[0].abertura");
+    }
+
+    @Test
+    @DisplayName("ERR-15 · parâmetro com codificação inválida na URL devolve 400, e não 500")
+    void deveDevolver400_QuandoUmParametroTiverCodificacaoInvalida() {
+        /* act */
+        MvcTestResult resultado = mvc.get().uri("/teste-de-erros/parametro-invalido").exchange();
+
+        /* assert */
+        assertThat(resultado).hasStatus(HttpStatus.BAD_REQUEST);
+        assertThat(resultado).bodyJson().extractingPath("$.title").isEqualTo("Requisição inválida");
+        assertThat(resultado).bodyJson().extractingPath("$.detail")
+                .isEqualTo("Um parâmetro da URL tem codificação inválida. Confira os caracteres com %.");
+    }
+
+    @Test
+    @DisplayName("ERR-16 · o log da violação de integridade cita a restrição, e não o dado pessoal que a violou")
+    void naoDeveRegistrarDadoPessoal_QuandoHouverViolacaoDeIntegridade(CapturedOutput saida) {
+        /* act */
+        mvc.get().uri("/teste-de-erros/integridade").exchange();
+        mvc.get().uri("/teste-de-erros/integridade-do-hibernate").exchange();
+
+        /* assert */
+        assertThat(saida.getOut())
+                .contains("Violação de integridade no banco: restrição uk_usuario_email")
+                .contains("Violação de integridade no banco: restrição uk_usuario_login")
+                .doesNotContain("maria@exemplo.com")
+                .doesNotContain("maria.silva");
+    }
+
+    @Test
     @DisplayName("ERR-02 · o type aponta para uma URL da própria aplicação que descreve o problema")
     void deveDescreverOTipoDeProblemaNaUrlDoType() {
         /* act */
@@ -177,6 +266,19 @@ class TratadorDeErrosIT {
         assertThat(resultado).bodyJson().extractingPath("$.title").isEqualTo("Requisição inválida");
         assertThat(resultado).bodyJson().extractingPath("$.type").isEqualTo(BASE_DOS_TIPOS + "requisicao-invalida");
         assertThat(resultado).bodyJson().extractingPath("$.detail").asString().startsWith("O corpo da requisição não pôde ser lido.");
+    }
+
+    @Test
+    @DisplayName("ERR-04 · uma lista no lugar do objeto inteiro devolve a mensagem geral, sem apontar campo")
+    void deveUsarAMensagemGeral_QuandoOCorpoInteiroTiverOTipoErrado() {
+        /* act */
+        MvcTestResult resultado = mvc.post().uri("/teste-de-erros/corpo")
+                .contentType(MediaType.APPLICATION_JSON).content("[1]").exchange();
+
+        /* assert */
+        assertThat(resultado).hasStatus(HttpStatus.BAD_REQUEST);
+        assertThat(resultado).bodyJson().extractingPath("$.detail").asString()
+                .startsWith("O corpo da requisição não pôde ser lido.");
     }
 
     @Test
@@ -310,6 +412,24 @@ class TratadorDeErrosIT {
             throw new CannotAcquireLockException("Lock wait timeout exceeded; try restarting transaction");
         }
 
+        @GetMapping("/integridade-do-hibernate")
+        void integridadeDoHibernate() {
+            var causa = new SQLIntegrityConstraintViolationException(
+                    "Duplicate entry 'maria.silva' for key 'usuario.uk_usuario_login'");
+            throw new DataIntegrityViolationException("could not execute statement",
+                    new ConstraintViolationException("could not execute statement", causa, "uk_usuario_login"));
+        }
+
+        @GetMapping("/parametro-invalido")
+        void parametroInvalido() {
+            throw new InvalidParameterException("Character decoding failed. Parameter [nome] with value [%zz]");
+        }
+
+        @GetMapping("/objeto")
+        Map<String, String> objeto() {
+            return Map.of("nome", "Maria");
+        }
+
         @GetMapping("/bug")
         void bug() {
             throw new IllegalArgumentException("Índice fora do intervalo.");
@@ -331,7 +451,14 @@ class TratadorDeErrosIT {
 
                 @NotBlank(message = "O e-mail é obrigatório.")
                 @Email(message = "O e-mail informado não é válido.")
-                String email) {
+                String email,
+
+                Integer idade,
+
+                List<TurnoDeTeste> turnos) {
+        }
+
+        record TurnoDeTeste(String abertura) {
         }
     }
 }
