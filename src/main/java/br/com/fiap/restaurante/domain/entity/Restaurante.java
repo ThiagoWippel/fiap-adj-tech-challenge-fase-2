@@ -5,6 +5,7 @@ import br.com.fiap.restaurante.domain.exception.RegraDeNegocioException;
 import br.com.fiap.restaurante.domain.exception.ValidacaoDeDominioException;
 import br.com.fiap.restaurante.domain.valueobject.Endereco;
 import br.com.fiap.restaurante.domain.valueobject.QuadroDeHorarios;
+import br.com.fiap.restaurante.domain.valueobject.TextoLivre;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -53,6 +54,7 @@ public class Restaurante {
     }
 
     public void setNome(String nome) {
+        TextoLivre.exigirUmaLinha(nome, "nome do restaurante");
         if (nome == null || nome.trim().length() < 2 || nome.trim().length() > 120) {
             throw new ValidacaoDeDominioException("O nome do restaurante deve ter entre 2 e 120 caracteres.");
         }

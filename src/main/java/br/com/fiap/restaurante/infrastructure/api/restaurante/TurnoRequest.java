@@ -3,6 +3,7 @@ package br.com.fiap.restaurante.infrastructure.api.restaurante;
 import br.com.fiap.restaurante.application.dto.TurnoDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Pattern;
 
 /**
@@ -12,6 +13,7 @@ import jakarta.validation.constraints.Pattern;
 public record TurnoRequest(
         @Schema(example = "SEXTA", description = "SEGUNDA, TERCA, QUARTA, QUINTA, SEXTA, SABADO ou DOMINGO")
         @NotBlank(message = "O dia da semana do turno é obrigatório.")
+        @Size(max = 10, message = "O dia da semana deve ter no máximo 10 caracteres.")
         String diaSemana,
 
         @Schema(example = "18:00")

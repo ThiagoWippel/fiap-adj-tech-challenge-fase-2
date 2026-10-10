@@ -2,6 +2,7 @@ package br.com.fiap.restaurante.domain.entity;
 
 import br.com.fiap.restaurante.domain.exception.ValidacaoDeDominioException;
 import br.com.fiap.restaurante.domain.valueobject.Preco;
+import br.com.fiap.restaurante.domain.valueobject.TextoLivre;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -66,6 +67,7 @@ public class ItemCardapio {
 
     /** Tira os espaços das pontas e junta os repetidos: "  Feijoada   completa " vira "Feijoada completa". */
     public void setNome(String nome) {
+        TextoLivre.exigirUmaLinha(nome, "nome do item");
         String limpo = nome == null ? "" : nome.trim().replaceAll("\\s+", " ");
         if (limpo.length() < 2 || limpo.length() > 100) {
             throw new ValidacaoDeDominioException("O nome do item deve ter entre 2 e 100 caracteres.");
@@ -74,6 +76,7 @@ public class ItemCardapio {
     }
 
     public void setDescricao(String descricao) {
+        TextoLivre.exigirSemControle(descricao, "descrição");
         if (descricao == null || descricao.isBlank()) {
             throw new ValidacaoDeDominioException("A descrição do item é obrigatória.");
         }
@@ -104,6 +107,7 @@ public class ItemCardapio {
      * seguir esse caminho.
      */
     public void setCaminhoFoto(String caminhoFoto) {
+        TextoLivre.exigirUmaLinha(caminhoFoto, "caminho da foto");
         if (caminhoFoto == null || caminhoFoto.isBlank()) {
             throw new ValidacaoDeDominioException("O caminho da foto é obrigatório.");
         }

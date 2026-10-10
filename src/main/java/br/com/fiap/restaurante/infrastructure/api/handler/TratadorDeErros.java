@@ -5,6 +5,7 @@ import br.com.fiap.restaurante.application.exception.CredenciaisInvalidasExcepti
 import br.com.fiap.restaurante.application.exception.RecursoNaoEncontradoException;
 import br.com.fiap.restaurante.domain.exception.RegraDeNegocioException;
 import br.com.fiap.restaurante.domain.exception.ValidacaoDeDominioException;
+import br.com.fiap.restaurante.infrastructure.api.comum.CorpoGrandeDemaisException;
 import br.com.fiap.restaurante.infrastructure.api.problema.TipoDeProblema;
 import br.com.fiap.restaurante.infrastructure.config.ProblemasProperties;
 import org.apache.tomcat.util.http.InvalidParameterException;
@@ -170,6 +171,10 @@ public class TratadorDeErros extends ResponseEntityExceptionHandler {
                                                                   HttpHeaders cabecalhos,
                                                                   HttpStatusCode status,
                                                                   WebRequest requisicao) {
+        if (temNaCausa(excecao, CorpoGrandeDemaisException.class)) {
+            return responder(TipoDeProblema.CORPO_GRANDE_DEMAIS, "O corpo da requisição passa do limite de 1 MB.",
+                    excecao, requisicao);
+        }
         if (!(excecao.getCause() instanceof MismatchedInputException tipoErrado) || tipoErrado.getPath().isEmpty()) {
             return super.handleHttpMessageNotReadable(excecao, cabecalhos, status, requisicao);
         }
@@ -220,6 +225,15 @@ public class TratadorDeErros extends ResponseEntityExceptionHandler {
 
     static String momento(LocalDateTime agora) {
         return agora.format(FORMATO_DO_MOMENTO);
+    }
+
+    private static boolean temNaCausa(Throwable excecao, Class<? extends Throwable> tipo) {
+        for (Throwable causa = excecao; causa != null; causa = causa.getCause()) {
+            if (tipo.isInstance(causa)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     static String restricaoViolada(DataIntegrityViolationException excecao) {

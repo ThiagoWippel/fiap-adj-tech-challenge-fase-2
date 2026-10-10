@@ -18,9 +18,9 @@ import java.time.LocalDateTime;
 
 /**
  * Responde em ProblemDetail os erros que o servidor encaminha para /error sem passar
- * pelos controllers, como um TRACE recusado pelo Tomcat ou o próprio /error acessado
- * direto. Substitui o controller padrão do Spring Boot, que responderia em outro
- * formato.
+ * pelos controllers: um TRACE recusado pelo Tomcat, um corpo grande demais barrado
+ * pelo filtro ou o próprio /error acessado direto. Substitui o controller padrão do
+ * Spring Boot, que responderia em outro formato.
  */
 @Hidden
 @RestController
@@ -55,6 +55,7 @@ public class ErroDoServidorController implements ErrorController {
         return switch (status) {
             case 404 -> "Não existe recurso no caminho " + caminho + ".";
             case 405 -> "O método da requisição não é suportado nesta rota.";
+            case 413 -> "O corpo da requisição passa do limite de 1 MB.";
             default -> status >= 500
                     ? "Ocorreu uma falha inesperada ao processar a requisição."
                     : "A requisição não pôde ser atendida.";

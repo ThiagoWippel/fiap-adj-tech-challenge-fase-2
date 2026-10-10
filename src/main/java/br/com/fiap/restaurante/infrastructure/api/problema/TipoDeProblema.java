@@ -38,6 +38,10 @@ public enum TipoDeProblema {
             "O cabeçalho Accept pediu um formato que a API não produz. Peça application/json, ou não envie "
                     + "o cabeçalho."),
 
+    CORPO_GRANDE_DEMAIS("corpo-grande-demais", "Corpo grande demais", 413,
+            "O corpo da requisição passa do limite de 1 MB. O maior corpo que a API espera, um restaurante com "
+                    + "50 turnos, tem poucos KB."),
+
     MIDIA_NAO_SUPORTADA("midia-nao-suportada", "Tipo de mídia não suportado", 415,
             "O corpo da requisição foi enviado num formato que a rota não aceita. Envie application/json."),
 
@@ -95,6 +99,7 @@ public enum TipoDeProblema {
             case 404 -> RECURSO_NAO_ENCONTRADO;
             case 405 -> METODO_NAO_PERMITIDO;
             case 406 -> FORMATO_NAO_DISPONIVEL;
+            case 413 -> CORPO_GRANDE_DEMAIS;
             case 415 -> MIDIA_NAO_SUPORTADA;
             default -> status >= 500 ? ERRO_INTERNO : REQUISICAO_INVALIDA;
         };

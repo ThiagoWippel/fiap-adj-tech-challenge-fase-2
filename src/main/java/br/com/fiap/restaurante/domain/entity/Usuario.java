@@ -4,6 +4,7 @@ import br.com.fiap.restaurante.domain.exception.RegraDeNegocioException;
 import br.com.fiap.restaurante.domain.exception.ValidacaoDeDominioException;
 import br.com.fiap.restaurante.domain.valueobject.Documento;
 import br.com.fiap.restaurante.domain.valueobject.Endereco;
+import br.com.fiap.restaurante.domain.valueobject.TextoLivre;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -76,6 +77,7 @@ public class Usuario {
     }
 
     public void setNome(String nome) {
+        TextoLivre.exigirUmaLinha(nome, "nome");
         if (nome == null || nome.trim().length() < 3 || nome.trim().length() > 120) {
             throw new ValidacaoDeDominioException("O nome deve ter entre 3 e 120 caracteres.");
         }
@@ -83,6 +85,7 @@ public class Usuario {
     }
 
     public void setEmail(String email) {
+        TextoLivre.exigirUmaLinha(email, "e-mail");
         if (email == null || email.trim().length() > 255 || !email.trim().matches(FORMATO_EMAIL)) {
             throw new ValidacaoDeDominioException("O e-mail informado não é válido.");
         }

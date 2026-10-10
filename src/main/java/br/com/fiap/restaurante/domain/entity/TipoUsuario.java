@@ -1,6 +1,7 @@
 package br.com.fiap.restaurante.domain.entity;
 
 import br.com.fiap.restaurante.domain.exception.ValidacaoDeDominioException;
+import br.com.fiap.restaurante.domain.valueobject.TextoLivre;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -46,6 +47,7 @@ public class TipoUsuario {
     }
 
     public void setNome(String nome) {
+        TextoLivre.exigirUmaLinha(nome, "nome do tipo");
         if (nome == null || nome.isBlank() || nome.trim().length() < 3 || nome.trim().length() > 50) {
             throw new ValidacaoDeDominioException("O nome do tipo deve ter entre 3 e 50 caracteres.");
         }

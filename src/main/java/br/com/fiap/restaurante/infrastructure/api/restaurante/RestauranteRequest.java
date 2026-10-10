@@ -30,6 +30,7 @@ public record RestauranteRequest(
                 + "MEXICANA, PORTUGUESA, FRANCESA, HAMBURGUERIA, LANCHES, CHURRASCARIA, FRUTOS_DO_MAR, VEGETARIANA, "
                 + "VEGANA, DOCES_E_SOBREMESAS, CAFETERIA ou OUTRA")
         @NotBlank(message = "O tipo de cozinha é obrigatório.")
+        @Size(max = 30, message = "O tipo de cozinha deve ter no máximo 30 caracteres.")
         String tipoCozinha,
 
         @Schema(example = "7", description = "Usuário do tipo Dono de Restaurante")

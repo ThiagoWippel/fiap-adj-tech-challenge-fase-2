@@ -41,6 +41,7 @@ public record CriarUsuarioRequest(
 
         @Schema(example = "CLIENTE", description = "Código do tipo de usuário")
         @NotBlank(message = "O tipo do usuário é obrigatório.")
+        @Size(max = 50, message = "O tipo do usuário deve ter no máximo 50 caracteres.")
         String tipo,
 
         @Schema(example = "123.456.789-09", description = "Obrigatório para todos os tipos, menos DONO_RESTAURANTE")

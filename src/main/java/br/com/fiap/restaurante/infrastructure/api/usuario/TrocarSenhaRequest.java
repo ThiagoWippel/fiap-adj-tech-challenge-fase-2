@@ -11,6 +11,7 @@ import jakarta.validation.constraints.Size;
 public record TrocarSenhaRequest(
         @Schema(example = "SenhaSegura123")
         @NotBlank(message = "A senha atual é obrigatória.")
+        @Size(max = 72, message = "A senha atual deve ter no máximo 72 caracteres.")
         String senhaAtual,
 
         @Schema(example = "SenhaNova456")

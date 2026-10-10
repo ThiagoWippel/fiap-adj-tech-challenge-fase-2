@@ -27,6 +27,7 @@ public record Endereco(String rua, String numero, String complemento, String bai
     }
 
     private static String obrigatorio(String valor, String campo, int tamanhoMaximo) {
+        TextoLivre.exigirUmaLinha(valor, campo);
         return limitar(obrigatorio(valor, campo), campo, tamanhoMaximo);
     }
 
@@ -38,6 +39,7 @@ public record Endereco(String rua, String numero, String complemento, String bai
     }
 
     private static String opcional(String valor, String campo, int tamanhoMaximo) {
+        TextoLivre.exigirUmaLinha(valor, campo);
         if (valor == null || valor.isBlank()) {
             return null;
         }
