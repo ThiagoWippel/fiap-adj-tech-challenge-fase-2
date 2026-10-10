@@ -34,6 +34,10 @@ public enum TipoDeProblema {
     METODO_NAO_PERMITIDO("metodo-nao-permitido", "Método não permitido", 405,
             "A rota existe, mas não aceita o método HTTP usado na requisição."),
 
+    FORMATO_NAO_DISPONIVEL("formato-nao-disponivel", "Formato de resposta não disponível", 406,
+            "O cabeçalho Accept pediu um formato que a API não produz. Peça application/json, ou não envie "
+                    + "o cabeçalho."),
+
     MIDIA_NAO_SUPORTADA("midia-nao-suportada", "Tipo de mídia não suportado", 415,
             "O corpo da requisição foi enviado num formato que a rota não aceita. Envie application/json."),
 
@@ -90,6 +94,7 @@ public enum TipoDeProblema {
         return switch (status) {
             case 404 -> RECURSO_NAO_ENCONTRADO;
             case 405 -> METODO_NAO_PERMITIDO;
+            case 406 -> FORMATO_NAO_DISPONIVEL;
             case 415 -> MIDIA_NAO_SUPORTADA;
             default -> status >= 500 ? ERRO_INTERNO : REQUISICAO_INVALIDA;
         };
