@@ -62,7 +62,7 @@ jobs:
       - name: Criar o .env a partir do exemplo
         run: cp .env.example .env
 
-      - name: Subir a aplicação e o banco a partir do .env.example (INF-03)
+      - name: Subir a aplicação e o banco a partir do .env.example (INF-03, INF-10)
         run: docker compose up -d --build --wait --wait-timeout 300
 
       - name: Instalar o Node

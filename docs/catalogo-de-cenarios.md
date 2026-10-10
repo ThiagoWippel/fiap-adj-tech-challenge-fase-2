@@ -62,20 +62,25 @@ Decisões do dossiê: A repositório · B token · C horário · D tipo do dono 
 
 | Fatia | Tema | Cenários |
 |---|---|---|
-| 0 | Fundação: arquitetura, infraestrutura, erros, paginação | 31 |
-| 1 | Usuário: herança da Fase 1, login, token, exclusão | 61 |
+| 0 | Fundação: arquitetura, infraestrutura, erros, paginação | 39 |
+| 1 | Usuário: herança da Fase 1, login, token, exclusão | 65 |
 | 2 | Tipo de usuário e troca de tipo | 28 |
-| 3 | Restaurante, horários e tipo de cozinha | 40 |
-| 4 | Item do cardápio | 23 |
-| 5 | Fechamento: operações simultâneas | 4 |
-| | **Total** | **187** |
+| 3 | Restaurante, horários e tipo de cozinha | 41 |
+| 4 | Item do cardápio | 24 |
+| 5 | Fechamento: operações simultâneas e entrada da API | 10 |
+| | **Total** | **207** |
 
 Os cenários de paginação (PAG) valem para todas as listagens e são repetidos no teste de integração de cada uma.
 
-Doze cenários, com origem AUD, entraram depois das fatias, na auditoria do código pronto. Cada um trava uma falha
-encontrada com a aplicação no ar: respostas 500 para senha acentuada, turno nulo e página alta demais; um 409 no
-lugar de 400; a paginação que repetia registros; entradas sem limite; o CNPJ alfanumérico recusado; e operações
-simultâneas que passavam juntas pelas verificações.
+Trinta e dois cenários, com origem AUD, entraram depois das fatias, em duas auditorias do código pronto. Cada um
+trava uma falha encontrada com a aplicação no ar. Na primeira: respostas 500 para senha acentuada, turno nulo e
+página alta demais; um 409 no lugar de 400; a paginação que repetia registros; entradas sem limite; o CNPJ
+alfanumérico recusado; e operações simultâneas que passavam juntas pelas verificações. Na segunda, com um fuzzer
+que trocou cada campo de cada requisição por valores hostis: um 500 no `sort` com `%` e outro na query mal
+codificada; `page` e `size` inválidos ignorados em silêncio; tipos convertidos sem aviso no JSON; textos sem limite
+e com caracteres de controle; corpo sem limite; emojis tratados como iguais pela colação; exemplos do Swagger que
+derrubavam a collection; erros fora do formato ProblemDetail; e um healthcheck que liberava a aplicação antes de o
+banco aceitar conexões.
 
 ---
 
@@ -103,6 +108,7 @@ simultâneas que passavam juntas pelas verificações.
 | INF-07 | A cada push, o GitHub Actions roda `mvn verify` (unitários, integração com Testcontainers, ArchUnit e os cortes de cobertura) e termina verde. | CI | EN-6, EN-8, Dec. V |
 | INF-08 | A porta de transação desfaz tudo o que foi gravado quando a operação lança exceção, e confirma as gravações quando ela termina sem erro. | U · I | Dec. G |
 | INF-09 | A porta de senha gera um hash BCrypt diferente a cada codificação, nunca o texto original, e confere a senha correta. | U | F1-07 |
+| INF-10 | O healthcheck do banco no compose só passa quando a porta TCP aceita conexões: a aplicação não sobe enquanto o MySQL ainda roda os scripts de inicialização. | CI | AUD, EN-5 |
 
 ### Erros (ERR)
 
@@ -118,6 +124,13 @@ simultâneas que passavam juntas pelas verificações.
 | ERR-08 | `ValidacaoDeDominioException` é uma `IllegalArgumentException` e vira 400; uma `IllegalArgumentException` lançada fora do domínio vira 500. | U · I | Dec. O |
 | ERR-09 | Títulos e mensagens saem em português com acento, por exemplo "Regra de negócio violada". | I | Dec. X |
 | ERR-10 | A extensão `momento` é preenchida num único lugar e aparece em todos os erros, inclusive nos gerados pelo próprio Spring (400, 404 e 405). | I | FB-3 |
+| ERR-11 | Rota inexistente com barra no fim devolve 404 citando o caminho pedido, com a barra. | I | AUD, F1-11 |
+| ERR-12 | Pedir no `Accept` um formato que a API não produz devolve 406, com tipo de problema próprio. | I | AUD, F1-11 |
+| ERR-13 | Erro que o servidor encaminha para `/error` (um TRACE, o próprio `/error` acessado direto) sai em ProblemDetail. | I | AUD, F1-11 |
+| ERR-14 | Valor com o tipo errado no JSON devolve 400 apontando o campo, inclusive dentro de objetos e listas (`endereco.cep`, `turnos[0].abertura`). | I | AUD, F1-11 |
+| ERR-15 | Parâmetro com codificação inválida na URL (`?nome=%zz`) devolve 400, e não 500. | I | AUD, F1-11 |
+| ERR-16 | O log da violação de integridade cita a restrição, e não o valor que a violou, que pode ser um e-mail ou um documento. | I | AUD, Dec. E |
+| ERR-17 | Requisição malformada que o Tomcat barra antes do Spring (caminho com `%zz`, cabeçalho grande demais) também sai em ProblemDetail, e não em página HTML. | I | AUD, F1-11 |
 
 ### Paginação (PAG)
 
@@ -193,6 +206,8 @@ simultâneas que passavam juntas pelas verificações.
 | USU-29 | Nenhuma resposta da API contém o campo senha. | I · P | F1-01 |
 | USU-30 | Persistir, atualizar e reler um usuário mantém `dataCriacao` e avança `dataUltimaAlteracao` (a armadilha do update). | I | F1-04, Dec. H |
 | USU-31 | Senha com até 72 caracteres, mas acima de 72 bytes (letra acentuada conta como dois), é recusada com 400 no cadastro e na troca, sem chegar ao BCrypt. | U · I | AUD, F1-02 |
+| USU-32 | Código do tipo com espaços nas pontas é aceito no cadastro e na troca de tipo. | C · I | AUD, Dec. D |
+| USU-33 | O banco recusa e-mail, login ou nome de tipo com espaço nas pontas, que escaparia da restrição única. | I | AUD, Dec. T |
 
 ### Login e token (LOG, TOK)
 
@@ -205,6 +220,7 @@ simultâneas que passavam juntas pelas verificações.
 | LOG-05 | A senha antiga deixa de funcionar depois da troca. | I · P | F1-02, F1-07 |
 | LOG-06 | Usuário removido não consegue fazer login. | C | Dec. E |
 | LOG-07 | Login com corpo inválido (login ou senha ausente) devolve 400. | I | F1-07 |
+| LOG-08 | Login com espaços nas pontas autentica, como o cadastro, que guarda o login sem eles. | C · I | AUD, F1-07 |
 | TOK-01 | O token emitido é um JWT assinado, com `sub` igual ao id do usuário, o código do tipo e a expiração definida na configuração. | U · I | Dec. B |
 | TOK-02 | Um token adulterado não passa na verificação da assinatura. | U | Dec. B |
 | TOK-03 | Nenhum endpoint exige token nesta fase: requisição sem `Authorization` é atendida normalmente. | I | Dec. B |
@@ -226,6 +242,7 @@ simultâneas que passavam juntas pelas verificações.
 |---|---|---|---|
 | ACE-01 | A collection da Fase 1 roda contra a Fase 2 e passa inteira, com três ajustes deliberados e documentados: o `type` dos erros, os títulos com acento e a verificação de mensagem do login atualizada para as palavras acentuadas. | P · CI | EN-OBJ, Dec. Q |
 | ACE-02 | A cada push, o GitHub Actions sobe o docker-compose e roda a collection completa com o Newman, e termina verde. | CI | EN-4, EN-5, Dec. V |
+| ACE-03 | Os exemplos do Swagger não repetem e-mail, login, documento nem tipo que a collection cadastra: testar pelo Swagger antes de rodar a collection não a derruba. | I | AUD, EN-4 |
 
 ---
 
@@ -315,6 +332,7 @@ simultâneas que passavam juntas pelas verificações.
 | HOR-13 | Horário em formato inválido ("25:00", "11h") ou dia inexistente devolve 400. | I | Dec. C |
 | HOR-14 | Lista de turnos com um elemento nulo devolve 400 apontando o turno, e não 500. | I | AUD, Dec. C |
 | HOR-15 | Mais de 50 turnos é recusado; até 50, aceito. | U · I | AUD, Dec. C |
+| HOR-16 | O banco recusa turno com dia inexistente ou com abertura igual ao fechamento, mesmo vindo de fora da aplicação. | I | AUD, Dec. C |
 
 ### Tipo de cozinha (COZ)
 
@@ -364,6 +382,7 @@ simultâneas que passavam juntas pelas verificações.
 | ITE-21 | CRUD HTTP aninhado: POST devolve 201 com `Location`; GET lista paginada com filtro `apenasNoLocal`; GET por id; PUT; DELETE devolve 204 e, depois dele, 404. | I · P | EN-IT, EN-1, Dec. M |
 | ITE-22 | Todas as rotas de item de um restaurante removido devolvem 404. | I | Dec. E, M |
 | ITE-23 | Caminho da foto que sobe de pasta (`..`) ou usa esquema que não é http nem https (`javascript:`, `file:`) é recusado. | U · I | AUD, EN-IT, Dec. W |
+| ITE-24 | Nomes que só diferem no emoji ("Pizza 🍕" e "Pizza 🍔") são itens diferentes; maiúscula e acento continuam sem diferenciar. | I | AUD, Dec. S, T |
 
 ---
 
@@ -381,3 +400,16 @@ Encontrados na auditoria: duas requisições ao mesmo tempo sobre o mesmo regist
 | CON-02 | Trocar o dono para Cliente e cadastrar um restaurante para ele ao mesmo tempo: só uma das duas dá certo. | C · I | AUD, Dec. D |
 | CON-03 | Excluir e atualizar ao mesmo tempo o mesmo usuário, restaurante, item ou tipo: o registro excluído não volta, e nenhuma resposta é 500. | C · I | AUD, Dec. E |
 | CON-04 | Falha de concorrência no banco (espera pela reserva esgotada, impasse) devolve 409 em ProblemDetail, pedindo para tentar de novo. | I | AUD, F1-11 |
+
+### Entrada da API (ENT)
+
+Encontrados na segunda auditoria, com um fuzzer que trocou cada campo de cada requisição, e cada parâmetro de cada listagem, por valores hostis.
+
+| ID | Cenário | Nível | Origem |
+|---|---|---|---|
+| ENT-01 | `sort` com caractere que não cabe num nome de campo (`%`, espaço, `;`) devolve 400 em todas as listagens, e não 500. | I | AUD, Dec. W |
+| ENT-02 | `page` ou `size` que não são inteiros válidos (`abc`, `-1`, `1.5`, `size=0`) devolvem 400, em vez de virar o padrão em silêncio. | I | AUD, Dec. W |
+| ENT-03 | O JSON não converte tipos em silêncio: número no lugar de texto, texto no lugar de número, `1` no lugar de `true` e id com casas decimais ou em texto (`"１２３"`) devolvem 400 apontando o campo. | I | AUD, F1-11 |
+| ENT-04 | Todo texto do corpo tem tamanho máximo; o excesso devolve 400 apontando o campo. | I | AUD, Dec. W |
+| ENT-05 | Texto com caractere de controle (o nulo, os que invertem a direção da escrita) é recusado; nomes e endereços também recusam quebra de linha, e a descrição do item aceita. | U · I | AUD, Dec. W |
+| ENT-06 | Corpo acima de 1 MB devolve 413 em ProblemDetail, com ou sem Content-Length. | I | AUD, Dec. W |

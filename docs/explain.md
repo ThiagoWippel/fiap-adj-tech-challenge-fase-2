@@ -1,6 +1,6 @@
 # EXPLAIN das consultas principais
 
-MySQL 8.4.11. com o schema de `docker/mysql/init/01-schema.sql` e uma massa de 3.000 usuários. 6.000 restaurantes. 12.000 turnos e 60.000 itens (parte deles removida).
+MySQL 8.4.11, com o schema de `docker/mysql/init/01-schema.sql` e uma massa de 3.000 usuários, 6.000 restaurantes, 12.000 turnos e 60.000 itens (parte deles removida).
 
 Cada consulta aparece duas vezes: **sem índice**, forçada com `IGNORE INDEX` (o MySQL não deixa apagar um índice que sustenta uma chave estrangeira), e **com índice**, como a aplicação roda. A coluna `rows` é a estimativa de linhas que o MySQL precisa ler; `type = ALL` é leitura da tabela inteira.
 
@@ -16,7 +16,7 @@ SELECT * FROM restaurante WHERE dono_id = 252 AND removido_em IS NULL ORDER BY n
 
 | Situação | type | key | rows | filtered | Extra |
 |---|---|---|---|---|---|
-| sem índice | ALL | NULL | 6004 | 0.02 | Using where; Using filesort |
+| sem índice | ALL | NULL | 5856 | 0.02 | Using where; Using filesort |
 | com `idx_restaurante_dono` | ref | idx_restaurante_dono | 12 | 10.00 | Using where; Using filesort |
 
 ## Restaurantes por tipo de cozinha
@@ -29,7 +29,7 @@ SELECT * FROM restaurante WHERE nome LIKE '%1%' AND tipo_cozinha = 'ITALIANA' AN
 
 | Situação | type | key | rows | filtered | Extra |
 |---|---|---|---|---|---|
-| sem índice | ALL | NULL | 6004 | 0.11 | Using where; Using filesort |
+| sem índice | ALL | NULL | 5856 | 0.06 | Using where; Using filesort |
 | com `idx_restaurante_cozinha` | ref | idx_restaurante_cozinha | 334 | 1.11 | Using where; Using filesort |
 
 ## Turnos dos restaurantes de uma página
@@ -42,7 +42,7 @@ SELECT * FROM horario_funcionamento WHERE restaurante_id IN (11, 12, 13, 14, 15,
 
 | Situação | type | key | rows | filtered | Extra |
 |---|---|---|---|---|---|
-| sem índice | ALL | NULL | 12134 | 50.00 | Using where |
+| sem índice | ALL | NULL | 11491 | 50.00 | Using where |
 | com `idx_horario_restaurante` | range | idx_horario_restaurante | 20 | 100.00 | Using index condition |
 
 ## Usuários de um tipo
@@ -55,7 +55,7 @@ SELECT COUNT(*) FROM usuario WHERE tipo_usuario_id = 3 AND removido_em IS NULL
 
 | Situação | type | key | rows | filtered | Extra |
 |---|---|---|---|---|---|
-| sem índice | ALL | NULL | 3008 | 1.67 | Using where |
+| sem índice | ALL | NULL | 3006 | 1.67 | Using where |
 | com `idx_usuario_tipo` | ref | idx_usuario_tipo | 300 | 10.00 | Using where |
 
 ## Cardápio de um restaurante
@@ -94,4 +94,4 @@ SELECT * FROM usuario WHERE nome LIKE '%silva%' AND removido_em IS NULL ORDER BY
 
 | Situação | type | key | rows | filtered | Extra |
 |---|---|---|---|---|---|
-| como roda | ALL | NULL | 3008 | 1.11 | Using where; Using filesort |
+| como roda | ALL | NULL | 3006 | 1.11 | Using where; Using filesort |

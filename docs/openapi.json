@@ -75,11 +75,11 @@
                                 },
                                 "example": {
                                     "id": 1,
-                                    "nome": "Maria Silva",
-                                    "email": "maria.silva@exemplo.com",
-                                    "login": "maria.silva",
+                                    "nome": "Laura Mendes",
+                                    "email": "laura.mendes@exemplo.com",
+                                    "login": "laura.mendes",
                                     "tipo": "CLIENTE",
-                                    "documento": "12345678909",
+                                    "documento": "24681357928",
                                     "endereco": {
                                         "rua": "Rua das Flores",
                                         "numero": "123",
@@ -152,11 +152,11 @@
                                 },
                                 "example": {
                                     "id": 1,
-                                    "nome": "Maria Silva",
-                                    "email": "maria.silva@exemplo.com",
-                                    "login": "maria.silva",
+                                    "nome": "Laura Mendes",
+                                    "email": "laura.mendes@exemplo.com",
+                                    "login": "laura.mendes",
                                     "tipo": "CLIENTE",
-                                    "documento": "12345678909",
+                                    "documento": "24681357928",
                                     "endereco": {
                                         "rua": "Rua das Flores",
                                         "numero": "123",
@@ -409,8 +409,8 @@
                                 },
                                 "example": {
                                     "id": 3,
-                                    "nome": "Entregador",
-                                    "codigo": "ENTREGADOR",
+                                    "nome": "Garçom",
+                                    "codigo": "GARCOM",
                                     "sistema": false
                                 }
                             }
@@ -473,8 +473,8 @@
                                 },
                                 "example": {
                                     "id": 3,
-                                    "nome": "Entregador",
-                                    "codigo": "ENTREGADOR",
+                                    "nome": "Garçom",
+                                    "codigo": "GARCOM",
                                     "sistema": false
                                 }
                             }
@@ -528,7 +528,7 @@
                                     "type": "http://localhost:8080/problemas/conflito-de-dados",
                                     "title": "Conflito de dados",
                                     "status": 409,
-                                    "detail": "Já existe um tipo de usuário com o nome Entregador.",
+                                    "detail": "Já existe um tipo de usuário com o nome Garçom.",
                                     "instance": "/api/v1/tipos-usuario",
                                     "momento": "2026-10-08T10:30:00"
                                 }
@@ -587,7 +587,7 @@
                                             "type": "http://localhost:8080/problemas/conflito-de-dados",
                                             "title": "Conflito de dados",
                                             "status": 409,
-                                            "detail": "O tipo Entregador não pode ser excluído: 2 usuários ativos o usam.",
+                                            "detail": "O tipo Garçom não pode ser excluído: 2 usuários ativos o usam.",
                                             "instance": "/api/v1/tipos-usuario/3",
                                             "momento": "2026-10-08T10:30:00"
                                         }
@@ -914,7 +914,7 @@
                                     ],
                                     "dono": {
                                         "id": 7,
-                                        "nome": "Maria Silva"
+                                        "nome": "Laura Mendes"
                                     },
                                     "dataCriacao": "2026-10-08T10:30:00",
                                     "dataUltimaAlteracao": "2026-10-08T10:30:00"
@@ -1009,7 +1009,7 @@
                                     ],
                                     "dono": {
                                         "id": 7,
-                                        "nome": "Maria Silva"
+                                        "nome": "Laura Mendes"
                                     },
                                     "dataCriacao": "2026-10-08T10:30:00",
                                     "dataUltimaAlteracao": "2026-10-08T10:30:00"
@@ -1123,7 +1123,7 @@
                         "schema": {
                             "type": "string"
                         },
-                        "example": "maria"
+                        "example": "laura"
                     }
                 ],
                 "responses": {
@@ -1140,11 +1140,11 @@
                                 "example": [
                                     {
                                         "id": 1,
-                                        "nome": "Maria Silva",
-                                        "email": "maria.silva@exemplo.com",
-                                        "login": "maria.silva",
+                                        "nome": "Laura Mendes",
+                                        "email": "laura.mendes@exemplo.com",
+                                        "login": "laura.mendes",
                                         "tipo": "CLIENTE",
-                                        "documento": "12345678909",
+                                        "documento": "24681357928",
                                         "endereco": {
                                             "rua": "Rua das Flores",
                                             "numero": "123",
@@ -1215,11 +1215,11 @@
                                 },
                                 "example": {
                                     "id": 1,
-                                    "nome": "Maria Silva",
-                                    "email": "maria.silva@exemplo.com",
-                                    "login": "maria.silva",
+                                    "nome": "Laura Mendes",
+                                    "email": "laura.mendes@exemplo.com",
+                                    "login": "laura.mendes",
                                     "tipo": "CLIENTE",
-                                    "documento": "12345678909",
+                                    "documento": "24681357928",
                                     "endereco": {
                                         "rua": "Rua das Flores",
                                         "numero": "123",
@@ -1284,7 +1284,7 @@
                                     "type": "http://localhost:8080/problemas/recurso-nao-encontrado",
                                     "title": "Recurso não encontrado",
                                     "status": 404,
-                                    "detail": "Tipo de usuário ENTREGADOR não encontrado.",
+                                    "detail": "Tipo de usuário GARCOM não encontrado.",
                                     "instance": "/api/v1/usuarios",
                                     "momento": "2026-10-08T10:30:00"
                                 }
@@ -1370,8 +1370,8 @@
                                         },
                                         {
                                             "id": 3,
-                                            "nome": "Entregador",
-                                            "codigo": "ENTREGADOR",
+                                            "nome": "Garçom",
+                                            "codigo": "GARCOM",
                                             "sistema": false
                                         }
                                     ],
@@ -1428,8 +1428,8 @@
                                 },
                                 "example": {
                                     "id": 3,
-                                    "nome": "Entregador",
-                                    "codigo": "ENTREGADOR",
+                                    "nome": "Garçom",
+                                    "codigo": "GARCOM",
                                     "sistema": false
                                 }
                             }
@@ -1468,7 +1468,7 @@
                                     "type": "http://localhost:8080/problemas/conflito-de-dados",
                                     "title": "Conflito de dados",
                                     "status": 409,
-                                    "detail": "Já existe um tipo de usuário com o nome Entregador.",
+                                    "detail": "Já existe um tipo de usuário com o nome Garçom.",
                                     "instance": "/api/v1/tipos-usuario",
                                     "momento": "2026-10-08T10:30:00"
                                 }
@@ -1577,7 +1577,7 @@
                                             ],
                                             "dono": {
                                                 "id": 7,
-                                                "nome": "Maria Silva"
+                                                "nome": "Laura Mendes"
                                             },
                                             "dataCriacao": "2026-10-08T10:30:00",
                                             "dataUltimaAlteracao": "2026-10-08T10:30:00"
@@ -1682,7 +1682,7 @@
                                     ],
                                     "dono": {
                                         "id": 7,
-                                        "nome": "Maria Silva"
+                                        "nome": "Laura Mendes"
                                     },
                                     "dataCriacao": "2026-10-08T10:30:00",
                                     "dataUltimaAlteracao": "2026-10-08T10:30:00"
@@ -2033,7 +2033,7 @@
                                 },
                                 "example": {
                                     "id": 1,
-                                    "nome": "Maria Silva",
+                                    "nome": "Laura Mendes",
                                     "tipo": "CLIENTE",
                                     "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidGlwbyI6IkNMSUVOVEUifQ.assinatura",
                                     "expiraEm": "2026-10-08T11:30:00"
@@ -2125,11 +2125,11 @@
                                 },
                                 "example": {
                                     "id": 1,
-                                    "nome": "Maria Silva",
-                                    "email": "maria.silva@exemplo.com",
-                                    "login": "maria.silva",
+                                    "nome": "Laura Mendes",
+                                    "email": "laura.mendes@exemplo.com",
+                                    "login": "laura.mendes",
                                     "tipo": "DONO_RESTAURANTE",
-                                    "documento": "11222333000181",
+                                    "documento": "12ABC34501DE35",
                                     "endereco": {
                                         "rua": "Rua das Flores",
                                         "numero": "123",
@@ -2252,7 +2252,7 @@
                         "schema": {
                             "type": "string"
                         },
-                        "example": "maria"
+                        "example": "laura"
                     },
                     {
                         "name": "page",
@@ -2294,11 +2294,11 @@
                                     "conteudo": [
                                         {
                                             "id": 1,
-                                            "nome": "Maria Silva",
-                                            "email": "maria.silva@exemplo.com",
-                                            "login": "maria.silva",
+                                            "nome": "Laura Mendes",
+                                            "email": "laura.mendes@exemplo.com",
+                                            "login": "laura.mendes",
                                             "tipo": "CLIENTE",
-                                            "documento": "12345678909",
+                                            "documento": "24681357928",
                                             "endereco": {
                                                 "rua": "Rua das Flores",
                                                 "numero": "123",
@@ -2429,7 +2429,7 @@
                                             ],
                                             "dono": {
                                                 "id": 7,
-                                                "nome": "Maria Silva"
+                                                "nome": "Laura Mendes"
                                             },
                                             "dataCriacao": "2026-10-08T10:30:00",
                                             "dataUltimaAlteracao": "2026-10-08T10:30:00"
@@ -2525,7 +2525,7 @@
                                             "nome": "Bruno Lima",
                                             "email": "bruno@exemplo.com",
                                             "login": "bruno.lima",
-                                            "tipo": "ENTREGADOR",
+                                            "tipo": "GARCOM",
                                             "documento": "52998224725",
                                             "endereco": {
                                                 "rua": "Rua das Flores",
@@ -2575,20 +2575,20 @@
                 "properties": {
                     "nome": {
                         "type": "string",
-                        "example": "Maria Silva Souza",
+                        "example": "Laura Mendes Costa",
                         "maxLength": 120,
                         "minLength": 3
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
-                        "example": "maria.souza@exemplo.com",
+                        "example": "laura.costa@exemplo.com",
                         "maxLength": 255,
                         "minLength": 0
                     },
                     "login": {
                         "type": "string",
-                        "example": "maria.souza",
+                        "example": "laura.costa",
                         "minLength": 1,
                         "pattern": "[A-Za-z0-9._-]{4,50}"
                     },
@@ -2727,7 +2727,8 @@
                     "senhaAtual": {
                         "type": "string",
                         "example": "SenhaSegura123",
-                        "minLength": 1
+                        "maxLength": 72,
+                        "minLength": 0
                     },
                     "novaSenha": {
                         "type": "string",
@@ -2746,7 +2747,7 @@
                 "properties": {
                     "nome": {
                         "type": "string",
-                        "example": "Entregador",
+                        "example": "Garçom",
                         "maxLength": 50,
                         "minLength": 3
                     }
@@ -2793,8 +2794,8 @@
                         "type": "number",
                         "description": "Maior que zero, com no máximo duas casas decimais",
                         "example": 39.9,
-                        "maximum": 99999999.99,
-                        "minimum": 0
+                        "exclusiveMinimum": 0,
+                        "maximum": 99999999.99
                     },
                     "apenasNoLocal": {
                         "type": "boolean",
@@ -2870,7 +2871,8 @@
                         "type": "string",
                         "description": "BRASILEIRA, ITALIANA, PIZZARIA, JAPONESA, CHINESA, ARABE, MEXICANA, PORTUGUESA, FRANCESA, HAMBURGUERIA, LANCHES, CHURRASCARIA, FRUTOS_DO_MAR, VEGETARIANA, VEGANA, DOCES_E_SOBREMESAS, CAFETERIA ou OUTRA",
                         "example": "ITALIANA",
-                        "minLength": 1
+                        "maxLength": 30,
+                        "minLength": 0
                     },
                     "donoId": {
                         "type": "integer",
@@ -2902,7 +2904,8 @@
                         "type": "string",
                         "description": "SEGUNDA, TERCA, QUARTA, QUINTA, SEXTA, SABADO ou DOMINGO",
                         "example": "SEXTA",
-                        "minLength": 1
+                        "maxLength": 10,
+                        "minLength": 0
                     },
                     "abertura": {
                         "type": "string",
@@ -2989,20 +2992,20 @@
                 "properties": {
                     "nome": {
                         "type": "string",
-                        "example": "Maria Silva",
+                        "example": "Laura Mendes",
                         "maxLength": 120,
                         "minLength": 3
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
-                        "example": "maria.silva@exemplo.com",
+                        "example": "laura.mendes@exemplo.com",
                         "maxLength": 255,
                         "minLength": 0
                     },
                     "login": {
                         "type": "string",
-                        "example": "maria.silva",
+                        "example": "laura.mendes",
                         "minLength": 1,
                         "pattern": "[A-Za-z0-9._-]{4,50}"
                     },
@@ -3016,17 +3019,18 @@
                         "type": "string",
                         "description": "Código do tipo de usuário",
                         "example": "CLIENTE",
-                        "minLength": 1
+                        "maxLength": 50,
+                        "minLength": 0
                     },
                     "cpf": {
                         "type": "string",
                         "description": "Obrigatório para todos os tipos, menos DONO_RESTAURANTE",
-                        "example": "123.456.789-09"
+                        "example": "246.813.579-28"
                     },
                     "cnpj": {
                         "type": "string",
-                        "description": "Obrigatório para DONO_RESTAURANTE. Aceita também o formato alfanumérico, como 12.ABC.345/01DE-35",
-                        "example": "11.222.333/0001-81"
+                        "description": "Obrigatório para DONO_RESTAURANTE. Aceita o formato só com números e o alfanumérico",
+                        "example": "12.ABC.345/01DE-35"
                     },
                     "endereco": {
                         "$ref": "#/components/schemas/EnderecoRequest"
@@ -3046,13 +3050,15 @@
                 "properties": {
                     "login": {
                         "type": "string",
-                        "example": "maria.silva",
-                        "minLength": 1
+                        "example": "laura.mendes",
+                        "maxLength": 50,
+                        "minLength": 0
                     },
                     "senha": {
                         "type": "string",
                         "example": "SenhaSegura123",
-                        "minLength": 1
+                        "maxLength": 72,
+                        "minLength": 0
                     }
                 },
                 "required": [
@@ -3089,13 +3095,15 @@
                         "type": "string",
                         "description": "Código do novo tipo",
                         "example": "DONO_RESTAURANTE",
-                        "minLength": 1
+                        "maxLength": 50,
+                        "minLength": 0
                     },
                     "documento": {
                         "type": "string",
                         "description": "CNPJ para DONO_RESTAURANTE, CPF para os demais. O CNPJ pode ser alfanumérico.",
-                        "example": "11.222.333/0001-81",
-                        "minLength": 1
+                        "example": "12.ABC.345/01DE-35",
+                        "maxLength": 18,
+                        "minLength": 0
                     }
                 },
                 "required": [

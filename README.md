@@ -74,6 +74,9 @@ Regras que cruzam os cadastros:
 - A exclusão depende da natureza do dado: o usuário é anonimizado, restaurante e item têm exclusão lógica, e
   o tipo de usuário é excluído de verdade, se nenhum usuário ativo o usar.
 - A senha tem de 8 a 72 caracteres e no máximo 72 bytes, o limite do BCrypt: letra acentuada conta como dois.
+- Todo texto tem tamanho máximo e não aceita caracteres de controle, como o nulo; nomes e endereços têm uma
+  linha só. O JSON não converte tipos: `"39.90"` entre aspas não vale como preço, nem `1` como `true`. O corpo
+  da requisição vai até 1 MB.
 
 ## Como executar
 
@@ -119,7 +122,7 @@ baixa as imagens e compila o projeto, e leva alguns minutos.
 | Especificação OpenAPI | http://localhost:8080/v3/api-docs |
 | Saúde da aplicação | http://localhost:8080/actuator/health |
 | Tipos de problema dos erros | http://localhost:8080/problemas |
-| Banco, para ferramentas externas | `localhost:3307` |
+| Banco, para ferramentas externas | `localhost:3307`, só a partir desta máquina |
 
 ### Variáveis de ambiente
 
@@ -233,8 +236,10 @@ POST /api/v1/restaurantes
 
 As listagens novas seguem o formato da busca v2 da Fase 1: `conteudo` mais `pagina`, `tamanho`,
 `totalElementos`, `totalPaginas` e `ultima`. Aceitam `page`, `size` e `sort`; o padrão é 10 por página, em
-ordem de nome, e o `size` vai no máximo a 50. Ordenar por um campo que a resposta não mostra devolve 400.
-Registros removidos nunca aparecem.
+ordem de nome, e o `size` vai no máximo a 50. `page` e `size` precisam ser inteiros (a página a partir de 0, o
+tamanho a partir de 1), e ordenar por um campo que a resposta não mostra devolve 400. Registros com o mesmo valor
+no campo de ordenação são desempatados pelo id, então nenhum aparece em duas páginas. Registros removidos nunca
+aparecem.
 
 ### Versionamento
 
@@ -244,8 +249,8 @@ usuários da v2, que devolve uma página em vez de uma lista. Recursos novos nas
 
 ### Erros
 
-Todas as respostas de erro seguem a RFC 9457 (ProblemDetail), inclusive os erros do próprio Spring, como
-JSON malformado e rota inexistente:
+Todas as respostas de erro seguem a RFC 9457 (ProblemDetail), inclusive as do próprio Spring, como JSON
+malformado e rota inexistente, e as do Tomcat, como uma URL com codificação inválida:
 
 ```json
 {
@@ -259,18 +264,21 @@ JSON malformado e rota inexistente:
 ```
 
 O `type` aponta para a própria aplicação, que descreve o problema em `/problemas/{identificador}`. As falhas
-de validação de campo trazem também `erros`, com o campo e a mensagem de cada um.
+de validação de campo e os valores com o tipo errado trazem também `erros`, com o campo e a mensagem de cada
+um (`endereco.cep`, `horarios[0].abertura`).
 
 | Título | Status | Quando |
 |---|---|---|
 | Dados inválidos | 400 | Campo ausente, fora do formato ou fora das regras |
 | Regra de negócio violada | 400 | Regra que envolve mais de um campo, como o documento exigido pelo tipo ou turnos sobrepostos |
-| Requisição inválida | 400 | JSON malformado, parâmetro de tipo errado, ordenação por campo não aceito |
+| Requisição inválida | 400 | JSON malformado, valor com o tipo errado, parâmetro de URL inválido, `page`, `size` ou `sort` inválidos |
 | Credenciais inválidas | 401 | Login ou senha incorretos, senha atual incorreta |
 | Recurso não encontrado | 404 | Id inexistente ou registro removido |
 | Método não permitido | 405 | Verbo que a rota não aceita |
+| Formato de resposta não disponível | 406 | `Accept` pedindo um formato que a API não produz |
 | Conflito de dados | 409 | Unicidade, tipo em uso, dono que não é Dono de Restaurante, restaurante ativo, ou outra operação alterando o mesmo registro ao mesmo tempo |
-| Mídia não suportada | 415 | Corpo que não é JSON |
+| Corpo grande demais | 413 | Corpo acima de 1 MB |
+| Tipo de mídia não suportado | 415 | Corpo que não é JSON |
 | Erro interno | 500 | Falha inesperada; o detalhe fica só no log |
 
 ### Token
@@ -418,8 +426,12 @@ Usuário, restaurante e item têm `data_criacao` e `data_ultima_alteracao`, pree
 Data. O schema vem do script [`docker/mysql/init/01-schema.sql`](docker/mysql/init/01-schema.sql); o Hibernate
 só confere o mapeamento.
 
-- As tabelas usam `utf8mb4_unicode_ci`, que compara sem diferenciar maiúsculas, acentos e espaço no fim. É o
-  que faz `Maria@Exemplo.com` colidir com `maria@exemplo.com`.
+- As tabelas usam `utf8mb4_0900_ai_ci`, que compara sem diferenciar maiúsculas nem acentos: é o que faz
+  `Maria@Exemplo.com` colidir com `maria@exemplo.com`. Ela distingue um emoji de outro (`Pizza 🍕` e
+  `Pizza 🍔` são itens diferentes) e considera o espaço no fim; por isso as colunas únicas de texto têm uma
+  regra `CHECK` que exige o valor sem espaços nas pontas.
+- Os turnos têm regras `CHECK` para o dia da semana e para abertura diferente do fechamento, além das
+  conferências do domínio.
 - Uma regra `CHECK` exige todos os dados de um usuário ativo. As colunas aceitam nulo só por causa da
   anonimização.
 - `ativo_marcador` é gerada pelo próprio MySQL: vale 1 para o item ativo e fica nula quando ele é removido.
@@ -468,10 +480,10 @@ só confere o mapeamento.
 
 - **Cobertura:** dois cortes travam o build, cada um com 80% de linhas e de ramos: o dos testes unitários sobre
   o núcleo (`domain`, `application` e `interfaceadapter`) e o total. Hoje o núcleo está em 100% e o total acima
-  de 99%, com 355 testes unitários e 182 de integração.
-- **Catálogo de cenários:** os 187 cenários de [`docs/catalogo-de-cenarios.md`](docs/catalogo-de-cenarios.md)
-  foram escritos antes do código, menos os 12 da auditoria final, que travam falhas encontradas com a aplicação
-  no ar. O ID de cada um aparece no nome do teste que o comprova, na descrição da
+  de 99%, com 396 testes unitários e 218 de integração.
+- **Catálogo de cenários:** os 207 cenários de [`docs/catalogo-de-cenarios.md`](docs/catalogo-de-cenarios.md)
+  foram escritos antes do código, menos os 32 das duas auditorias finais, que travam falhas encontradas com a
+  aplicação no ar. O ID de cada um aparece no nome do teste que o comprova, na descrição da
   requisição da collection e na [matriz](docs/matriz-de-evidencias.md).
 - **TDD:** no histórico do git, o commit dos testes de cada parte vem antes do commit da implementação.
 - **CI:** a cada push, o GitHub Actions roda dois jobs. Um executa o `mvn verify`; o outro sobe o docker compose
@@ -523,6 +535,17 @@ O processo do MySQL dentro do contêiner roda com outro usuário e precisa ler o
 
 ```bash
 chmod 644 docker/mysql/init/*.sql
+docker compose down -v
+docker compose up -d --build --wait
+```
+
+### A collection falha logo na primeira pasta
+
+A pasta 1 cadastra usuários com e-mail, login e documento fixos, os mesmos da collection da Fase 1. Se uma
+execução anterior parou no meio, esses dados ficaram no banco e o cadastro devolve 409; as pastas seguintes falham
+em cascata. Os exemplos do Swagger usam outros dados, então testar por lá não causa isso. Para recomeçar do zero:
+
+```bash
 docker compose down -v
 docker compose up -d --build --wait
 ```
