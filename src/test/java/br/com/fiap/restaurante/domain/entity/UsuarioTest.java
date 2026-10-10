@@ -311,4 +311,17 @@ class UsuarioTest {
         assertThat(usuario.temTipoEDocumento(cliente, Documento.cpf("52998224725"))).isFalse();
         assertThat(usuario.temTipoEDocumento(entregador, cpf)).isFalse();
     }
+
+    @Test
+    @DisplayName("ENT-05 · nome ou e-mail com caractere de controle é recusado")
+    void deveRecusarControleNoNomeENoEmail() {
+        /* act + assert */
+        assertThatThrownBy(() -> Usuario.create("Maria\u0000Silva", "maria@exemplo.com", "maria.silva",
+                SENHA_CODIFICADA, endereco, cliente, cpf))
+                .isInstanceOf(ValidacaoDeDominioException.class)
+                .hasMessage("O campo nome não aceita quebra de linha nem caracteres de controle.");
+        assertThatThrownBy(() -> Usuario.create("Maria Silva", "maria\u202E@exemplo.com", "maria.silva",
+                SENHA_CODIFICADA, endereco, cliente, cpf))
+                .hasMessage("O campo e-mail não aceita quebra de linha nem caracteres de controle.");
+    }
 }

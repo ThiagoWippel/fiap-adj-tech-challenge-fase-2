@@ -145,4 +145,14 @@ class RestauranteTest {
         assertThat(restaurante.getTipoCozinha()).isEqualTo(TipoCozinha.PIZZARIA);
         assertThat(restaurante.getHorarios().turnos()).extracting(Turno::toString).containsExactly("SEXTA 18:00–02:00");
     }
+
+    @Test
+    @DisplayName("ENT-05 · nome do restaurante com caractere de controle é recusado")
+    void deveRecusarControleNoNome() {
+        /* act + assert */
+        assertThatThrownBy(() -> Restaurante.create("Cantina \u202Eanon", endereco, TipoCozinha.ITALIANA,
+                horarios, ana))
+                .isInstanceOf(ValidacaoDeDominioException.class)
+                .hasMessage("O campo nome do restaurante não aceita quebra de linha nem caracteres de controle.");
+    }
 }

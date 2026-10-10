@@ -190,4 +190,19 @@ class ItemCardapioTest {
         assertThat(item.getNome()).isEqualTo("Feijoada");
         assertThat(item.getCaminhoFoto()).isEqualTo(FOTO);
     }
+
+    @Test
+    @DisplayName("ENT-05 · nome e caminho da foto são de uma linha; a descrição aceita quebra de linha, não controle")
+    void deveRecusarControleNosTextosDoItem() {
+        /* act + assert */
+        assertThatThrownBy(() -> ItemCardapio.create(9L, "Feijoada\ncompleta", "Feijoada.", PRECO, true, "a.jpg"))
+                .isInstanceOf(ValidacaoDeDominioException.class)
+                .hasMessage("O campo nome do item não aceita quebra de linha nem caracteres de controle.");
+        assertThatThrownBy(() -> ItemCardapio.create(9L, "Feijoada", "Feijoada.", PRECO, true, "fotos/\u0000a.jpg"))
+                .hasMessage("O campo caminho da foto não aceita quebra de linha nem caracteres de controle.");
+        assertThatThrownBy(() -> ItemCardapio.create(9L, "Feijoada", "Feijoada\u0007.", PRECO, true, "a.jpg"))
+                .hasMessage("O campo descrição não aceita caracteres de controle.");
+        assertThat(ItemCardapio.create(9L, "Feijoada", "Feijoada.\nServe duas pessoas.", PRECO, true, "a.jpg")
+                .getDescricao()).isEqualTo("Feijoada.\nServe duas pessoas.");
+    }
 }

@@ -136,4 +136,13 @@ class TipoUsuarioTest {
                 .isEqualTo(TipoUsuario.create(1L, "Consumidor", "CLIENTE"))
                 .isNotEqualTo(TipoUsuario.create(2L, "Cliente", "CLIENTE"));
     }
+
+    @Test
+    @DisplayName("ENT-05 · nome do tipo com caractere de controle é recusado")
+    void deveRecusarControleNoNome() {
+        /* act + assert */
+        assertThatThrownBy(() -> TipoUsuario.create("Entregador\u0007"))
+                .isInstanceOf(ValidacaoDeDominioException.class)
+                .hasMessage("O campo nome do tipo não aceita quebra de linha nem caracteres de controle.");
+    }
 }

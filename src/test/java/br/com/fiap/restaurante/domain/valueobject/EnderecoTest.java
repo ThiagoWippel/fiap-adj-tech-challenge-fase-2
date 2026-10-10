@@ -110,4 +110,16 @@ class EnderecoTest {
         assertThatThrownBy(() -> new Endereco("Rua das Flores", "123", null, "Centro", "C".repeat(81), "SC", "88301000"))
                 .hasMessage("O campo cidade deve ter no máximo 80 caracteres.");
     }
+
+    @Test
+    @DisplayName("ENT-05 · campos do endereço com quebra de linha ou caractere de controle são recusados")
+    void deveRecusarControleNoEndereco() {
+        /* act + assert */
+        assertThatThrownBy(() -> new Endereco("Rua das\nFlores", "123", null, "Centro", "Itajaí", "SC", "88301000"))
+                .isInstanceOf(ValidacaoDeDominioException.class)
+                .hasMessage("O campo rua não aceita quebra de linha nem caracteres de controle.");
+        assertThatThrownBy(() -> new Endereco("Rua das Flores", "123", "\u202EApto", "Centro", "Itajaí", "SC",
+                "88301000"))
+                .hasMessage("O campo complemento não aceita quebra de linha nem caracteres de controle.");
+    }
 }

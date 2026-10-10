@@ -121,4 +121,31 @@ class PaginacaoDasListagensIT {
                 .body("detail", equalTo("A página 999999999 passa do limite: com 10 itens por página, "
                         + "a última página possível é 214748364."));
     }
+
+    @ParameterizedTest(name = "ENT-01 · {0}: sort com caractere que não cabe num nome de campo devolve 400, e não 500")
+    @ValueSource(strings = {"usuarios v2", "tipos de usuário", "usuários do tipo", "restaurantes",
+            "restaurantes do usuário", "itens do cardápio"})
+    void deveRecusarOrdenacaoMalFormada(String listagem) {
+        for (String sort : List.of("%", "nome%", "nome desc", "nome;drop")) {
+            api.requisicao().queryParam("sort", sort).get(rotas.get(listagem))
+                    .then().statusCode(400)
+                    .body("detail", equalTo("O parâmetro sort aceita nomes de campo e a direção, como nome,desc."));
+        }
+    }
+
+    @ParameterizedTest(name = "ENT-02 · {0}: page ou size que não são inteiros válidos devolvem 400, e não o padrão")
+    @ValueSource(strings = {"usuarios v2", "tipos de usuário", "usuários do tipo", "restaurantes",
+            "restaurantes do usuário", "itens do cardápio"})
+    void deveRecusarPaginaOuTamanhoInvalidos(String listagem) {
+        for (String page : List.of("abc", "-1", "1.5", "99999999999")) {
+            api.requisicao().queryParam("page", page).get(rotas.get(listagem))
+                    .then().statusCode(400)
+                    .body("detail", equalTo("O parâmetro page deve ser um número inteiro a partir de 0."));
+        }
+        for (String size : List.of("abc", "0", "-5", "2.5")) {
+            api.requisicao().queryParam("size", size).get(rotas.get(listagem))
+                    .then().statusCode(400)
+                    .body("detail", equalTo("O parâmetro size deve ser um número inteiro a partir de 1."));
+        }
+    }
 }
