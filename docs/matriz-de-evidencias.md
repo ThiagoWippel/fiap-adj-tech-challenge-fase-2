@@ -42,6 +42,7 @@ Níveis: **U** domínio · **C** caso de uso · **I** integração com MySQL · 
 | F1-10 | Estratégia de versionamento de API | USU-27, USU-28 |
 | F1-11 | Respostas de erro no padrão ProblemDetail | ERR-01, ERR-03, ERR-04, ERR-05, ERR-06, ERR-07, ERR-11, ERR-12, ERR-13, ERR-14, ERR-15, ERR-17, CON-04, ENT-03 |
 | F1-12 | Swagger com exemplos de sucesso e de erro | INF-05 |
+| F1-13 | Banco relacional em container | INF-01, INF-03 |
 
 ## Fatia 0 · Fundação
 
@@ -57,7 +58,7 @@ Níveis: **U** domínio · **C** caso de uso · **I** integração com MySQL · 
 | INF-04 | Quando a cobertura dos testes unitários no núcleo (`domain`, `application`, `interfaceadapter`) ou a cobertura total cai abaixo de 80% de linha ou de ramo, então o build falha. Testado de propósito uma vez. | CI | — | CI: Os dois cortes de cobertura travam o build abaixo de 80% (INF-04) |
 | INF-05 | Quando consulto `/v3/api-docs`, então os 26 endpoints aparecem, cada um com ao menos um exemplo de sucesso e um de erro. | I | `DocumentacaoIT.deveServirAEspecificacaoOpenApi`<br>`DocumentacaoIT.deveDocumentarExemplosDeSucessoEDeErro` | — |
 | INF-06 | Dado o perfil `docker` sem a chave de assinatura do token, quando a aplicação sobe, então ela falha na inicialização com uma mensagem que nomeia a variável de ambiente que falta. | I | `ConfiguracaoDoTokenIT.deveFalharSemAChave`<br>`ConfiguracaoDoTokenIT.deveFalharComChaveCurta`<br>`ConfiguracaoDoTokenIT.deveCarregarAsPropriedades` | — |
-| INF-07 | A cada push, o GitHub Actions roda `mvn verify` (unitários, integração com Testcontainers, ArchUnit e os cortes de cobertura) e termina verde. | CI | — | CI: Testes, arquitetura e cobertura (INF-07) |
+| INF-07 | A cada push na main e a cada pull request, o GitHub Actions roda `mvn verify` (unitários, integração com Testcontainers, ArchUnit e os cortes de cobertura) e termina verde. | CI | — | CI: Testes, arquitetura e cobertura (INF-07) |
 | INF-08 | A porta de transação desfaz tudo o que foi gravado quando a operação lança exceção, e confirma as gravações quando ela termina sem erro. | U · I | `ITransactionManagerTest.deveExecutarOperacaoSemRetornoDentroDaTransacao`<br>`GerenciadorDeTransacaoIT.deveDesfazerAsGravacoes_QuandoAOperacaoFalhar`<br>`GerenciadorDeTransacaoIT.deveConfirmarAsGravacoes_QuandoAOperacaoTerminarSemErro` | — |
 | INF-09 | A porta de senha gera um hash BCrypt diferente a cada codificação, nunca o texto original, e confere a senha correta. | U | `CodificadorDeSenhaBCryptTest.deveGerarHashBCrypt`<br>`CodificadorDeSenhaBCryptTest.deveGerarHashesDiferentesParaAMesmaSenha`<br>`CodificadorDeSenhaBCryptTest.deveConferirASenhaCorretaERecusarAErrada` | — |
 | INF-10 | O healthcheck do banco no compose só passa quando a porta TCP aceita conexões: a aplicação não sobe enquanto o MySQL ainda roda os scripts de inicialização. | CI | — | CI: Subir a aplicação e o banco a partir do .env.example (INF-03, INF-10) |
@@ -135,7 +136,7 @@ Níveis: **U** domínio · **C** caso de uso · **I** integração com MySQL · 
 | USU-30 | Persistir, atualizar e reler um usuário mantém `dataCriacao` e avança `dataUltimaAlteracao` (a armadilha do update). | I | `JpaUsuarioDataSourceIT.deveManterADataDeCriacaoNaAtualizacao` | — |
 | USU-31 | Senha com até 72 caracteres, mas acima de 72 bytes (letra acentuada conta como dois), é recusada com 400 no cadastro e na troca, sem chegar ao BCrypt. | U · I | `SenhaEmTextoTest.deveRecusarSenhaAcimaDe72Bytes`<br>`SenhaEmTextoTest.deveAceitarSenhaAcentuadaNoLimite`<br>`UsuarioApiIT.deveRecusarSenhaAcimaDe72Bytes` | — |
 | USU-32 | Código do tipo com espaços nas pontas é aceito no cadastro e na troca de tipo. | C · I | `CadastrarUsuarioUseCaseTest.deveProcurarOTipoSemEspacos`<br>`TrocarTipoDoUsuarioUseCaseTest.deveProcurarOTipoSemEspacos`<br>`UsuarioApiIT.deveAceitarTipoComEspacosNasPontas` | — |
-| USU-33 | O banco recusa e-mail, login ou nome de tipo com espaço nas pontas, que escaparia da restrição única. | I | `JpaUsuarioDataSourceIT.deveRecusarValorUnicoComEspacoNasPontas` | — |
+| USU-33 | O banco recusa e-mail, login, documento ou nome de tipo com espaço nas pontas, que escaparia da restrição única. | I | `JpaUsuarioDataSourceIT.deveRecusarValorUnicoComEspacoNasPontas` | — |
 | LOG-01 | Login com credenciais válidas devolve id, nome, tipo, token e validade do token. | C · I · P | `AutenticarUsuarioUseCaseTest.deveAutenticarEDevolverOToken`<br>`AutenticacaoApiIT.deveAutenticar`<br>`AutenticacaoControllerTest.deveAutenticar`<br>`AutenticacaoPresenterTest.deveMontarARespostaDoLogin` | Postman: 6. Credenciais validas |
 | LOG-02 | Login inexistente devolve 401 com a mesma mensagem da senha incorreta, sem revelar que o login não existe. | C · I · P | `AutenticarUsuarioUseCaseTest.deveRecusarLoginInexistente`<br>`AutenticacaoApiIT.deveResponderIgualParaLoginInexistenteESenhaErrada` | Postman: 6. Login inexistente |
 | LOG-03 | Login inexistente ainda executa uma comparação de hash, para levar o mesmo tempo que uma senha errada. | C | `AutenticarUsuarioUseCaseTest.deveConferirASenhaMesmoComLoginInexistente`<br>`CodificadorDeSenhaBCryptTest.deveRecusarQuandoNaoHouverHash` | — |
@@ -154,7 +155,7 @@ Níveis: **U** domínio · **C** caso de uso · **I** integração com MySQL · 
 | EXC-05 | Depois da exclusão, um novo cadastro com o mesmo e-mail, login e documento é aceito, com id novo. | I · P | `UsuarioApiIT.devePermitirRecadastroDepoisDaExclusao` | Postman: 13. Recadastrar o cliente com os mesmos dados |
 | EXC-06 | O banco recusa um usuário ativo (sem `removido_em`) com e-mail, login, senha, documento, endereço ou tipo nulo. | I | `JpaUsuarioDataSourceIT.deveRecusarUsuarioAtivoIncompleto` | — |
 | ACE-01 | A collection da Fase 1 roda contra a Fase 2 e passa inteira, com três ajustes deliberados e documentados: o `type` dos erros, os títulos com acento e a verificação de mensagem do login atualizada para as palavras acentuadas. | P · CI | — | CI: Rodar a collection com o Newman (ACE-01) |
-| ACE-02 | A cada push, o GitHub Actions sobe o docker-compose e roda a collection completa com o Newman, e termina verde. | CI | — | CI: Aceitação com a collection do Postman (ACE-02) |
+| ACE-02 | A cada push na main e a cada pull request, o GitHub Actions sobe o docker-compose e roda a collection completa com o Newman, e termina verde. | CI | — | CI: Aceitação com a collection do Postman (ACE-02) |
 | ACE-03 | Os exemplos do Swagger não repetem e-mail, login, documento nem tipo que a collection cadastra: testar pelo Swagger antes de rodar a collection não a derruba. | I | `DocumentacaoIT.naoDeveRepetirOsDadosDaCollection` | — |
 
 ## Fatia 2 · Tipo de usuário

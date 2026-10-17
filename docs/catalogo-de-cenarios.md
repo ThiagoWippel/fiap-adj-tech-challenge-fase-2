@@ -99,13 +99,13 @@ banco aceitar conexões.
 
 | ID | Cenário | Nível | Origem |
 |---|---|---|---|
-| INF-01 | Dado o MySQL do Testcontainers criado pelo script de schema, quando o contexto sobe, então o Hibernate em modo `validate` aceita o mapeamento de todas as entidades. | I | EN-8, Dec. T |
+| INF-01 | Dado o MySQL do Testcontainers criado pelo script de schema, quando o contexto sobe, então o Hibernate em modo `validate` aceita o mapeamento de todas as entidades. | I | EN-8, F1-13, Dec. T |
 | INF-02 | Quando consulto `/actuator/health` com o banco no ar, então recebo `UP`. | I | EN-5, Dec. V |
-| INF-03 | Dado um clone limpo e o `.env` copiado do `.env.example`, quando rodo `docker compose up`, então aplicação e banco sobem e o healthcheck da aplicação passa. | CI | EN-5, EN-OBJ |
+| INF-03 | Dado um clone limpo e o `.env` copiado do `.env.example`, quando rodo `docker compose up`, então aplicação e banco sobem e o healthcheck da aplicação passa. | CI | EN-5, F1-13, EN-OBJ |
 | INF-04 | Quando a cobertura dos testes unitários no núcleo (`domain`, `application`, `interfaceadapter`) ou a cobertura total cai abaixo de 80% de linha ou de ramo, então o build falha. Testado de propósito uma vez. | CI | EN-8, Dec. N |
 | INF-05 | Quando consulto `/v3/api-docs`, então os 26 endpoints aparecem, cada um com ao menos um exemplo de sucesso e um de erro. | I | F1-12, EN-3 |
 | INF-06 | Dado o perfil `docker` sem a chave de assinatura do token, quando a aplicação sobe, então ela falha na inicialização com uma mensagem que nomeia a variável de ambiente que falta. | I | Dec. B |
-| INF-07 | A cada push, o GitHub Actions roda `mvn verify` (unitários, integração com Testcontainers, ArchUnit e os cortes de cobertura) e termina verde. | CI | EN-6, EN-8, Dec. V |
+| INF-07 | A cada push na main e a cada pull request, o GitHub Actions roda `mvn verify` (unitários, integração com Testcontainers, ArchUnit e os cortes de cobertura) e termina verde. | CI | EN-6, EN-8, Dec. V |
 | INF-08 | A porta de transação desfaz tudo o que foi gravado quando a operação lança exceção, e confirma as gravações quando ela termina sem erro. | U · I | Dec. G |
 | INF-09 | A porta de senha gera um hash BCrypt diferente a cada codificação, nunca o texto original, e confere a senha correta. | U | F1-07 |
 | INF-10 | O healthcheck do banco no compose só passa quando a porta TCP aceita conexões: a aplicação não sobe enquanto o MySQL ainda roda os scripts de inicialização. | CI | AUD, EN-5 |
@@ -207,7 +207,7 @@ banco aceitar conexões.
 | USU-30 | Persistir, atualizar e reler um usuário mantém `dataCriacao` e avança `dataUltimaAlteracao` (a armadilha do update). | I | F1-04, Dec. H |
 | USU-31 | Senha com até 72 caracteres, mas acima de 72 bytes (letra acentuada conta como dois), é recusada com 400 no cadastro e na troca, sem chegar ao BCrypt. | U · I | AUD, F1-02 |
 | USU-32 | Código do tipo com espaços nas pontas é aceito no cadastro e na troca de tipo. | C · I | AUD, Dec. D |
-| USU-33 | O banco recusa e-mail, login ou nome de tipo com espaço nas pontas, que escaparia da restrição única. | I | AUD, Dec. T |
+| USU-33 | O banco recusa e-mail, login, documento ou nome de tipo com espaço nas pontas, que escaparia da restrição única. | I | AUD, Dec. T |
 
 ### Login e token (LOG, TOK)
 
@@ -241,7 +241,7 @@ banco aceitar conexões.
 | ID | Cenário | Nível | Origem |
 |---|---|---|---|
 | ACE-01 | A collection da Fase 1 roda contra a Fase 2 e passa inteira, com três ajustes deliberados e documentados: o `type` dos erros, os títulos com acento e a verificação de mensagem do login atualizada para as palavras acentuadas. | P · CI | EN-OBJ, Dec. Q |
-| ACE-02 | A cada push, o GitHub Actions sobe o docker-compose e roda a collection completa com o Newman, e termina verde. | CI | EN-4, EN-5, Dec. V |
+| ACE-02 | A cada push na main e a cada pull request, o GitHub Actions sobe o docker-compose e roda a collection completa com o Newman, e termina verde. | CI | EN-4, EN-5, Dec. V |
 | ACE-03 | Os exemplos do Swagger não repetem e-mail, login, documento nem tipo que a collection cadastra: testar pelo Swagger antes de rodar a collection não a derruba. | I | AUD, EN-4 |
 
 ---

@@ -1,4 +1,4 @@
-# A cada push e pull request:
+# A cada push na main e a cada pull request:
 # - testes unitários, testes de integração (MySQL via Testcontainers), regras do
 #   ArchUnit e cortes de cobertura;
 # - aceitação: o docker compose sobe a aplicação e o Newman roda a collection.

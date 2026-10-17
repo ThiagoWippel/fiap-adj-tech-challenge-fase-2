@@ -28,7 +28,7 @@ Com a aplicação no ar, o Swagger fica em http://localhost:8080/swagger-ui.html
 | 1 · Funcionalidade | [Endpoints](#endpoints): 26 rotas, as 8 da Fase 1 e 18 novas · testes em `src/test/.../infrastructure/api` |
 | 2 · Qualidade do código | [Arquitetura](#arquitetura), Javadoc em todas as classes públicas, [decisões](#decisões-principais) |
 | 3 · Documentação | Este README · Swagger com exemplos de sucesso e de erro em cada rota · [`docs/openapi.json`](docs/openapi.json) |
-| 4 · Collections | [`postman/`](postman/): 88 requisições com verificações, rodadas pelo CI a cada push |
+| 4 · Collections | [`postman/`](postman/): 88 requisições com verificações, rodadas pelo CI a cada push na main e a cada pull request |
 | 5 · Docker Compose | [`docker-compose.yml`](docker-compose.yml): aplicação e MySQL, os dois com healthcheck |
 | 6 · Repositório | Este repositório, público, com o histórico da Fase 1 |
 | 7 · Clean Architecture | Pacotes `domain`, `application`, `interfaceadapter` e `infrastructure`, com as regras de dependência testadas pelo ArchUnit |
@@ -65,6 +65,26 @@ o comprova: está tudo na [matriz requisito → evidência](docs/matriz-de-evide
   (sexta 18:00–02:00) e os turnos não podem se sobrepor.
 - **Itens do cardápio**: nas rotas do restaurante. Nome único entre os itens ativos do restaurante, preço com
   no máximo duas casas, disponibilidade só no local e o caminho da foto (relativo ou URL http/https, sem `..`).
+
+A jornada de quem usa o sistema, da conta ao cardápio:
+
+```mermaid
+flowchart LR
+    T["Tipos de usuário<br/>Cliente e Dono de Restaurante já vêm no banco;<br/>outros pelo cadastro de tipos"]
+    C["Conta da Laura<br/>tipo Cliente, com CPF"]
+    D["Troca de tipo<br/>Dono de Restaurante, com CNPJ<br/>mesma conta, mesmo id"]
+    R["Restaurante<br/>endereço, cozinha, turnos e dono"]
+    I["Cardápio<br/>nome, descrição, preço,<br/>só no local e caminho da foto"]
+    V["Consulta do cliente<br/>restaurantes por nome e cozinha;<br/>cardápio de cada um"]
+    L["Login<br/>devolve o token"]
+    T --> C
+    C --> D
+    D --> R
+    R --> I
+    I --> V
+    C --> L
+    C -. "dono que é Cliente: 409" .-> R
+```
 
 Regras que cruzam os cadastros:
 
@@ -480,13 +500,13 @@ só confere o mapeamento.
 
 - **Cobertura:** dois cortes travam o build, cada um com 80% de linhas e de ramos: o dos testes unitários sobre
   o núcleo (`domain`, `application` e `interfaceadapter`) e o total. Hoje o núcleo está em 100% e o total acima
-  de 99%, com 396 testes unitários e 218 de integração.
+  de 99%, com 396 testes unitários e 219 de integração.
 - **Catálogo de cenários:** os 207 cenários de [`docs/catalogo-de-cenarios.md`](docs/catalogo-de-cenarios.md)
   foram escritos antes do código, menos os 32 das duas auditorias finais, que travam falhas encontradas com a
   aplicação no ar. O ID de cada um aparece no nome do teste que o comprova, na descrição da
   requisição da collection e na [matriz](docs/matriz-de-evidencias.md).
 - **TDD:** no histórico do git, o commit dos testes de cada parte vem antes do commit da implementação.
-- **CI:** a cada push, o GitHub Actions roda dois jobs. Um executa o `mvn verify`; o outro sobe o docker compose
+- **CI:** a cada push na main e a cada pull request, o GitHub Actions roda dois jobs. Um executa o `mvn verify`; o outro sobe o docker compose
   a partir do `.env.example` e roda a collection duas vezes seguidas com o Newman.
 
 ## Collection do Postman

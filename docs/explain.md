@@ -86,7 +86,7 @@ SELECT id FROM item_cardapio WHERE restaurante_id = 42 AND nome = 'Prato 3' AND 
 
 ## Busca de usuários pelo trecho do nome
 
-`GET /usuarios?nome=` e a v2. Um `LIKE` com `%` no começo não aproveita índice de árvore, então não há índice em `nome`: com ou sem ele, o MySQL leria a tabela inteira.
+`GET /usuarios?nome=` e a v2. Um `LIKE` com `%` no começo não aproveita índice de árvore para localizar o termo. Com um índice em `nome`, o MySQL percorreria os nomes em ordem e pararia cedo só quando o termo é comum; com um termo raro, leria todos de qualquer forma, e o índice ainda pesaria em cada gravação. Por isso não há índice em `nome`.
 
 ```sql
 SELECT * FROM usuario WHERE nome LIKE '%silva%' AND removido_em IS NULL ORDER BY nome LIMIT 10
