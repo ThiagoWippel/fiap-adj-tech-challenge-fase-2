@@ -116,7 +116,7 @@ class JpaUsuarioDataSourceIT {
     }
 
     @ParameterizedTest(name = "USU-33 · o banco recusa {0} com espaço nas pontas, que escaparia da restrição única")
-    @ValueSource(strings = {"email", "login"})
+    @ValueSource(strings = {"email", "login", "documento"})
     void deveRecusarValorUnicoComEspacoNasPontas(String coluna) {
         /* arrange */
         List<Object> valores = new ArrayList<>(Arrays.asList("Maria Silva", "maria@exemplo.com", "maria.silva",
