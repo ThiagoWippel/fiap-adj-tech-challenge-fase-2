@@ -63,6 +63,7 @@ CREATE TABLE usuario (
     CONSTRAINT uk_usuario_documento UNIQUE (documento),
     CONSTRAINT ck_usuario_email_aparado CHECK (email = TRIM(email)),
     CONSTRAINT ck_usuario_login_aparado CHECK (login = TRIM(login)),
+    CONSTRAINT ck_usuario_documento_aparado CHECK (documento = TRIM(documento)),
     -- Sem ON DELETE: o MySQL não aceita ação referencial em coluna usada num CHECK.
     -- O padrão do InnoDB já impede excluir um tipo em uso.
     CONSTRAINT fk_usuario_tipo_usuario FOREIGN KEY (tipo_usuario_id) REFERENCES tipo_usuario (id),
