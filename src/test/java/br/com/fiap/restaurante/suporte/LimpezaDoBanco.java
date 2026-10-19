@@ -3,7 +3,7 @@ package br.com.fiap.restaurante.suporte;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * Deixa o banco dos testes de integração como o script de schema criou: sem
+ * Deixa o banco dos testes de integração como as migrações o criam: sem
  * itens, restaurantes nem usuários, só com os dois tipos de sistema e com os
  * nomes originais.
  */

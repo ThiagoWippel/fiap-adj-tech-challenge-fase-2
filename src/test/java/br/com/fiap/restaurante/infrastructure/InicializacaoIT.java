@@ -45,8 +45,8 @@ class InicializacaoIT {
     }
 
     @Test
-    @DisplayName("INF-01 · o script de schema cria as tabelas que as entidades mapeiam")
-    void deveCriarAsTabelasPeloScript() {
+    @DisplayName("INF-01 · as migrações criam as tabelas que as entidades mapeiam")
+    void deveCriarAsTabelasPelasMigracoes() {
         /* act */
         var tabelas = jdbc.queryForList(
                 "SELECT table_name FROM information_schema.tables WHERE table_schema = DATABASE()", String.class);

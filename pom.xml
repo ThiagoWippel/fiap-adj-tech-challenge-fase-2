@@ -72,6 +72,16 @@
 			<version>${nimbus-jose-jwt.version}</version>
 		</dependency>
 
+		<!-- Migrações do banco: a estrutura evolui por arquivos versionados em db/migration -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-flyway</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-mysql</artifactId>
+		</dependency>
+
 		<!-- MySQL em todos os perfis -->
 		<dependency>
 			<groupId>com.mysql</groupId>
