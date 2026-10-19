@@ -1,6 +1,6 @@
 # EXPLAIN das consultas principais
 
-MySQL 8.4.11, com o schema de `docker/mysql/init/01-schema.sql` e uma massa de 3.000 usuários, 6.000 restaurantes, 12.000 turnos e 60.000 itens (parte deles removida).
+MySQL 8.4.11, com a estrutura das migrações do Flyway (`src/main/resources/db/migration`) e uma massa de 3.000 usuários, 6.000 restaurantes, 12.000 turnos e 60.000 itens (parte deles removida).
 
 Cada consulta aparece duas vezes: **sem índice**, forçada com `IGNORE INDEX` (o MySQL não deixa apagar um índice que sustenta uma chave estrangeira), e **com índice**, como a aplicação roda. A coluna `rows` é a estimativa de linhas que o MySQL precisa ler; `type = ALL` é leitura da tabela inteira.
 

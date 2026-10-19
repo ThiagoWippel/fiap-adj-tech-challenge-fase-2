@@ -443,8 +443,9 @@ erDiagram
 ```
 
 Usuário, restaurante e item têm `data_criacao` e `data_ultima_alteracao`, preenchidas pela auditoria do Spring
-Data. O schema vem do script [`docker/mysql/init/01-schema.sql`](docker/mysql/init/01-schema.sql); o Hibernate
-só confere o mapeamento.
+Data. A estrutura vem das migrações do Flyway, em
+[`src/main/resources/db/migration`](src/main/resources/db/migration), que a própria aplicação aplica ao subir; o
+Hibernate só confere o mapeamento.
 
 - As tabelas usam `utf8mb4_0900_ai_ci`, que compara sem diferenciar maiúsculas nem acentos: é o que faz
   `Maria@Exemplo.com` colidir com `maria@exemplo.com`. Ela distingue um emoji de outro (`Pizza 🍕` e
@@ -460,10 +461,24 @@ só confere o mapeamento.
 - Os índices de `dono_id`, `tipo_cozinha`, `restaurante_id` e `tipo_usuario_id` atendem as consultas da
   aplicação. O [EXPLAIN antes e depois dos índices](docs/explain.md) mostra o ganho em cada uma.
 
+### Migrações
+
+| Versão | O que faz |
+|---|---|
+| V1 | A estrutura da Fase 1, sem mudança |
+| V2 | A tabela `tipo_usuario`, com os dois tipos de sistema |
+| V3 | O usuário da Fase 2: o tipo vira um registro de `tipo_usuario`, CPF e CNPJ viram `documento`, e os usuários existentes são convertidos |
+| V4 | `restaurante` e `horario_funcionamento` |
+| V5 | `item_cardapio` |
+
+Um banco vazio recebe da V1 à V5. Um banco criado pela Fase 1 não tem o histórico do Flyway: é reconhecido como V1
+e recebe da V2 em diante, e os usuários continuam com o mesmo id e entram com a mesma senha (INF-11 a INF-14).
+Mudança de estrutura entra como migração nova, nunca editando uma que já foi aplicada.
+
 ## Decisões principais
 
 - **MySQL em todo lugar.** O H2 da Fase 1 saiu: os testes de integração usam o MySQL 8.4 do Testcontainers, com
-  o mesmo script do compose. Regras como a colação e a coluna gerada só existem no MySQL.
+  as mesmas migrações da aplicação. Regras como a colação e a coluna gerada só existem no MySQL.
 - **Exclusão conforme a natureza do dado.** Usuário é dado pessoal: é anonimizado, com base na LGPD, e o e-mail,
   o login e o documento ficam livres para um novo cadastro. Restaurante e item são dados de negócio, que
   pedidos e avaliações das próximas fases vão referenciar: exclusão lógica. Tipo de usuário é referência:
@@ -476,6 +491,10 @@ só confere o mapeamento.
   a volta, para encontrar sobreposição até na passagem de domingo para segunda.
 - **Contrato da Fase 1 preservado.** A collection da Fase 1 roda contra a Fase 2 com três ajustes, descritos na
   própria collection.
+- **Migrações versionadas.** O volume do banco tem o mesmo nome na Fase 1 e na Fase 2, então quem rodou a Fase 1
+  sobe a Fase 2 sobre o banco dela. Com um script de criação, o MySQL não o executava de novo, e a aplicação não
+  subia. Com o Flyway, esse banco é atualizado sem perder dados, e as próximas fases acrescentam migrações em vez
+  de pedir que o banco seja recriado.
 - **Desempenho.** Associações LAZY, sem sessão aberta durante a serialização, e a listagem de restaurantes com
   um número fixo de consultas, qualquer que seja o tamanho da página (há um teste que conta).
 - **Operações simultâneas.** As operações que alteram um registro o reservam no banco (`SELECT ... FOR UPDATE`)
@@ -494,16 +513,16 @@ só confere o mapeamento.
 | Nível | Ferramenta | O que cobre |
 |---|---|---|
 | Unitário | JUnit 6, AssertJ, Mockito | Entidades, objetos de valor, casos de uso (com mocks), gateways, presenters e controllers |
-| Integração | Testcontainers (MySQL 8.4), `@SpringBootTest`, REST-Assured | Endpoints, formato dos erros, mapeamento, consultas e restrições do banco |
+| Integração | Testcontainers (MySQL 8.4), `@SpringBootTest`, REST-Assured | Endpoints, formato dos erros, mapeamento, consultas, restrições do banco e migrações |
 | Arquitetura | ArchUnit | Direção das dependências entre as camadas |
 | Aceitação | Postman + Newman | A collection inteira contra o docker compose |
 
 - **Cobertura:** dois cortes travam o build, cada um com 80% de linhas e de ramos: o dos testes unitários sobre
   o núcleo (`domain`, `application` e `interfaceadapter`) e o total. Hoje o núcleo está em 100% e o total acima
-  de 99%, com 396 testes unitários e 219 de integração.
-- **Catálogo de cenários:** os 207 cenários de [`docs/catalogo-de-cenarios.md`](docs/catalogo-de-cenarios.md)
+  de 99%, com 396 testes unitários e 223 de integração.
+- **Catálogo de cenários:** os 211 cenários de [`docs/catalogo-de-cenarios.md`](docs/catalogo-de-cenarios.md)
   foram escritos antes do código, menos os 32 das duas auditorias finais, que travam falhas encontradas com a
-  aplicação no ar. O ID de cada um aparece no nome do teste que o comprova, na descrição da
+  aplicação no ar, e os 4 das migrações, que entraram com o Flyway. O ID de cada um aparece no nome do teste que o comprova, na descrição da
   requisição da collection e na [matriz](docs/matriz-de-evidencias.md).
 - **TDD:** no histórico do git, o commit dos testes de cada parte vem antes do commit da implementação.
 - **CI:** a cada push na main e a cada pull request, o GitHub Actions roda dois jobs. Um executa o `mvn verify`; o outro sobe o docker compose
@@ -537,26 +556,14 @@ Defina a variável de ambiente JWT_CHAVE com a chave de assinatura do token.
 O `.env` não tem a chave, ou ela tem menos de 32 caracteres. Copie a linha `JWT_CHAVE` do `.env.example`, ou
 gere uma com `openssl rand -base64 32`, e suba de novo.
 
-### Mudanças no schema não aparecem
+### O banco já existe, de uma versão anterior
 
-O MySQL só executa o script de `docker/mysql/init` na primeira subida, com o volume vazio. Depois de atualizar
-o projeto:
-
-```bash
-docker compose down -v
-docker compose up -d --build --wait
-```
-
-O `down -v` apaga os dados do banco.
-
-### `Permission denied` ao ler o script do schema
-
-O processo do MySQL dentro do contêiner roda com outro usuário e precisa ler o arquivo:
+Não é preciso apagar o volume, nem quando o banco veio da Fase 1. Ao subir, a aplicação aplica só as migrações
+que faltam, e o log mostra cada uma:
 
 ```bash
-chmod 644 docker/mysql/init/*.sql
-docker compose down -v
 docker compose up -d --build --wait
+docker compose logs app | grep -i migrat
 ```
 
 ### A collection falha logo na primeira pasta

@@ -8,7 +8,7 @@ cenário leva ao teste que roda.
 Níveis: **U** domínio · **C** caso de uso · **I** integração com MySQL · **P** collection (Newman no CI) ·
 **A** regra de arquitetura · **CI** pipeline.
 
-**207 de 207 cenários com evidência.**
+**211 de 211 cenários com evidência.**
 
 ## Requisito → cenários
 
@@ -36,13 +36,13 @@ Níveis: **U** domínio · **C** caso de uso · **I** integração com MySQL · 
 | F1-04 | Registro da data da última alteração | USU-25, USU-30 |
 | F1-05 | Busca de usuários pelo nome | USU-17, USU-27, USU-28 |
 | F1-06 | Unicidade do e-mail | USU-07, USU-12, USU-13, USU-20, USU-21 |
-| F1-07 | Serviço de validação de login | INF-09, LOG-01, LOG-02, LOG-03, LOG-04, LOG-05, LOG-07, LOG-08 |
+| F1-07 | Serviço de validação de login | INF-09, INF-13, LOG-01, LOG-02, LOG-03, LOG-04, LOG-05, LOG-07, LOG-08 |
 | F1-08 | Os dois tipos de usuário obrigatórios | USU-19 |
 | F1-09 | Campos obrigatórios: nome, e-mail, login, senha, data da última alteração e endereço | END-01, END-02, END-03, END-04, END-05, USU-01, USU-02, USU-03, USU-04, USU-22 |
 | F1-10 | Estratégia de versionamento de API | USU-27, USU-28 |
 | F1-11 | Respostas de erro no padrão ProblemDetail | ERR-01, ERR-03, ERR-04, ERR-05, ERR-06, ERR-07, ERR-11, ERR-12, ERR-13, ERR-14, ERR-15, ERR-17, CON-04, ENT-03 |
 | F1-12 | Swagger com exemplos de sucesso e de erro | INF-05 |
-| F1-13 | Banco relacional em container | INF-01, INF-03 |
+| F1-13 | Banco relacional em container | INF-01, INF-03, INF-11, INF-12, INF-14 |
 
 ## Fatia 0 · Fundação
 
@@ -52,16 +52,20 @@ Níveis: **U** domínio · **C** caso de uso · **I** integração com MySQL · 
 | ARQ-02 | Os pacotes `domain`, `application` e `interfaceadapter` não dependem de `infrastructure`. | A | `ArquiteturaTest.nucleoNaoDependeDaInfraestrutura` | — |
 | ARQ-03 | As camadas respeitam a direção das dependências: infraestrutura → adaptadores → aplicação → domínio. | A | `ArquiteturaTest.camadasRespeitamADirecaoDasDependencias` | — |
 | ARQ-04 | O pacote `interfaceadapter` não usa classes nem anotações do Spring: controllers, gateways e presenters são Java puro. | A | `ArquiteturaTest.adaptadoresNaoDependemDeFramework` | — |
-| INF-01 | Dado o MySQL do Testcontainers criado pelo script de schema, quando o contexto sobe, então o Hibernate em modo `validate` aceita o mapeamento de todas as entidades. | I | `InicializacaoIT.deveSubirContraOMysqlDoConteiner_ComHibernateEmModoValidate`<br>`InicializacaoIT.deveCriarAsTabelasPeloScript` | — |
+| INF-01 | Dado o MySQL do Testcontainers com a estrutura criada pelas migrações do Flyway, quando o contexto sobe, então o Hibernate em modo `validate` aceita o mapeamento de todas as entidades. | I | `InicializacaoIT.deveSubirContraOMysqlDoConteiner_ComHibernateEmModoValidate`<br>`InicializacaoIT.deveCriarAsTabelasPelasMigracoes` | — |
 | INF-02 | Quando consulto `/actuator/health` com o banco no ar, então recebo `UP`. | I | `SaudeIT.deveResponderUp_QuandoOBancoEstiverNoAr` | — |
-| INF-03 | Dado um clone limpo e o `.env` copiado do `.env.example`, quando rodo `docker compose up`, então aplicação e banco sobem e o healthcheck da aplicação passa. | CI | — | CI: Subir a aplicação e o banco a partir do .env.example (INF-03, INF-10) |
+| INF-03 | Dado um clone limpo e o `.env` copiado do `.env.example`, quando rodo `docker compose up`, então aplicação e banco sobem, a aplicação cria a estrutura do banco pelas migrações e o healthcheck da aplicação passa. | CI | — | CI: Subir a aplicação e o banco a partir do .env.example (INF-03, INF-10) |
 | INF-04 | Quando a cobertura dos testes unitários no núcleo (`domain`, `application`, `interfaceadapter`) ou a cobertura total cai abaixo de 80% de linha ou de ramo, então o build falha. Testado de propósito uma vez. | CI | — | CI: Os dois cortes de cobertura travam o build abaixo de 80% (INF-04) |
 | INF-05 | Quando consulto `/v3/api-docs`, então os 26 endpoints aparecem, cada um com ao menos um exemplo de sucesso e um de erro. | I | `DocumentacaoIT.deveServirAEspecificacaoOpenApi`<br>`DocumentacaoIT.deveDocumentarExemplosDeSucessoEDeErro` | — |
 | INF-06 | Dado o perfil `docker` sem a chave de assinatura do token, quando a aplicação sobe, então ela falha na inicialização com uma mensagem que nomeia a variável de ambiente que falta. | I | `ConfiguracaoDoTokenIT.deveFalharSemAChave`<br>`ConfiguracaoDoTokenIT.deveFalharComChaveCurta`<br>`ConfiguracaoDoTokenIT.deveCarregarAsPropriedades` | — |
 | INF-07 | A cada push na main e a cada pull request, o GitHub Actions roda `mvn verify` (unitários, integração com Testcontainers, ArchUnit e os cortes de cobertura) e termina verde. | CI | — | CI: Testes, arquitetura e cobertura (INF-07) |
 | INF-08 | A porta de transação desfaz tudo o que foi gravado quando a operação lança exceção, e confirma as gravações quando ela termina sem erro. | U · I | `ITransactionManagerTest.deveExecutarOperacaoSemRetornoDentroDaTransacao`<br>`GerenciadorDeTransacaoIT.deveDesfazerAsGravacoes_QuandoAOperacaoFalhar`<br>`GerenciadorDeTransacaoIT.deveConfirmarAsGravacoes_QuandoAOperacaoTerminarSemErro` | — |
 | INF-09 | A porta de senha gera um hash BCrypt diferente a cada codificação, nunca o texto original, e confere a senha correta. | U | `CodificadorDeSenhaBCryptTest.deveGerarHashBCrypt`<br>`CodificadorDeSenhaBCryptTest.deveGerarHashesDiferentesParaAMesmaSenha`<br>`CodificadorDeSenhaBCryptTest.deveConferirASenhaCorretaERecusarAErrada` | — |
-| INF-10 | O healthcheck do banco no compose só passa quando a porta TCP aceita conexões: a aplicação não sobe enquanto o MySQL ainda roda os scripts de inicialização. | CI | — | CI: Subir a aplicação e o banco a partir do .env.example (INF-03, INF-10) |
+| INF-10 | O healthcheck do banco no compose só passa quando a porta TCP aceita conexões: a aplicação não sobe enquanto o MySQL ainda prepara o volume na primeira subida. | CI | — | CI: Subir a aplicação e o banco a partir do .env.example (INF-03, INF-10) |
+| INF-11 | Dado um banco vazio, quando a aplicação sobe, então o Flyway aplica as migrações V1 a V5, em ordem, e todas ficam registradas como sucesso no histórico. | I | `MigracoesDoBancoIT.deveAplicarAsCincoMigracoesEmOrdem_QuandoOBancoEstiverVazio` | — |
+| INF-12 | Dado um banco criado pelo script da Fase 1, sem o histórico do Flyway e com um cliente e um dono, quando a aplicação da Fase 2 sobe, então o banco é reconhecido como V1 e recebe da V2 à V5; os dois usuários mantêm id, nome, login, hash da senha e datas; o tipo vira o registro de mesmo código; o CPF e o CNPJ passam para `documento`; o CEP perde o hífen e o e-mail perde os espaços das pontas. | I | `MigracoesDoBancoIT.deveAtualizarOBancoDaFase1_SemPerderOsUsuarios` | — |
+| INF-13 | O cliente cadastrado na Fase 1 faz login na Fase 2 com a senha de antes; com outra senha, recebe 401. | I | `MigracoesDoBancoIT.deveAutenticarOClienteDaFase1_ComASenhaDeAntes` | — |
+| INF-14 | Dado um banco já na versão atual, quando a aplicação sobe de novo, então nenhuma migração é reaplicada e o histórico não muda. | I | `MigracoesDoBancoIT.naoDeveReaplicarMigracoes_QuandoOBancoJaEstiverAtualizado` | — |
 | ERR-01 | Quando qualquer erro acontece, então a resposta é `application/problem+json` com `type`, `title`, `status`, `detail`, `instance` e `momento`. | I | `ExcecoesDaAplicacaoTest.recursoNaoEncontradoDeveCarregarAMensagem`<br>`ExcecoesDaAplicacaoTest.conflitoDeDadosDeveCarregarAMensagem`<br>`ExcecoesDaAplicacaoTest.credenciaisInvalidasDeveCarregarAMensagem`<br>`ExcecoesDeDominioTest.regraDeNegocioDeveCarregarAMensagem`<br>`TratadorDeErrosIT.deveResponderNoFormatoProblemDetail`<br>`TratadorDeErrosIT.naoDeveExporAMensagemDoBanco_QuandoHouverViolacaoDeIntegridade`<br>`TratadorDeErrosTest.deveFormatarOMomentoSempreComSegundos` | Postman: 2. E-mail duplicado<br>Postman: 7. Consulta de usuario inexistente |
 | ERR-02 | O `type` aponta para o namespace estável da própria aplicação (`/problemas/{tipo}`), e essa URL responde 200 com a descrição do problema. | I | `TratadorDeErrosIT.deveDescreverOTipoDeProblemaNaUrlDoType`<br>`TratadorDeErrosIT.deveListarTodosOsTiposDeProblema`<br>`TratadorDeErrosIT.deveDevolver404_QuandoOTipoDeProblemaNaoExistir`<br>`TipoDeProblemaTest.deveMontarOEnderecoAbsolutoDoTipo`<br>`TipoDeProblemaTest.deveEncontrarOTipoPeloIdentificador` | — |
 | ERR-03 | Dado um corpo que falha no Bean Validation, então a resposta traz a extensão `erros` com o campo e a mensagem de cada falha. | I | `TratadorDeErrosIT.deveListarOsCamposInvalidos_QuandoAValidacaoFalhar` | — |

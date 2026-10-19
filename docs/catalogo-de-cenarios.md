@@ -62,13 +62,13 @@ Decisões do dossiê: A repositório · B token · C horário · D tipo do dono 
 
 | Fatia | Tema | Cenários |
 |---|---|---|
-| 0 | Fundação: arquitetura, infraestrutura, erros, paginação | 39 |
+| 0 | Fundação: arquitetura, infraestrutura, erros, paginação | 43 |
 | 1 | Usuário: herança da Fase 1, login, token, exclusão | 65 |
 | 2 | Tipo de usuário e troca de tipo | 28 |
 | 3 | Restaurante, horários e tipo de cozinha | 41 |
 | 4 | Item do cardápio | 24 |
 | 5 | Fechamento: operações simultâneas e entrada da API | 10 |
-| | **Total** | **207** |
+| | **Total** | **211** |
 
 Os cenários de paginação (PAG) valem para todas as listagens e são repetidos no teste de integração de cada uma.
 
@@ -81,6 +81,11 @@ codificada; `page` e `size` inválidos ignorados em silêncio; tipos convertidos
 e com caracteres de controle; corpo sem limite; emojis tratados como iguais pela colação; exemplos do Swagger que
 derrubavam a collection; erros fora do formato ProblemDetail; e um healthcheck que liberava a aplicação antes de o
 banco aceitar conexões.
+
+Os quatro cenários de migração (INF-11 a INF-14) entraram em 19/10, com a adoção do Flyway. A decisão V tinha
+deixado o Flyway de fora porque o banco nasceria do zero a partir do script. Mas o volume do compose tem o mesmo nome
+nas duas fases, e quem rodou a Fase 1 sobe a Fase 2 sobre o banco dela: o MySQL não roda o script de novo, e a
+aplicação não subia. Com as migrações, esse banco é reconhecido como a versão 1 e atualizado sem perder dados.
 
 ---
 
@@ -99,16 +104,20 @@ banco aceitar conexões.
 
 | ID | Cenário | Nível | Origem |
 |---|---|---|---|
-| INF-01 | Dado o MySQL do Testcontainers criado pelo script de schema, quando o contexto sobe, então o Hibernate em modo `validate` aceita o mapeamento de todas as entidades. | I | EN-8, F1-13, Dec. T |
+| INF-01 | Dado o MySQL do Testcontainers com a estrutura criada pelas migrações do Flyway, quando o contexto sobe, então o Hibernate em modo `validate` aceita o mapeamento de todas as entidades. | I | EN-8, F1-13, Dec. T |
 | INF-02 | Quando consulto `/actuator/health` com o banco no ar, então recebo `UP`. | I | EN-5, Dec. V |
-| INF-03 | Dado um clone limpo e o `.env` copiado do `.env.example`, quando rodo `docker compose up`, então aplicação e banco sobem e o healthcheck da aplicação passa. | CI | EN-5, F1-13, EN-OBJ |
+| INF-03 | Dado um clone limpo e o `.env` copiado do `.env.example`, quando rodo `docker compose up`, então aplicação e banco sobem, a aplicação cria a estrutura do banco pelas migrações e o healthcheck da aplicação passa. | CI | EN-5, F1-13, EN-OBJ |
 | INF-04 | Quando a cobertura dos testes unitários no núcleo (`domain`, `application`, `interfaceadapter`) ou a cobertura total cai abaixo de 80% de linha ou de ramo, então o build falha. Testado de propósito uma vez. | CI | EN-8, Dec. N |
 | INF-05 | Quando consulto `/v3/api-docs`, então os 26 endpoints aparecem, cada um com ao menos um exemplo de sucesso e um de erro. | I | F1-12, EN-3 |
 | INF-06 | Dado o perfil `docker` sem a chave de assinatura do token, quando a aplicação sobe, então ela falha na inicialização com uma mensagem que nomeia a variável de ambiente que falta. | I | Dec. B |
 | INF-07 | A cada push na main e a cada pull request, o GitHub Actions roda `mvn verify` (unitários, integração com Testcontainers, ArchUnit e os cortes de cobertura) e termina verde. | CI | EN-6, EN-8, Dec. V |
 | INF-08 | A porta de transação desfaz tudo o que foi gravado quando a operação lança exceção, e confirma as gravações quando ela termina sem erro. | U · I | Dec. G |
 | INF-09 | A porta de senha gera um hash BCrypt diferente a cada codificação, nunca o texto original, e confere a senha correta. | U | F1-07 |
-| INF-10 | O healthcheck do banco no compose só passa quando a porta TCP aceita conexões: a aplicação não sobe enquanto o MySQL ainda roda os scripts de inicialização. | CI | AUD, EN-5 |
+| INF-10 | O healthcheck do banco no compose só passa quando a porta TCP aceita conexões: a aplicação não sobe enquanto o MySQL ainda prepara o volume na primeira subida. | CI | AUD, EN-5 |
+| INF-11 | Dado um banco vazio, quando a aplicação sobe, então o Flyway aplica as migrações V1 a V5, em ordem, e todas ficam registradas como sucesso no histórico. | I | F1-13, Dec. V |
+| INF-12 | Dado um banco criado pelo script da Fase 1, sem o histórico do Flyway e com um cliente e um dono, quando a aplicação da Fase 2 sobe, então o banco é reconhecido como V1 e recebe da V2 à V5; os dois usuários mantêm id, nome, login, hash da senha e datas; o tipo vira o registro de mesmo código; o CPF e o CNPJ passam para `documento`; o CEP perde o hífen e o e-mail perde os espaços das pontas. | I | Dec. Q, F1-13 |
+| INF-13 | O cliente cadastrado na Fase 1 faz login na Fase 2 com a senha de antes; com outra senha, recebe 401. | I | Dec. Q, F1-07 |
+| INF-14 | Dado um banco já na versão atual, quando a aplicação sobe de novo, então nenhuma migração é reaplicada e o histórico não muda. | I | F1-13, Dec. V |
 
 ### Erros (ERR)
 
