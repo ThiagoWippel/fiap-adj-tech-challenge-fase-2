@@ -36,7 +36,7 @@ jobs:
           java-version: '21'
           cache: maven
 
-      # Os dois cortes de cobertura travam o build abaixo de 80% (INF-04)
+      # Os três cortes de cobertura travam o build abaixo de 80% (INF-04)
       - name: Rodar mvn verify
         run: ./mvnw -B verify
 
@@ -47,6 +47,7 @@ jobs:
           name: relatorios-de-cobertura
           path: |
             target/site/jacoco-unitarios
+            target/site/jacoco-unitarios-no-projeto
             target/site/jacoco-total
           if-no-files-found: ignore
 
