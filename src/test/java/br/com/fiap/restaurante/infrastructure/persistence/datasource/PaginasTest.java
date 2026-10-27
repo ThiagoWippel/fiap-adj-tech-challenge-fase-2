@@ -1,9 +1,11 @@
 package br.com.fiap.restaurante.infrastructure.persistence.datasource;
 
+import br.com.fiap.restaurante.application.dto.Pagina;
 import br.com.fiap.restaurante.application.dto.PedidoDePagina;
 import br.com.fiap.restaurante.application.dto.PedidoDePagina.Ordem;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
@@ -34,5 +36,20 @@ class PaginasTest {
 
         /* assert */
         assertThat(pagina.getSort()).containsExactly(Sort.Order.desc("id"));
+    }
+
+    @Test
+    @DisplayName("PAG-01 · a página do Spring Data vira a página dos casos de uso, com cada registro convertido")
+    void deveConverterAPagina() {
+        /* arrange */
+        PageRequest pedido = Paginas.paraPageRequest(new PedidoDePagina(1, 2, List.of(new Ordem("preco", true))));
+
+        /* act */
+        Pagina<String> pagina = Paginas.paraPagina(new PageImpl<>(List.of("feijoada", "moqueca"), pedido, 5),
+                String::toUpperCase);
+
+        /* assert */
+        assertThat(pedido.getSort()).containsExactly(Sort.Order.asc("preco"), Sort.Order.asc("id"));
+        assertThat(pagina).isEqualTo(new Pagina<>(List.of("FEIJOADA", "MOQUECA"), 1, 2, 5, 3));
     }
 }

@@ -76,6 +76,21 @@ class LimiteDoCorpoTest {
         assertThat(entrada.read()).isEqualTo(-1);
     }
 
+    @Test
+    @DisplayName("ENT-06 · com Content-Length dentro do limite, a requisição segue sem a contagem da leitura")
+    void deveRepassarARequisicaoDentroDoLimite() throws Exception {
+        /* arrange */
+        MockHttpServletRequest requisicao = new MockHttpServletRequest("POST", "/api/v1/tipos-usuario");
+        requisicao.setContent("{\"nome\":\"Entregador\"}".getBytes());
+        MockFilterChain cadeia = new MockFilterChain();
+
+        /* act */
+        filtro.doFilter(requisicao, new MockHttpServletResponse(), cadeia);
+
+        /* assert */
+        assertThat(cadeia.getRequest()).isSameAs(requisicao);
+    }
+
     private static HttpServletRequest semContentLength(byte[] corpo) {
         MockHttpServletRequest requisicao = new MockHttpServletRequest("POST", "/api/v1/tipos-usuario");
         requisicao.setContent(corpo);

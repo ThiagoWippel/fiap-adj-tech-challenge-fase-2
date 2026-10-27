@@ -2,6 +2,8 @@ package br.com.fiap.restaurante.infrastructure.api.comum;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -42,6 +44,39 @@ class ParametrosDePaginacaoTest {
                 listagem))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("O parâmetro page deve ser um número inteiro a partir de 0.");
+    }
+
+    @ParameterizedTest(name = "ENT-02 · {0}={1} é recusado com 400")
+    @CsvSource(delimiter = '|', value = {
+            "page | abc | O parâmetro page deve ser um número inteiro a partir de 0.",
+            "page | -1  | O parâmetro page deve ser um número inteiro a partir de 0.",
+            "page | 1.5 | O parâmetro page deve ser um número inteiro a partir de 0.",
+            "size | 0   | O parâmetro size deve ser um número inteiro a partir de 1.",
+            "size | abc | O parâmetro size deve ser um número inteiro a partir de 1."
+    })
+    void deveRecusarPageESizeInvalidos(String parametro, String valor, String mensagem) throws NoSuchMethodException {
+        /* arrange */
+        HandlerMethod listagem = new HandlerMethod(new Rotas(), Rotas.class.getMethod("listar", Pageable.class));
+
+        /* act + assert */
+        assertThatThrownBy(() -> interceptor.preHandle(requisicao(parametro, valor), new MockHttpServletResponse(),
+                listagem))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining(mensagem);
+    }
+
+    @Test
+    @DisplayName("ENT-01 · sort com caractere que não cabe num nome de campo é recusado com 400; size válido passa")
+    void deveRecusarSortComCaractereInvalido() throws NoSuchMethodException {
+        /* arrange */
+        HandlerMethod listagem = new HandlerMethod(new Rotas(), Rotas.class.getMethod("listar", Pageable.class));
+
+        /* act + assert */
+        assertThat(interceptor.preHandle(requisicao("size", "50"), new MockHttpServletResponse(), listagem)).isTrue();
+        assertThatThrownBy(() -> interceptor.preHandle(requisicao("sort", "nome;desc"), new MockHttpServletResponse(),
+                listagem))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("O parâmetro sort aceita nomes de campo e a direção, como nome,desc.");
     }
 
     private static MockHttpServletRequest requisicao(String parametro, String valor) {
