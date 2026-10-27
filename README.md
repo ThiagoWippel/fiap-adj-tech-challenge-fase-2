@@ -32,7 +32,7 @@ Com a aplicação no ar, o Swagger fica em http://localhost:8080/swagger-ui.html
 | 5 · Docker Compose | [`docker-compose.yml`](docker-compose.yml): aplicação e MySQL, os dois com healthcheck |
 | 6 · Repositório | Este repositório, público, com o histórico da Fase 1 |
 | 7 · Clean Architecture | Pacotes `domain`, `application`, `interfaceadapter` e `infrastructure`, com as regras de dependência testadas pelo ArchUnit |
-| 8 · Testes | 80% de cobertura exigida em dois cortes que travam o build; integração contra MySQL real ([Testes](#testes)) |
+| 8 · Testes | 80% de cobertura exigida em três cortes que travam o build; integração contra MySQL real ([Testes](#testes)) |
 | 9 · Vídeo | Entregue com o relatório |
 
 Cada requisito leva a um cenário do [catálogo](docs/catalogo-de-cenarios.md), e cada cenário leva ao teste que
@@ -180,8 +180,8 @@ docker compose up -d --wait mysql
 ```
 
 Roda os testes unitários, os de integração (com o MySQL 8.4 do Testcontainers), as regras do ArchUnit e os
-cortes de cobertura. Os relatórios do JaCoCo ficam em `target/site/jacoco-unitarios` e
-`target/site/jacoco-total`. Só os unitários: `./mvnw test`.
+cortes de cobertura. Os relatórios do JaCoCo ficam em `target/site/jacoco-unitarios`,
+`target/site/jacoco-unitarios-no-projeto` e `target/site/jacoco-total`. Só os unitários: `./mvnw test`.
 
 ## Endpoints
 
@@ -517,9 +517,11 @@ Mudança de estrutura entra como migração nova, nunca editando uma que já foi
 | Arquitetura | ArchUnit | Direção das dependências entre as camadas |
 | Aceitação | Postman + Newman | A collection inteira contra o docker compose |
 
-- **Cobertura:** dois cortes travam o build, cada um com 80% de linhas e de ramos: o dos testes unitários sobre
-  o núcleo (`domain`, `application` e `interfaceadapter`) e o total. Hoje o núcleo está em 100% e o total acima
-  de 99%, com 396 testes unitários e 223 de integração.
+- **Cobertura:** três cortes travam o build, cada um com 80% de linhas e de ramos: o dos testes unitários sobre
+  o núcleo (`domain`, `application` e `interfaceadapter`), o dos testes unitários sobre o projeto inteiro e o
+  total. Os dois últimos deixam de fora a classe `main` e a configuração. Hoje o núcleo está em 100%, os
+  unitários sobre o projeto inteiro em 89% das linhas e o total acima de 99%, com 440 testes unitários e 223 de
+  integração.
 - **Catálogo de cenários:** os 211 cenários de [`docs/catalogo-de-cenarios.md`](docs/catalogo-de-cenarios.md)
   foram escritos antes do código, menos os 32 das duas auditorias finais, que travam falhas encontradas com a
   aplicação no ar, e os 4 das migrações, que entraram com o Flyway. O ID de cada um aparece no nome do teste que o comprova, na descrição da

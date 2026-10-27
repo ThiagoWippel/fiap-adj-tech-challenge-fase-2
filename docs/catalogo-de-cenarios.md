@@ -107,7 +107,7 @@ aplicação não subia. Com as migrações, esse banco é reconhecido como a ver
 | INF-01 | Dado o MySQL do Testcontainers com a estrutura criada pelas migrações do Flyway, quando o contexto sobe, então o Hibernate em modo `validate` aceita o mapeamento de todas as entidades. | I | EN-8, F1-13, Dec. T |
 | INF-02 | Quando consulto `/actuator/health` com o banco no ar, então recebo `UP`. | I | EN-5, Dec. V |
 | INF-03 | Dado um clone limpo e o `.env` copiado do `.env.example`, quando rodo `docker compose up`, então aplicação e banco sobem, a aplicação cria a estrutura do banco pelas migrações e o healthcheck da aplicação passa. | CI | EN-5, F1-13, EN-OBJ |
-| INF-04 | Quando a cobertura dos testes unitários no núcleo (`domain`, `application`, `interfaceadapter`) ou a cobertura total cai abaixo de 80% de linha ou de ramo, então o build falha. Testado de propósito uma vez. | CI | EN-8, Dec. N |
+| INF-04 | Quando a cobertura dos testes unitários no núcleo (`domain`, `application`, `interfaceadapter`), a dos testes unitários no projeto inteiro ou a cobertura total cai abaixo de 80% de linha ou de ramo, então o build falha. Testado de propósito uma vez. | CI | EN-8, Dec. N |
 | INF-05 | Quando consulto `/v3/api-docs`, então os 26 endpoints aparecem, cada um com ao menos um exemplo de sucesso e um de erro. | I | F1-12, EN-3 |
 | INF-06 | Dado o perfil `docker` sem a chave de assinatura do token, quando a aplicação sobe, então ela falha na inicialização com uma mensagem que nomeia a variável de ambiente que falta. | I | Dec. B |
 | INF-07 | A cada push na main e a cada pull request, o GitHub Actions roda `mvn verify` (unitários, integração com Testcontainers, ArchUnit e os cortes de cobertura) e termina verde. | CI | EN-6, EN-8, Dec. V |
