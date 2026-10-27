@@ -225,9 +225,11 @@
 			</plugin>
 
 			<!--
-				Dois cortes de cobertura, os dois travando o build:
+				Três cortes de cobertura, todos travando o build:
 				- unitário: só testes unitários, sobre domain, application e interfaceadapter;
+				- unitário no projeto: só testes unitários, sobre o projeto inteiro;
 				- total: unitários e integração, sobre o projeto inteiro.
+				Os dois últimos deixam de fora a classe main e a configuração.
 			-->
 			<plugin>
 				<groupId>org.jacoco</groupId>
@@ -269,6 +271,52 @@
 								<include>br/com/fiap/restaurante/application/**</include>
 								<include>br/com/fiap/restaurante/interfaceadapter/**</include>
 							</includes>
+							<rules>
+								<rule>
+									<element>BUNDLE</element>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>${cobertura.minima}</minimum>
+										</limit>
+										<limit>
+											<counter>BRANCH</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>${cobertura.minima}</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+					<execution>
+						<id>relatorio-unitarios-no-projeto</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<dataFile>${project.build.directory}/jacoco.exec</dataFile>
+							<outputDirectory>${project.reporting.outputDirectory}/jacoco-unitarios-no-projeto</outputDirectory>
+							<excludes>
+								<exclude>br/com/fiap/restaurante/RestauranteApplication.class</exclude>
+								<exclude>br/com/fiap/restaurante/infrastructure/config/**</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>corte-unitarios-no-projeto</id>
+						<phase>test</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<dataFile>${project.build.directory}/jacoco.exec</dataFile>
+							<excludes>
+								<exclude>br/com/fiap/restaurante/RestauranteApplication.class</exclude>
+								<exclude>br/com/fiap/restaurante/infrastructure/config/**</exclude>
+							</excludes>
 							<rules>
 								<rule>
 									<element>BUNDLE</element>
