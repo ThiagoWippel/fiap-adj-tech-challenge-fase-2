@@ -28,6 +28,8 @@ import static org.hamcrest.Matchers.equalTo;
 @DisplayName("Documentação da API")
 class DocumentacaoIT {
 
+    private static final Pattern ORDENACAO = Pattern.compile("Não é possível ordenar por (\\w+)\\..*");
+
     @LocalServerPort
     private int porta;
 
@@ -45,15 +47,15 @@ class DocumentacaoIT {
     }
 
     @Test
-    @DisplayName("INF-05 · cada endpoint documenta uma resposta de sucesso e uma de erro, com exemplo")
+    @DisplayName("INF-05 · cada endpoint documenta uma resposta de sucesso e uma de erro, com exemplo da própria rota")
     void deveDocumentarExemplosDeSucessoEDeErro() {
         /* arrange */
-        Map<String, Map<String, Map<String, Object>>> rotas = given().port(porta)
-                .get("/v3/api-docs")
-                .then().statusCode(200)
-                .extract().jsonPath().getMap("paths");
+        JsonPath especificacao = given().port(porta).get("/v3/api-docs").then().statusCode(200).extract().jsonPath();
+        Map<String, Map<String, Map<String, Object>>> rotas = especificacao.getMap("paths");
         List<String> operacoes = new ArrayList<>();
         List<String> semExemplo = new ArrayList<>();
+        List<String> deOutraRota = new ArrayList<>();
+        List<String> ordenacaoDiferente = new ArrayList<>();
 
         /* act */
         rotas.forEach((rota, metodos) -> metodos.forEach((metodo, operacao) -> {
@@ -68,11 +70,36 @@ class DocumentacaoIT {
             if (!sucesso || !erro) {
                 semExemplo.add(nome);
             }
+            // Um exemplo copiado de outro endpoint aparece pela rota do instance ou por um campo que a requisição não tem
+            Pattern daRota = Pattern.compile(rota.replaceAll("\\{[^}]+}", "[^/]+"));
+            Set<String> campos = camposDaRequisicao(especificacao, operacao);
+            respostas.entrySet().stream().filter(r -> r.getKey().startsWith("4")).forEach(r -> exemplos(r.getValue())
+                    .forEach(exemplo -> {
+                        String origem = nome + " " + r.getKey() + ": ";
+                        String instancia = String.valueOf(exemplo.get("instance"));
+                        if (!daRota.matcher(instancia).matches()) {
+                            deOutraRota.add(origem + instancia);
+                        }
+                        camposComErro(exemplo).stream()
+                                .filter(campo -> !campos.contains(campo))
+                                .forEach(campo -> deOutraRota.add(origem + "campo " + campo));
+                        // A lista de campos aceitos muda de uma listagem para outra: o exemplo é conferido na API
+                        Matcher ordenacao = ORDENACAO.matcher(String.valueOf(exemplo.get("detail")));
+                        if (ordenacao.matches()) {
+                            String devolvido = given().port(porta).queryParam("sort", ordenacao.group(1))
+                                    .get(instancia).then().statusCode(400).extract().path("detail");
+                            if (!devolvido.equals(exemplo.get("detail"))) {
+                                ordenacaoDiferente.add(origem + devolvido);
+                            }
+                        }
+                    }));
         }));
 
         /* assert */
         assertThat(operacoes).hasSize(26);
         assertThat(semExemplo).isEmpty();
+        assertThat(deOutraRota).isEmpty();
+        assertThat(ordenacaoDiferente).isEmpty();
     }
 
     @Test
@@ -115,6 +142,50 @@ class DocumentacaoIT {
     private static String normalizar(String valor) {
         String semAcento = Normalizer.normalize(valor, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
         return semAcento.toLowerCase(Locale.ROOT).replaceAll("[./-]", "");
+    }
+
+    // O exemplo único (example) e os nomeados (examples) de cada tipo de mídia da resposta
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> exemplos(Map<String, Object> resposta) {
+        Map<String, Map<String, Object>> conteudo = (Map<String, Map<String, Object>>) resposta.get("content");
+        List<Map<String, Object>> exemplos = new ArrayList<>();
+        if (conteudo != null) {
+            conteudo.values().forEach(midia -> {
+                if (midia.get("example") instanceof Map<?, ?> unico) {
+                    exemplos.add((Map<String, Object>) unico);
+                }
+                if (midia.get("examples") instanceof Map<?, ?> nomeados) {
+                    nomeados.values().forEach(nomeado ->
+                            exemplos.add((Map<String, Object>) ((Map<String, Object>) nomeado).get("value")));
+                }
+            });
+        }
+        return exemplos;
+    }
+
+    // O que um erro de campo pode citar: os parâmetros da operação e os campos do corpo
+    @SuppressWarnings("unchecked")
+    private static Set<String> camposDaRequisicao(JsonPath especificacao, Map<String, Object> operacao) {
+        Set<String> campos = new HashSet<>();
+        ((List<Map<String, Object>>) operacao.getOrDefault("parameters", List.of()))
+                .forEach(parametro -> campos.add((String) parametro.get("name")));
+        Map<String, Object> corpo = (Map<String, Object>) operacao.get("requestBody");
+        if (corpo != null) {
+            ((Map<String, Map<String, Object>>) corpo.get("content")).values().forEach(midia -> {
+                String esquema = (String) ((Map<String, Object>) midia.get("schema")).get("$ref");
+                String nome = esquema.substring(esquema.lastIndexOf('/') + 1);
+                campos.addAll(especificacao.<String, Object>getMap("components.schemas." + nome + ".properties").keySet());
+            });
+        }
+        return campos;
+    }
+
+    // O campo de cada erro sem o caminho dentro dele: endereco.cep conta como endereco
+    @SuppressWarnings("unchecked")
+    private static List<String> camposComErro(Map<String, Object> exemplo) {
+        return ((List<Map<String, String>>) exemplo.getOrDefault("erros", List.of())).stream()
+                .map(erro -> erro.get("campo").split("[.\\[]")[0])
+                .toList();
     }
 
     // Respostas sem corpo (204) não têm exemplo; as que têm corpo precisam de um.
