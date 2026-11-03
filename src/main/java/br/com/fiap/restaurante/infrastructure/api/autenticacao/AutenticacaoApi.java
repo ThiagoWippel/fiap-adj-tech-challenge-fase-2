@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.CREDENCIAIS_INVALIDAS;
-import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DADOS_INVALIDOS;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.LOGIN_INCOMPLETO;
 
 /**
  * Documentação OpenAPI do endpoint de login.
@@ -33,7 +33,7 @@ interface AutenticacaoApi {
                       "expiraEm": "2026-10-08T11:30:00"
                     }""")))
     @ApiResponse(responseCode = "400", description = "Login ou senha ausente",
-            content = @Content(mediaType = "application/problem+json", examples = @ExampleObject(DADOS_INVALIDOS)))
+            content = @Content(mediaType = "application/problem+json", examples = @ExampleObject(LOGIN_INCOMPLETO)))
     @ApiResponse(responseCode = "401", description = "Login ou senha inválidos",
             content = @Content(mediaType = "application/problem+json",
                     examples = @ExampleObject(CREDENCIAIS_INVALIDAS)))

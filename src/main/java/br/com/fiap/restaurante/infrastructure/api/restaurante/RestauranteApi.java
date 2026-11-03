@@ -15,12 +15,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.COZINHA_INVALIDA;
-import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DADOS_INVALIDOS;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DADOS_DO_RESTAURANTE_INVALIDOS;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DONO_NAO_ENCONTRADO;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DONO_NAO_E_DONO;
-import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.ORDENACAO_INVALIDA;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DONO_NAO_E_DONO_NA_TRANSFERENCIA;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.ORDENACAO_DE_RESTAURANTES_INVALIDA;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.RESTAURANTE_NAO_ENCONTRADO;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.TURNOS_SOBREPOSTOS;
-import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.USUARIO_NAO_ENCONTRADO;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.TURNOS_SOBREPOSTOS_NA_ATUALIZACAO;
 
 /**
  * Documentação OpenAPI dos endpoints de restaurante.
@@ -42,11 +44,11 @@ interface RestauranteApi {
     @ApiResponse(responseCode = "400",
             description = "Campo inválido, tipo de cozinha fora da lista ou turnos sobrepostos",
             content = @Content(mediaType = PROBLEMA, examples = {
-                    @ExampleObject(name = "Campos inválidos", value = DADOS_INVALIDOS),
+                    @ExampleObject(name = "Campos inválidos", value = DADOS_DO_RESTAURANTE_INVALIDOS),
                     @ExampleObject(name = "Tipo de cozinha", value = COZINHA_INVALIDA),
                     @ExampleObject(name = "Turnos sobrepostos", value = TURNOS_SOBREPOSTOS)}))
     @ApiResponse(responseCode = "404", description = "Dono inexistente",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(USUARIO_NAO_ENCONTRADO)))
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(DONO_NAO_ENCONTRADO)))
     @ApiResponse(responseCode = "409", description = "O dono não é do tipo Dono de Restaurante",
             content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(DONO_NAO_E_DONO)))
     ResponseEntity<RestauranteResponse> cadastrar(RestauranteRequest requisicao, UriComponentsBuilder uri);
@@ -62,7 +64,7 @@ interface RestauranteApi {
             description = "Tipo de cozinha fora da lista, ou ordenação por campo não aceito",
             content = @Content(mediaType = PROBLEMA, examples = {
                     @ExampleObject(name = "Tipo de cozinha", value = COZINHA_INVALIDA),
-                    @ExampleObject(name = "Ordenação", value = ORDENACAO_INVALIDA)}))
+                    @ExampleObject(name = "Ordenação", value = ORDENACAO_DE_RESTAURANTES_INVALIDA)}))
     @Parameter(name = "page", in = ParameterIn.QUERY, description = "Número da página, a partir de 0",
             schema = @Schema(type = "integer", defaultValue = "0"))
     @Parameter(name = "size", in = ParameterIn.QUERY, description = "Itens por página, no máximo 50",
@@ -91,11 +93,11 @@ interface RestauranteApi {
                     examples = @ExampleObject(ExemplosDeRestaurante.RESTAURANTE)))
     @ApiResponse(responseCode = "400",
             description = "Campo inválido, tipo de cozinha fora da lista ou turnos sobrepostos",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(TURNOS_SOBREPOSTOS)))
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(TURNOS_SOBREPOSTOS_NA_ATUALIZACAO)))
     @ApiResponse(responseCode = "404", description = "Restaurante ou novo dono inexistente",
             content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(RESTAURANTE_NAO_ENCONTRADO)))
     @ApiResponse(responseCode = "409", description = "O novo dono não é do tipo Dono de Restaurante",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(DONO_NAO_E_DONO)))
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(DONO_NAO_E_DONO_NA_TRANSFERENCIA)))
     ResponseEntity<RestauranteResponse> atualizar(@Parameter(description = "Id do restaurante", example = "9") Long id,
                                                   RestauranteRequest requisicao);
 

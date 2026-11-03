@@ -19,16 +19,24 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.CODIFICACAO_INVALIDA;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DADOS_DA_ATUALIZACAO_INVALIDOS;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DADOS_DA_TROCA_DE_TIPO_INVALIDOS;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DADOS_INVALIDOS;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DOCUMENTO_DO_TIPO;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DOCUMENTO_EM_USO;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DONO_COM_RESTAURANTE;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.EMAIL_EM_USO;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.EMAIL_EM_USO_NA_ATUALIZACAO;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.NOVA_SENHA_INVALIDA;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.REGRA_DE_NEGOCIO;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.SENHA_ATUAL_INCORRETA;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.TIPO_NAO_ENCONTRADO;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.USUARIO_COM_RESTAURANTE;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.USUARIO_NAO_ENCONTRADO;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.USUARIO_NAO_ENCONTRADO_NA_SENHA;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.USUARIO_NAO_ENCONTRADO_NA_TROCA_DE_TIPO;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.USUARIO_NAO_ENCONTRADO_NOS_RESTAURANTES;
 
 /**
  * Documentação OpenAPI dos endpoints de usuário. Fica separada para o
@@ -73,8 +81,8 @@ interface UsuarioApi {
             content = @Content(mediaType = JSON,
                     array = @ArraySchema(schema = @Schema(implementation = UsuarioResponse.class)),
                     examples = @ExampleObject(ExemplosDeUsuario.LISTA)))
-    @ApiResponse(responseCode = "400", description = "Parâmetro em formato inválido",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(DADOS_INVALIDOS)))
+    @ApiResponse(responseCode = "400", description = "Parâmetro da URL com codificação inválida",
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(CODIFICACAO_INVALIDA)))
     ResponseEntity<List<UsuarioResponse>> buscarPorNome(
             @Parameter(description = "Trecho do nome", example = "laura") String nome);
 
@@ -84,11 +92,11 @@ interface UsuarioApi {
             content = @Content(mediaType = JSON, schema = @Schema(implementation = UsuarioResponse.class),
                     examples = @ExampleObject(ExemplosDeUsuario.USUARIO)))
     @ApiResponse(responseCode = "400", description = "Campo inválido",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(DADOS_INVALIDOS)))
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(DADOS_DA_ATUALIZACAO_INVALIDOS)))
     @ApiResponse(responseCode = "404", description = "Usuário inexistente ou removido",
             content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(USUARIO_NAO_ENCONTRADO)))
     @ApiResponse(responseCode = "409", description = "E-mail ou login de outro usuário",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(EMAIL_EM_USO)))
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(EMAIL_EM_USO_NA_ATUALIZACAO)))
     ResponseEntity<UsuarioResponse> atualizar(@Parameter(description = "Id do usuário", example = "1") Long id,
                                               AtualizarUsuarioRequest requisicao);
 
@@ -96,11 +104,11 @@ interface UsuarioApi {
             Exige a senha atual. A nova senha deve ter de 8 a 72 caracteres.""")
     @ApiResponse(responseCode = "204", description = "Senha trocada")
     @ApiResponse(responseCode = "400", description = "Nova senha fora das regras",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(DADOS_INVALIDOS)))
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(NOVA_SENHA_INVALIDA)))
     @ApiResponse(responseCode = "401", description = "Senha atual incorreta",
             content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(SENHA_ATUAL_INCORRETA)))
     @ApiResponse(responseCode = "404", description = "Usuário inexistente ou removido",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(USUARIO_NAO_ENCONTRADO)))
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(USUARIO_NAO_ENCONTRADO_NA_SENHA)))
     ResponseEntity<Void> trocarSenha(@Parameter(description = "Id do usuário", example = "1") Long id,
                                      TrocarSenhaRequest requisicao);
 
@@ -114,9 +122,9 @@ interface UsuarioApi {
     @ApiResponse(responseCode = "400", description = "Documento ausente, inválido ou incompatível com o tipo",
             content = @Content(mediaType = PROBLEMA, examples = {
                     @ExampleObject(name = "Documento do tipo", value = DOCUMENTO_DO_TIPO),
-                    @ExampleObject(name = "Campos inválidos", value = DADOS_INVALIDOS)}))
+                    @ExampleObject(name = "Campos inválidos", value = DADOS_DA_TROCA_DE_TIPO_INVALIDOS)}))
     @ApiResponse(responseCode = "404", description = "Usuário ou tipo inexistente",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(USUARIO_NAO_ENCONTRADO)))
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(USUARIO_NAO_ENCONTRADO_NA_TROCA_DE_TIPO)))
     @ApiResponse(responseCode = "409", description = """
             Documento usado por outro usuário, ou Dono de Restaurante com restaurante ativo tentando mudar para \
             outro tipo""",
@@ -132,7 +140,7 @@ interface UsuarioApi {
             content = @Content(mediaType = JSON, schema = @Schema(implementation = PaginaResponse.class),
                     examples = @ExampleObject(ExemplosDeRestaurante.PAGINA)))
     @ApiResponse(responseCode = "404", description = "Usuário inexistente ou removido",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(USUARIO_NAO_ENCONTRADO)))
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(USUARIO_NAO_ENCONTRADO_NOS_RESTAURANTES)))
     @Parameter(name = "page", in = ParameterIn.QUERY, description = "Número da página, a partir de 0",
             schema = @Schema(type = "integer", defaultValue = "0"))
     @Parameter(name = "size", in = ParameterIn.QUERY, description = "Itens por página, no máximo 50",

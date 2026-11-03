@@ -15,10 +15,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DADOS_DO_ITEM_INVALIDOS;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DADOS_DO_ITEM_INVALIDOS_NA_ATUALIZACAO;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.ITEM_NAO_ENCONTRADO;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.NOME_DE_ITEM_EM_USO;
-import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.ORDENACAO_INVALIDA;
-import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.RESTAURANTE_NAO_ENCONTRADO;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.NOME_DE_ITEM_EM_USO_NA_ATUALIZACAO;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.ORDENACAO_DO_CARDAPIO_INVALIDA;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.RESTAURANTE_NAO_ENCONTRADO_NO_CARDAPIO;
 
 /**
  * Documentação OpenAPI dos endpoints de item do cardápio.
@@ -40,7 +42,7 @@ interface ItemCardapioApi {
     @ApiResponse(responseCode = "400", description = "Campo ausente ou inválido",
             content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(DADOS_DO_ITEM_INVALIDOS)))
     @ApiResponse(responseCode = "404", description = "Restaurante inexistente ou removido",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(RESTAURANTE_NAO_ENCONTRADO)))
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(RESTAURANTE_NAO_ENCONTRADO_NO_CARDAPIO)))
     @ApiResponse(responseCode = "409", description = "Nome de outro item ativo do restaurante",
             content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(NOME_DE_ITEM_EM_USO)))
     ResponseEntity<ItemCardapioResponse> cadastrar(
@@ -54,9 +56,9 @@ interface ItemCardapioApi {
             content = @Content(mediaType = JSON, schema = @Schema(implementation = PaginaResponse.class),
                     examples = @ExampleObject(ExemplosDeItemCardapio.PAGINA)))
     @ApiResponse(responseCode = "400", description = "Ordenação por campo não aceito",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(ORDENACAO_INVALIDA)))
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(ORDENACAO_DO_CARDAPIO_INVALIDA)))
     @ApiResponse(responseCode = "404", description = "Restaurante inexistente ou removido",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(RESTAURANTE_NAO_ENCONTRADO)))
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(RESTAURANTE_NAO_ENCONTRADO_NO_CARDAPIO)))
     @Parameter(name = "page", in = ParameterIn.QUERY, description = "Número da página, a partir de 0",
             schema = @Schema(type = "integer", defaultValue = "0"))
     @Parameter(name = "size", in = ParameterIn.QUERY, description = "Itens por página, no máximo 50",
@@ -88,12 +90,12 @@ interface ItemCardapioApi {
             content = @Content(mediaType = JSON, schema = @Schema(implementation = ItemCardapioResponse.class),
                     examples = @ExampleObject(ExemplosDeItemCardapio.ITEM)))
     @ApiResponse(responseCode = "400", description = "Campo ausente ou inválido",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(DADOS_DO_ITEM_INVALIDOS)))
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(DADOS_DO_ITEM_INVALIDOS_NA_ATUALIZACAO)))
     @ApiResponse(responseCode = "404",
             description = "Restaurante ou item inexistente, removido, ou item de outro restaurante",
             content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(ITEM_NAO_ENCONTRADO)))
     @ApiResponse(responseCode = "409", description = "Nome de outro item ativo do restaurante",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(NOME_DE_ITEM_EM_USO)))
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(NOME_DE_ITEM_EM_USO_NA_ATUALIZACAO)))
     ResponseEntity<ItemCardapioResponse> atualizar(
             @Parameter(description = "Id do restaurante", example = "9") Long restauranteId,
             @Parameter(description = "Id do item", example = "5") Long itemId,

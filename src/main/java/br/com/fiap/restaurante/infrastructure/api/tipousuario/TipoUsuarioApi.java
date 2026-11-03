@@ -15,12 +15,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.DADOS_INVALIDOS;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.NOME_DE_TIPO_EM_USO;
-import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.ORDENACAO_INVALIDA;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.NOME_DE_TIPO_EM_USO_NA_RENOMEACAO;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.NOME_DE_TIPO_INVALIDO;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.NOME_DE_TIPO_INVALIDO_NA_RENOMEACAO;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.ORDENACAO_DE_TIPOS_INVALIDA;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.TIPO_DE_SISTEMA;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.TIPO_EM_USO;
 import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.TIPO_INEXISTENTE;
+import static br.com.fiap.restaurante.infrastructure.api.comum.ExemplosDeProblema.TIPO_INEXISTENTE_NOS_USUARIOS;
 
 /**
  * Documentação OpenAPI dos endpoints de tipo de usuário.
@@ -39,7 +42,7 @@ interface TipoUsuarioApi {
             content = @Content(mediaType = JSON, schema = @Schema(implementation = TipoUsuarioResponse.class),
                     examples = @ExampleObject(ExemplosDeTipoUsuario.TIPO)))
     @ApiResponse(responseCode = "400", description = "Nome ausente ou fora de 3 a 50 caracteres",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(DADOS_INVALIDOS)))
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(NOME_DE_TIPO_INVALIDO)))
     @ApiResponse(responseCode = "409", description = "Nome já usado, ou nome que gera o código de outro tipo",
             content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(NOME_DE_TIPO_EM_USO)))
     ResponseEntity<TipoUsuarioResponse> cadastrar(TipoUsuarioRequest requisicao, UriComponentsBuilder uri);
@@ -50,7 +53,7 @@ interface TipoUsuarioApi {
             content = @Content(mediaType = JSON, schema = @Schema(implementation = PaginaResponse.class),
                     examples = @ExampleObject(ExemplosDeTipoUsuario.PAGINA)))
     @ApiResponse(responseCode = "400", description = "Ordenação por campo não aceito",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(ORDENACAO_INVALIDA)))
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(ORDENACAO_DE_TIPOS_INVALIDA)))
     @Parameter(name = "page", in = ParameterIn.QUERY, description = "Número da página, a partir de 0",
             schema = @Schema(type = "integer", defaultValue = "0"))
     @Parameter(name = "size", in = ParameterIn.QUERY, description = "Itens por página, no máximo 50",
@@ -73,11 +76,11 @@ interface TipoUsuarioApi {
             content = @Content(mediaType = JSON, schema = @Schema(implementation = TipoUsuarioResponse.class),
                     examples = @ExampleObject(ExemplosDeTipoUsuario.TIPO)))
     @ApiResponse(responseCode = "400", description = "Nome ausente ou fora de 3 a 50 caracteres",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(DADOS_INVALIDOS)))
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(NOME_DE_TIPO_INVALIDO_NA_RENOMEACAO)))
     @ApiResponse(responseCode = "404", description = "Tipo inexistente",
             content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(TIPO_INEXISTENTE)))
     @ApiResponse(responseCode = "409", description = "Nome de outro tipo",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(NOME_DE_TIPO_EM_USO)))
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(NOME_DE_TIPO_EM_USO_NA_RENOMEACAO)))
     ResponseEntity<TipoUsuarioResponse> renomear(@Parameter(description = "Id do tipo", example = "3") Long id,
                                                  TipoUsuarioRequest requisicao);
 
@@ -100,7 +103,7 @@ interface TipoUsuarioApi {
             content = @Content(mediaType = JSON, schema = @Schema(implementation = PaginaResponse.class),
                     examples = @ExampleObject(ExemplosDeTipoUsuario.PAGINA_DE_USUARIOS)))
     @ApiResponse(responseCode = "404", description = "Tipo inexistente",
-            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(TIPO_INEXISTENTE)))
+            content = @Content(mediaType = PROBLEMA, examples = @ExampleObject(TIPO_INEXISTENTE_NOS_USUARIOS)))
     @Parameter(name = "page", in = ParameterIn.QUERY, description = "Número da página, a partir de 0",
             schema = @Schema(type = "integer", defaultValue = "0"))
     @Parameter(name = "size", in = ParameterIn.QUERY, description = "Itens por página, no máximo 50",
