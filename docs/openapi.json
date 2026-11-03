@@ -181,7 +181,7 @@
                                     "title": "Dados inválidos",
                                     "status": 400,
                                     "detail": "Um ou mais campos da requisição não passaram na validação.",
-                                    "instance": "/api/v1/usuarios",
+                                    "instance": "/api/v1/usuarios/1",
                                     "momento": "2026-10-08T10:30:00",
                                     "erros": [
                                         {
@@ -189,8 +189,8 @@
                                             "mensagem": "O e-mail informado não é válido."
                                         },
                                         {
-                                            "campo": "senha",
-                                            "mensagem": "A senha deve ter entre 8 e 72 caracteres."
+                                            "campo": "login",
+                                            "mensagem": "O login deve ter de 4 a 50 caracteres: letras, números, ponto, hífen ou sublinhado."
                                         }
                                     ]
                                 }
@@ -221,7 +221,7 @@
                                     "title": "Conflito de dados",
                                     "status": 409,
                                     "detail": "O e-mail informado já está cadastrado.",
-                                    "instance": "/api/v1/usuarios",
+                                    "instance": "/api/v1/usuarios/1",
                                     "momento": "2026-10-08T10:30:00"
                                 }
                             }
@@ -330,16 +330,12 @@
                                     "title": "Dados inválidos",
                                     "status": 400,
                                     "detail": "Um ou mais campos da requisição não passaram na validação.",
-                                    "instance": "/api/v1/usuarios",
+                                    "instance": "/api/v1/usuarios/1/senha",
                                     "momento": "2026-10-08T10:30:00",
                                     "erros": [
                                         {
-                                            "campo": "email",
-                                            "mensagem": "O e-mail informado não é válido."
-                                        },
-                                        {
-                                            "campo": "senha",
-                                            "mensagem": "A senha deve ter entre 8 e 72 caracteres."
+                                            "campo": "novaSenha",
+                                            "mensagem": "A nova senha deve ter entre 8 e 72 caracteres."
                                         }
                                     ]
                                 }
@@ -370,7 +366,7 @@
                                     "title": "Recurso não encontrado",
                                     "status": 404,
                                     "detail": "Usuário 99 não encontrado.",
-                                    "instance": "/api/v1/usuarios/99",
+                                    "instance": "/api/v1/usuarios/99/senha",
                                     "momento": "2026-10-08T10:30:00"
                                 }
                             }
@@ -489,16 +485,12 @@
                                     "title": "Dados inválidos",
                                     "status": 400,
                                     "detail": "Um ou mais campos da requisição não passaram na validação.",
-                                    "instance": "/api/v1/usuarios",
+                                    "instance": "/api/v1/tipos-usuario/3",
                                     "momento": "2026-10-08T10:30:00",
                                     "erros": [
                                         {
-                                            "campo": "email",
-                                            "mensagem": "O e-mail informado não é válido."
-                                        },
-                                        {
-                                            "campo": "senha",
-                                            "mensagem": "A senha deve ter entre 8 e 72 caracteres."
+                                            "campo": "nome",
+                                            "mensagem": "O nome do tipo deve ter entre 3 e 50 caracteres."
                                         }
                                     ]
                                 }
@@ -529,7 +521,7 @@
                                     "title": "Conflito de dados",
                                     "status": 409,
                                     "detail": "Já existe um tipo de usuário com o nome Garçom.",
-                                    "instance": "/api/v1/tipos-usuario",
+                                    "instance": "/api/v1/tipos-usuario/3",
                                     "momento": "2026-10-08T10:30:00"
                                 }
                             }
@@ -753,7 +745,7 @@
                                     "title": "Dados inválidos",
                                     "status": 400,
                                     "detail": "Um ou mais campos da requisição não passaram na validação.",
-                                    "instance": "/api/v1/restaurantes/9/itens-cardapio",
+                                    "instance": "/api/v1/restaurantes/9/itens-cardapio/5",
                                     "momento": "2026-10-08T10:30:00",
                                     "erros": [
                                         {
@@ -793,7 +785,7 @@
                                     "title": "Conflito de dados",
                                     "status": 409,
                                     "detail": "O restaurante 9 já tem um item ativo chamado Feijoada.",
-                                    "instance": "/api/v1/restaurantes/9/itens-cardapio",
+                                    "instance": "/api/v1/restaurantes/9/itens-cardapio/5",
                                     "momento": "2026-10-08T10:30:00"
                                 }
                             }
@@ -1026,7 +1018,7 @@
                                     "title": "Regra de negócio violada",
                                     "status": 400,
                                     "detail": "Os turnos SEXTA 18:00–02:00 e SABADO 01:00–10:00 se sobrepõem.",
-                                    "instance": "/api/v1/restaurantes",
+                                    "instance": "/api/v1/restaurantes/9",
                                     "momento": "2026-10-08T10:30:00"
                                 }
                             }
@@ -1055,8 +1047,8 @@
                                     "type": "http://localhost:8080/problemas/conflito-de-dados",
                                     "title": "Conflito de dados",
                                     "status": 409,
-                                    "detail": "O usuário 7 não é Dono de Restaurante. Troque o tipo dele antes de cadastrar o restaurante.",
-                                    "instance": "/api/v1/restaurantes",
+                                    "detail": "O usuário 7 não é Dono de Restaurante. Troque o tipo dele antes de transferir o restaurante.",
+                                    "instance": "/api/v1/restaurantes/9",
                                     "momento": "2026-10-08T10:30:00"
                                 }
                             }
@@ -1162,26 +1154,16 @@
                         }
                     },
                     "400": {
-                        "description": "Parâmetro em formato inválido",
+                        "description": "Parâmetro da URL com codificação inválida",
                         "content": {
                             "application/problem+json": {
                                 "example": {
-                                    "type": "http://localhost:8080/problemas/dados-invalidos",
-                                    "title": "Dados inválidos",
+                                    "type": "http://localhost:8080/problemas/requisicao-invalida",
+                                    "title": "Requisição inválida",
                                     "status": 400,
-                                    "detail": "Um ou mais campos da requisição não passaram na validação.",
+                                    "detail": "Um parâmetro da URL tem codificação inválida. Confira os caracteres com %.",
                                     "instance": "/api/v1/usuarios",
-                                    "momento": "2026-10-08T10:30:00",
-                                    "erros": [
-                                        {
-                                            "campo": "email",
-                                            "mensagem": "O e-mail informado não é válido."
-                                        },
-                                        {
-                                            "campo": "senha",
-                                            "mensagem": "A senha deve ter entre 8 e 72 caracteres."
-                                        }
-                                    ]
+                                    "momento": "2026-10-08T10:30:00"
                                 }
                             }
                         }
@@ -1392,8 +1374,8 @@
                                     "type": "http://localhost:8080/problemas/requisicao-invalida",
                                     "title": "Requisição inválida",
                                     "status": 400,
-                                    "detail": "Não é possível ordenar por senha. Campos aceitos: dataCriacao, dataUltimaAlteracao, email, id, login, nome.",
-                                    "instance": "/api/v2/usuarios",
+                                    "detail": "Não é possível ordenar por dataCriacao. Campos aceitos: codigo, id, nome.",
+                                    "instance": "/api/v1/tipos-usuario",
                                     "momento": "2026-10-08T10:30:00"
                                 }
                             }
@@ -1444,16 +1426,12 @@
                                     "title": "Dados inválidos",
                                     "status": 400,
                                     "detail": "Um ou mais campos da requisição não passaram na validação.",
-                                    "instance": "/api/v1/usuarios",
+                                    "instance": "/api/v1/tipos-usuario",
                                     "momento": "2026-10-08T10:30:00",
                                     "erros": [
                                         {
-                                            "campo": "email",
-                                            "mensagem": "O e-mail informado não é válido."
-                                        },
-                                        {
-                                            "campo": "senha",
-                                            "mensagem": "A senha deve ter entre 8 e 72 caracteres."
+                                            "campo": "nome",
+                                            "mensagem": "O nome do tipo deve ter entre 3 e 50 caracteres."
                                         }
                                     ]
                                 }
@@ -1614,8 +1592,8 @@
                                             "type": "http://localhost:8080/problemas/requisicao-invalida",
                                             "title": "Requisição inválida",
                                             "status": 400,
-                                            "detail": "Não é possível ordenar por senha. Campos aceitos: dataCriacao, dataUltimaAlteracao, email, id, login, nome.",
-                                            "instance": "/api/v2/usuarios",
+                                            "detail": "Não é possível ordenar por dono. Campos aceitos: dataCriacao, dataUltimaAlteracao, id, nome, tipoCozinha.",
+                                            "instance": "/api/v1/restaurantes",
                                             "momento": "2026-10-08T10:30:00"
                                         }
                                     }
@@ -1702,16 +1680,16 @@
                                             "title": "Dados inválidos",
                                             "status": 400,
                                             "detail": "Um ou mais campos da requisição não passaram na validação.",
-                                            "instance": "/api/v1/usuarios",
+                                            "instance": "/api/v1/restaurantes",
                                             "momento": "2026-10-08T10:30:00",
                                             "erros": [
                                                 {
-                                                    "campo": "email",
-                                                    "mensagem": "O e-mail informado não é válido."
+                                                    "campo": "endereco.cep",
+                                                    "mensagem": "O CEP deve ter 8 dígitos."
                                                 },
                                                 {
-                                                    "campo": "senha",
-                                                    "mensagem": "A senha deve ter entre 8 e 72 caracteres."
+                                                    "campo": "horarios",
+                                                    "mensagem": "Informe de 1 a 50 turnos de funcionamento."
                                                 }
                                             ]
                                         }
@@ -1751,7 +1729,7 @@
                                     "title": "Recurso não encontrado",
                                     "status": 404,
                                     "detail": "Usuário 99 não encontrado.",
-                                    "instance": "/api/v1/usuarios/99",
+                                    "instance": "/api/v1/restaurantes",
                                     "momento": "2026-10-08T10:30:00"
                                 }
                             }
@@ -1871,8 +1849,8 @@
                                     "type": "http://localhost:8080/problemas/requisicao-invalida",
                                     "title": "Requisição inválida",
                                     "status": 400,
-                                    "detail": "Não é possível ordenar por senha. Campos aceitos: dataCriacao, dataUltimaAlteracao, email, id, login, nome.",
-                                    "instance": "/api/v2/usuarios",
+                                    "detail": "Não é possível ordenar por descricao. Campos aceitos: dataCriacao, dataUltimaAlteracao, id, nome, preco.",
+                                    "instance": "/api/v1/restaurantes/9/itens-cardapio",
                                     "momento": "2026-10-08T10:30:00"
                                 }
                             }
@@ -1887,7 +1865,7 @@
                                     "title": "Recurso não encontrado",
                                     "status": 404,
                                     "detail": "Restaurante 99 não encontrado.",
-                                    "instance": "/api/v1/restaurantes/99",
+                                    "instance": "/api/v1/restaurantes/99/itens-cardapio",
                                     "momento": "2026-10-08T10:30:00"
                                 }
                             }
@@ -1981,7 +1959,7 @@
                                     "title": "Recurso não encontrado",
                                     "status": 404,
                                     "detail": "Restaurante 99 não encontrado.",
-                                    "instance": "/api/v1/restaurantes/99",
+                                    "instance": "/api/v1/restaurantes/99/itens-cardapio",
                                     "momento": "2026-10-08T10:30:00"
                                 }
                             }
@@ -2050,16 +2028,16 @@
                                     "title": "Dados inválidos",
                                     "status": 400,
                                     "detail": "Um ou mais campos da requisição não passaram na validação.",
-                                    "instance": "/api/v1/usuarios",
+                                    "instance": "/api/v1/auth/login",
                                     "momento": "2026-10-08T10:30:00",
                                     "erros": [
                                         {
-                                            "campo": "email",
-                                            "mensagem": "O e-mail informado não é válido."
+                                            "campo": "login",
+                                            "mensagem": "O login é obrigatório."
                                         },
                                         {
                                             "campo": "senha",
-                                            "mensagem": "A senha deve ter entre 8 e 72 caracteres."
+                                            "mensagem": "A senha é obrigatória."
                                         }
                                     ]
                                 }
@@ -2168,16 +2146,16 @@
                                             "title": "Dados inválidos",
                                             "status": 400,
                                             "detail": "Um ou mais campos da requisição não passaram na validação.",
-                                            "instance": "/api/v1/usuarios",
+                                            "instance": "/api/v1/usuarios/1/tipo",
                                             "momento": "2026-10-08T10:30:00",
                                             "erros": [
                                                 {
-                                                    "campo": "email",
-                                                    "mensagem": "O e-mail informado não é válido."
+                                                    "campo": "documento",
+                                                    "mensagem": "O documento é obrigatório."
                                                 },
                                                 {
-                                                    "campo": "senha",
-                                                    "mensagem": "A senha deve ter entre 8 e 72 caracteres."
+                                                    "campo": "tipo",
+                                                    "mensagem": "O tipo é obrigatório."
                                                 }
                                             ]
                                         }
@@ -2195,7 +2173,7 @@
                                     "title": "Recurso não encontrado",
                                     "status": 404,
                                     "detail": "Usuário 99 não encontrado.",
-                                    "instance": "/api/v1/usuarios/99",
+                                    "instance": "/api/v1/usuarios/99/tipo",
                                     "momento": "2026-10-08T10:30:00"
                                 }
                             }
@@ -2453,7 +2431,7 @@
                                     "title": "Recurso não encontrado",
                                     "status": 404,
                                     "detail": "Usuário 99 não encontrado.",
-                                    "instance": "/api/v1/usuarios/99",
+                                    "instance": "/api/v1/usuarios/99/restaurantes",
                                     "momento": "2026-10-08T10:30:00"
                                 }
                             }
@@ -2558,7 +2536,7 @@
                                     "title": "Recurso não encontrado",
                                     "status": 404,
                                     "detail": "Tipo de usuário 99 não encontrado.",
-                                    "instance": "/api/v1/tipos-usuario/99",
+                                    "instance": "/api/v1/tipos-usuario/99/usuarios",
                                     "momento": "2026-10-08T10:30:00"
                                 }
                             }
