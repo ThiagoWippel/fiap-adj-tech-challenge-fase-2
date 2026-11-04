@@ -32,7 +32,7 @@ Com a aplicação no ar, o Swagger fica em http://localhost:8080/swagger-ui.html
 | 5 · Docker Compose | [`docker-compose.yml`](docker-compose.yml): aplicação e MySQL, os dois com healthcheck |
 | 6 · Repositório | Este repositório, público, com o histórico da Fase 1 |
 | 7 · Clean Architecture | Pacotes `domain`, `application`, `interfaceadapter` e `infrastructure`, com as regras de dependência testadas pelo ArchUnit |
-| 8 · Testes | 80% de cobertura exigida em três cortes que travam o build; integração contra MySQL real ([Testes](#testes)) |
+| 8 · Testes | 80% de cobertura exigida em três cortes que travam o build; integração contra o MySQL 8.4 do Testcontainers ([Testes](#testes)) |
 | 9 · Vídeo | [Apresentação no YouTube](https://youtu.be/E5E4Gmqc14k): a subida pelo Docker Compose, a collection inteira e os três cadastros novos |
 
 Cada requisito leva a um cenário do [catálogo](docs/catalogo-de-cenarios.md), e cada cenário leva ao teste que
@@ -64,7 +64,7 @@ o comprova: está tudo na [matriz requisito → evidência](docs/matriz-de-evide
   tipo Dono de Restaurante. Os horários são de 1 a 50 turnos por semana; um turno pode passar da meia-noite
   (sexta 18:00–02:00) e os turnos não podem se sobrepor.
 - **Itens do cardápio**: nas rotas do restaurante. Nome único entre os itens ativos do restaurante, preço com
-  no máximo duas casas, disponibilidade só no local e o caminho da foto (relativo ou URL http/https, sem `..`).
+  no máximo duas casas, disponibilidade só no local e o caminho da foto (caminho de arquivo sem `..` ou URL http/https).
 
 A jornada de quem usa o sistema, da conta ao cardápio:
 
@@ -122,7 +122,7 @@ cd fiap-adj-tech-challenge-fase-2
 cp .env.example .env
 ```
 
-O `.env.example` já funciona como está. Para uso real, troque as senhas e a `JWT_CHAVE`
+O `.env.example` já funciona como está. Antes de usar fora da sua máquina, troque as senhas e a `JWT_CHAVE`
 (`openssl rand -base64 32` gera uma).
 
 **3. Subir**
@@ -160,7 +160,7 @@ Ficam no `.env`, que não é versionado; o `.env.example` é o modelo.
 ### Encerrar
 
 ```bash
-docker compose down      # para os contêineres e mantém o banco
+docker compose down      # remove os contêineres e mantém o banco
 docker compose down -v   # apaga também o volume com os dados do banco
 ```
 
@@ -185,7 +185,7 @@ cortes de cobertura. Os relatórios do JaCoCo ficam em `target/site/jacoco-unita
 
 ## Endpoints
 
-São 26: as 8 rotas da Fase 1, com o mesmo contrato, e 18 novas. Todas estão no Swagger, com exemplo de sucesso
+São 26: as 8 rotas da Fase 1, que aceitam as mesmas requisições válidas, e 18 novas. Todas estão no Swagger, com exemplo de sucesso
 e de erro.
 
 **Usuários e login**
@@ -394,7 +394,7 @@ O material não resolve alguns problemas que a Clean Architecture cria, e cada u
 
 ```mermaid
 erDiagram
-    TIPO_USUARIO ||--o{ USUARIO : classifica
+    TIPO_USUARIO |o--o{ USUARIO : classifica
     USUARIO ||--o{ RESTAURANTE : "é dono de"
     RESTAURANTE ||--|{ HORARIO_FUNCIONAMENTO : "abre em"
     RESTAURANTE ||--o{ ITEM_CARDAPIO : vende
@@ -588,5 +588,5 @@ Outro processo usa a porta, muitas vezes uma execução local com `./mvnw spring
 
 ## Autor
 
-**Thiago Wippel Chaves** · RM375015
+**Thiago Wippel Chaves** · RM 375015
 Pós Tech FIAP · Arquitetura e Desenvolvimento em Java · Fase 2

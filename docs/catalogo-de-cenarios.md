@@ -1,7 +1,7 @@
 # Catálogo de cenários
 
 Tech Challenge · Fase 2 · sistema de gestão de restaurantes
-Versão de 07/10/2026. Fontes: enunciado da Fase 2, requisitos herdados da Fase 1, feedback da Fase 1 e o dossiê de decisões.
+Versão de 07/10/2026. Fontes: enunciado da Fase 2, requisitos herdados da Fase 1, feedback da Fase 1 e as decisões do planejamento.
 
 Este catálogo lista, antes de qualquer código, tudo o que o sistema precisa comprovar. Cada cenário tem um ID estável, e o mesmo ID aparece em três lugares:
 
@@ -19,7 +19,7 @@ Assim qualquer frase do enunciado leva a um cenário, e cada cenário leva a um 
 |---|---|---|
 | U | Unitário de domínio: entidade ou objeto de valor, sem dependências | JUnit + AssertJ |
 | C | Unitário de caso de uso, com gateways e portas substituídos por mocks | JUnit + Mockito |
-| I | Integração contra MySQL real em container | Testcontainers + `@SpringBootTest` / `@WebMvcTest` + REST-Assured |
+| I | Integração contra o MySQL 8.4 em contêiner | Testcontainers + `@SpringBootTest` / `@WebMvcTest` + REST-Assured |
 | P | Collection do Postman, rodada pelo Newman contra o docker-compose | Postman + Newman |
 | A | Regra de arquitetura | ArchUnit |
 | CI | Verificação feita pelo pipeline do GitHub Actions | GitHub Actions |
@@ -35,7 +35,7 @@ Assim qualquer frase do enunciado leva a um cenário, e cada cenário leva a um 
 | EN-1 a EN-9 | Enunciado, entregáveis e fatores de avaliação 1 a 9 |
 | F1-01 a F1-13 | Requisitos herdados da Fase 1 (lista abaixo) |
 | FB-1 a FB-3 | Feedback da Fase 1: login sem testes e geração de tokens; busca por nome na collection; ProblemDetail |
-| Dec. A a X | Decisão do dossiê com a letra correspondente |
+| Dec. A a X | Decisão do planejamento com a letra correspondente |
 | AUD | Auditoria do código pronto: falha encontrada com a aplicação no ar e travada por um cenário novo |
 
 Requisitos herdados da Fase 1:
@@ -56,7 +56,7 @@ Requisitos herdados da Fase 1:
 | F1-12 | Swagger com exemplos de sucesso e de erro |
 | F1-13 | Banco relacional em container |
 
-Decisões do dossiê: A repositório · B token · C horário · D tipo do dono · E exclusão · F banco · G transação · H auditoria · I pacotes · J documento · K Lombok e records · L gateway e data source · M rotas do cardápio · N cobertura · O exceção de domínio · P versionamento · Q contrato da Fase 1 · R tipo de cozinha · S nome do item · T banco nos testes · U método · V extras · W campos e listagens · X textos com acento.
+Decisões do planejamento: A repositório · B token · C horário · D tipo do dono · E exclusão · F banco · G transação · H auditoria · I pacotes · J documento · K Lombok e records · L gateway e data source · M rotas do cardápio · N cobertura · O exceção de domínio · P versionamento · Q contrato da Fase 1 · R tipo de cozinha · S nome do item · T banco nos testes · U método · V extras · W campos e listagens · X textos com acento.
 
 ## Resumo
 
@@ -397,7 +397,7 @@ aplicação não subia. Com as migrações, esse banco é reconhecido como a ver
 
 ## Fatia 5 · Fechamento
 
-A fatia 5 confirma que todos os cenários anteriores estão verdes no CI e percorre o checklist de entrega do briefing: README com guia de avaliação rápida, relatório em PDF organizado pelos nove critérios, matriz requisito → evidência gerada a partir deste catálogo, diagramas, EXPLAIN dos índices e o vídeo.
+A fatia 5 confirma que todos os cenários anteriores estão verdes no CI e percorre o checklist de entrega: README com guia de avaliação rápida, relatório em PDF organizado pelos nove critérios, matriz requisito → evidência gerada a partir deste catálogo, diagramas, EXPLAIN dos índices e o vídeo.
 
 ### Operações simultâneas (CON)
 
