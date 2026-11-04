@@ -33,7 +33,7 @@ Com a aplicação no ar, o Swagger fica em http://localhost:8080/swagger-ui.html
 | 6 · Repositório | Este repositório, público, com o histórico da Fase 1 |
 | 7 · Clean Architecture | Pacotes `domain`, `application`, `interfaceadapter` e `infrastructure`, com as regras de dependência testadas pelo ArchUnit |
 | 8 · Testes | 80% de cobertura exigida em três cortes que travam o build; integração contra MySQL real ([Testes](#testes)) |
-| 9 · Vídeo | Entregue com o relatório |
+| 9 · Vídeo | [Apresentação no YouTube](https://youtu.be/E5E4Gmqc14k): a subida pelo Docker Compose, a collection inteira e os três cadastros novos |
 
 Cada requisito leva a um cenário do [catálogo](docs/catalogo-de-cenarios.md), e cada cenário leva ao teste que
 o comprova: está tudo na [matriz requisito → evidência](docs/matriz-de-evidencias.md).
@@ -193,7 +193,7 @@ e de erro.
 | Método | Rota | Status | |
 |---|---|---|---|
 | POST | `/api/v1/usuarios` | 201 · 400 · 404 · 409 | Cadastro. O tipo vai pelo código (`CLIENTE`, `DONO_RESTAURANTE` ou um tipo do CRUD) |
-| GET | `/api/v1/usuarios?nome=` | 200 | Busca pelo trecho do nome, em lista |
+| GET | `/api/v1/usuarios?nome=` | 200 · 400 | Busca pelo trecho do nome, em lista |
 | GET | `/api/v2/usuarios?nome=` | 200 · 400 | A mesma busca, paginada |
 | GET | `/api/v1/usuarios/{id}` | 200 · 404 | |
 | PUT | `/api/v1/usuarios/{id}` | 200 · 400 · 404 · 409 | Nome, e-mail, login e endereço |

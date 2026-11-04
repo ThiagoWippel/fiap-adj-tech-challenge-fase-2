@@ -4,8 +4,6 @@ MySQL 8.4.11, com a estrutura das migrações do Flyway (`src/main/resources/db/
 
 Cada consulta aparece duas vezes: **sem índice**, forçada com `IGNORE INDEX` (o MySQL não deixa apagar um índice que sustenta uma chave estrangeira), e **com índice**, como a aplicação roda. A coluna `rows` é a estimativa de linhas que o MySQL precisa ler; `type = ALL` é leitura da tabela inteira.
 
-Para gerar de novo: `python3 ferramentas/gerar_explain.py` (fora do repositório, junto do relatório).
-
 ## Restaurantes de um dono
 
 Listagem de `GET /usuarios/{id}/restaurantes` e a contagem que bloqueia a exclusão e a troca de tipo do dono (EXC-07, TRO-10).
